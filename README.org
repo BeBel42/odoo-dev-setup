@@ -1,8 +1,12 @@
 #+title: Odoo dev setup
 
-First do
-=bash ./setup.bash=
-Then
-=docker compose up=
+- First do
+#+begin_src sh
+bash ./setup.bash
+#+end_src
+- Then
+#+begin_src sh
+docker compose up
+#+end_src
 
-Done. Odoo now runs on localhost:8069
+Done. Odoo now runs on =localhost:8069=
