@@ -1,0 +1,28 @@
+services:
+  db:
+    hostname: db
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: dbpassword
+      POSTGRES_DB: odoo
+    ports:
+      - "5432:5432"
+    restart: on-failure:10
+    volumes:
+      - ./db/volume/:/var/lib/postgresql/data
+      - /var/run/postgresql:/var/run/postgresql
+
+  odoo:
+    ports:
+      - "8069:8069"
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./entrypoint.bash:/app/entrypoint.bash
+      - ./enterprise:/app/enterprise
+      - ./odoo:/app/odoo
+      - ./tutorials:/app/tutorials
+      - ./.odoorc:/app/.odoorc
+    command: -u estate
