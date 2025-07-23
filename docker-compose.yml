@@ -24,5 +24,6 @@ services:
       - ./enterprise:/app/enterprise
       - ./odoo:/app/odoo
       - ./tutorials:/app/tutorials
+      - ./venv:/app/venv
       - ./.odoorc:/app/.odoorc
     command: -i estate -u estate
