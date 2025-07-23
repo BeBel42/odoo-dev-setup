@@ -22,11 +22,15 @@ git remote set-url --push origin you_should_not_push_on_this_repository
 cd "$PROJECT_DIR/enterprise"
 git remote add dev git@github.com:odoo-dev/enterprise.git || echo "Skipping remote creation"
 git remote set-url --push origin you_should_not_push_on_this_repository
+rm -f "$PROJECT_DIR/enterprise/odoo" # to avoid symlink bug in ./odoo/odoo/odoo
+ln -s "$PROJECT_DIR/odoo/odoo" "$PROJECT_DIR/enterprise/odoo"
 
 cd "$PROJECT_DIR/tutorials"
 git remote add dev git@github.com:odoo-dev/tutorials.git || echo "Skipping remote creation"
 git remote set-url --push origin you_should_not_push_on_this_repository
+rm -f "$PROJECT_DIR/tutorials/odoo" # to avoid symlink bug in ./odoo/odoo/odoo
+ln -s "$PROJECT_DIR/odoo/odoo" "$PROJECT_DIR/tutorials/odoo"
 
-cd "$PROJECT_DIR/odoo"
+cd "$PROJECT_DIR"
 python3 -m venv venv
-./venv/bin/python3 -m pip install -r requirements.txt
+./venv/bin/python3 -m pip install -r ./odoo/requirements.txt

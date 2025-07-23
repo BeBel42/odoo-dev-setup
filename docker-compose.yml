@@ -25,4 +25,4 @@ services:
       - ./odoo:/app/odoo
       - ./tutorials:/app/tutorials
       - ./.odoorc:/app/.odoorc
-    command: -u estate
+    command: -i estate -u estate
