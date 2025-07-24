@@ -1,12 +1,21 @@
 #+title: Odoo dev setup
 
-- First do
+- First setup the project (cloning may take some time)
+  You'll need to do this only once.
 #+begin_src sh
 bash ./setup.bash
 #+end_src
-- Then
+
+- Once everything is set up, you can start Odoo
 #+begin_src sh
 docker compose up
 #+end_src
+Done.
+Odoo now runs on =localhost:8069=
 
-Done. Odoo now runs on =localhost:8069=
+- When needing to restart the odoo server /e.g.: after some changes/, just restart the odoo container:
+#+begin_src sh
+docker compose restart odoo
+# restarting all the containers works fine too
+docker compose restart
+#+end_src

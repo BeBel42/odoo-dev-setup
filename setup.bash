@@ -32,5 +32,5 @@ rm -f "$PROJECT_DIR/tutorials/odoo" # to avoid symlink bug in ./odoo/odoo/odoo
 ln -s "$PROJECT_DIR/odoo/odoo" "$PROJECT_DIR/tutorials/odoo"
 
 cd "$PROJECT_DIR"
-python3 -m venv venv
+[ ! -d "$PROJECT_DIR/venv" ] && python3 -m venv "$PROJECT_DIR/venv"
 ./venv/bin/python3 -m pip install -r ./odoo/requirements.txt

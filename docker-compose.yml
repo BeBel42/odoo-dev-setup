@@ -26,4 +26,4 @@ services:
       - ./tutorials:/app/tutorials
       - ./venv:/app/venv
       - ./.odoorc:/app/.odoorc
-    command: -i estate -u estate
+    command: -i estate -u estate --dev xml
