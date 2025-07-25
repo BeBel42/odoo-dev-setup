@@ -1,0 +1,8 @@
+{
+	"reportUnannotatedClassAttribute": false,
+	"reportUnknownVariableType": false,
+	"reportUnknownMemberType": false,
+	"reportUntypedFunctionDecorator": false,
+    "venvPath": "../",
+    "venv": "venv"
+}
