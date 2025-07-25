@@ -3,7 +3,7 @@
 # TODO test if it works (not done yet either)
 
 set -e
-set -d
+set -u
 
 error() {
 	error_message=$(
@@ -14,7 +14,7 @@ $0 usage:
 	-d | --drop
 		Drop the database to restart an empty session"
 	)
-	echo "$1" 1>&2
+	[[ "$1" = "" ]] || echo "$1" 1>&2
 	echo "$error_message" 1>&2
 }
 
@@ -22,6 +22,7 @@ $0 usage:
 drop=0
 install=0
 help=0
+module=""
 
 while [[ "$#" -gt 0 ]]; do
 	case $1 in
@@ -45,7 +46,7 @@ if [[ $help = 1 ]]; then
 	exit 0
 fi
 
-if [ -z $module ]; then
+if [[ "$module" = "" ]]; then
 	error "Unknown parameter passed: $1"
 	exit 1
 fi
@@ -54,9 +55,9 @@ echo "Module: $module"
 echo "Should drop: $drop"
 echo "Should -i $install"
 
-docker compose up db
+echo docker compose up db
 if [[ $drop = 1 ]]; then
-	docker compose exec db psql 'DROP DATABASE $POSTGRES_DB;'
+	echo docker compose exec db psql 'DROP DATABASE $POSTGRES_DB;'
 fi
 
 action="-u"
@@ -64,5 +65,5 @@ if [[ $install = 1 ]]; then
 	action="-i"
 fi
 
-docker compose down odoo
-docker compose up odoo "$action $module"
+echo docker compose down odoo
+echo docker compose up odoo "$action $module"
