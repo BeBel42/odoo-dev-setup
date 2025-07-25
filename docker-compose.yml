@@ -26,4 +26,5 @@ services:
       - ./tutorials:/app/tutorials
       - ./venv:/app/venv
       - ./.odoorc:/app/.odoorc
-    command: -u estate --dev xml
+    # specify it while calling docker compose up
+    #command: -u estate --dev xml
