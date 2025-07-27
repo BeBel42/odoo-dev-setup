@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
+# Usage: this is a convenience script to quickly start and reload odoo.
+# It was made to prevent tiresome, manual operations to reboot the containers.
+
 set -e
 set -u
-
-# TODO add xml dev parameters (in config?)
 
 error() {
 	error_message="
@@ -53,9 +54,19 @@ fi
 
 # user did not mention module name (-m | --module <module_name>)
 if [[ "$module" = "" ]]; then
-	set +u
-	error "Error: missing module (-m) parameter"
-	exit 1
+	echo "Warning: missing module (-m) parameter.
+         No module will be updated / installed." 1>&2
+	cmd="" # no update / install module parameters to add
+else    # seeing if installing (-i) or updating (-u) module
+	if [[ $install = 1 ]]; then
+		echo "\"$( ([[ $drop = 1 ]] && echo '--drop') || echo '--install')\"" \
+			'has been specified. Adding "-i" to command' 1>&2
+		action="-i"
+	else
+		echo '"--install" has not been specified. Adding "-u" to command' 1>&2
+		action="-u"
+	fi
+	cmd="$action $module"
 fi
 
 echo "Starting db container..." 1>&2
@@ -68,15 +79,9 @@ if [[ $drop = 1 ]]; then
 	echo docker compose exec db psql 'DROP DATABASE $POSTGRES_DB;'
 fi
 
-if [[ $install = 1 ]]; then
-	echo "\"$( ([[ $drop = 1 ]] && echo '--drop') || echo '--install')\"" \
-		'has been specified. Adding "-i" to command' 1>&2
-	action="-i"
+if [[ $cmd = "" ]]; then
+	echo "Starting odoo container..." 1>&2
 else
-	echo '"--install" has not been specified. Adding "-u" to command' 1>&2
-	action="-u"
+	echo "Starting odoo container with \"$cmd\" parameters..." 1>&2
 fi
-
-cmd="$action $module"
-echo "Starting odoo container with \"$cmd\" parameters..." 1>&2
 echo docker compose up odoo "$cmd"

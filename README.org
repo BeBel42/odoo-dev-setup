@@ -1,21 +1,36 @@
 #+title: Odoo dev setup
 
+* Project setup
 - First setup the project (cloning may take some time)
   You'll need to do this only once.
 #+begin_src sh
 bash ./setup.bash
 #+end_src
 
-- Once everything is set up, you can start Odoo
+- Once everything is set up, you can start Odoo using the =utility script=
 #+begin_src sh
-docker compose up
+./run # internally calls docker-compose
 #+end_src
 Done.
 Odoo now runs on =localhost:8069=
 
-- When needing to restart the odoo server /e.g.: after some changes/, just restart the odoo container:
+* Utility script
+- When needing to restart the odoo server /e.g.: after some changes/, just restart odoo using the *utility script*:
 #+begin_src sh
-docker compose restart odoo
-# restarting all the containers works fine too
-docker compose restart
+./run -m <module_name> # reload module
 #+end_src
+There is no need to manually shut down the docker container. The utility script will take care of that.
+** Script details
+Here are the possible parameters for the utility script:
+#+BEGIN_SRC
+./run usage:
+	-m | --module <module_name>
+		Select the module to update / install.
+	-d | --drop
+		Drop the database to start on an empty session.
+		This will automatically reinstall the specified module.
+	-i | --install
+		Installs the module in the database.
+	-h | --help
+		Show this help prompt.
+#+END_SRC

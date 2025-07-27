@@ -2,6 +2,8 @@
 
 # execute this first, even before creating docker image
 
+# TODO remove pipfile if it still creates it
+
 set -e
 set -u
 
