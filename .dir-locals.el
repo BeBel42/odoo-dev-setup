@@ -1,4 +1,7 @@
 ;; Some custom emacs settings for this specific project
-((nil . (
-		 (projectile-project-root-files-bottom-up . (".odoorc"))
-		 )))
+
+;; Set project root to where .dir-locals.el is located
+((nil .
+  ((eval .
+    (setq projectile-project-root
+          (locate-dominating-file (or (buffer-file-name) default-directory) ".dir-locals.el"))))))
