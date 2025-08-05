@@ -30,8 +30,6 @@ for i in community enterprise tutorials; do
 	DEV_URL="git@github.com:odoo-dev/$([[ $i == 'community' ]] && echo "odoo.git" || echo "$i.git")"
 	git remote add dev $DEV_URL || echo "Skipping remote creation"
 	git remote set-url --push origin you_should_not_push_on_this_repository
-	rm -f "$PROJECT_DIR/$i/pyrightconfig.json"
-	ln -s "$PROJECT_DIR/pyrightconfig.json" "$PROJECT_DIR/$i/pyrightconfig.json"
 
 	echo "Done setting up $i project..."
 done

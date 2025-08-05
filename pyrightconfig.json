@@ -3,6 +3,6 @@
 	"reportUnknownVariableType": false,
 	"reportUnknownMemberType": false,
 	"reportUntypedFunctionDecorator": false,
-    "venvPath": "../",
+    "venvPath": "./",
     "venv": "venv"
 }
