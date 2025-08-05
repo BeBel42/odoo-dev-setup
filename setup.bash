@@ -32,4 +32,7 @@ done
 # create global venv and install dependencies
 cd "$PROJECT_DIR"
 [ ! -d "$PROJECT_DIR/venv" ] && python3 -m venv "$PROJECT_DIR/venv"
-./venv/bin/python3 -m pip install -r ./odoo/requirements.txt
+echo "Installing debugpy..."
+./venv/bin/python3 -m pip install debugpy 1>/dev/null
+echo "Installing odoo pip dependencies..."
+./venv/bin/python3 -m pip install -r ./odoo/requirements.txt 1>/dev/null

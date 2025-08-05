@@ -7,4 +7,3 @@ db_password=dbpassword
 db_user=odoo
 dbfilter=odoo
 addons_path=addons/,../enterprise/,../tutorials
-dev=all

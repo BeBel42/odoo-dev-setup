@@ -1,3 +1,5 @@
+name: odoo-dev
+
 services:
   db:
     hostname: db
@@ -7,18 +9,29 @@ services:
       POSTGRES_PASSWORD: dbpassword
       POSTGRES_DB: odoo
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     restart: on-failure:10
+    healthcheck:
+      test: pg_isready
+      interval: 10s
+      retries: 5
+      start_period: 1s
+      timeout: 5s
     volumes:
       - ./db/volume/:/var/lib/postgresql/data
       - /var/run/postgresql:/var/run/postgresql
 
   odoo:
     ports:
-      - "8069:8069"
+      - "127.0.0.1:8069:8069" # odoo
+      - "127.0.0.1:5678:5678" # debugpy
     build:
       context: .
       dockerfile: ./Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
     volumes:
       - ./entrypoint.bash:/app/entrypoint.bash
       - ./enterprise:/app/enterprise
@@ -26,5 +39,3 @@ services:
       - ./tutorials:/app/tutorials
       - ./venv:/app/venv
       - ./.odoorc:/app/.odoorc
-    # specify it while calling docker compose up
-    #command: -u estate --dev xml

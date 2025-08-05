@@ -24,10 +24,13 @@ RUN npm install -g rtlcss
 COPY ./odoo/setup/debinstall.sh ./setup/debinstall.sh
 COPY ./odoo/debian/control ./debian/control
 RUN ./setup/debinstall.sh
-# Cleaning files (will be refilled by volume later
+# Cleaning files (will be refilled by volume later)
 RUN rm -rf ./setup ./debian
 
 WORKDIR /app
 
 # Is mapped in docker-compose.yml
 ENTRYPOINT ["bash", "entrypoint.bash"]
+
+EXPOSE 8069
+EXPOSE 5678

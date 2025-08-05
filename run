@@ -27,6 +27,7 @@ drop=0
 install=0
 help=0
 module=""
+cmd="--dev all" # TODO add --nodev parameter to disable this
 
 # parse script parameters
 while [[ "$#" -gt 0 ]]; do
@@ -56,32 +57,29 @@ fi
 if [[ "$module" = "" ]]; then
 	echo "Warning: missing module (-m) parameter.
          No module will be updated / installed." 1>&2
-	cmd="" # no update / install module parameters to add
 else    # seeing if installing (-i) or updating (-u) module
 	if [[ $install = 1 ]]; then
 		echo "\"$( ([[ $drop = 1 ]] && echo '--drop') || echo '--install')\"" \
-			'has been specified. Adding "-i" to command' 1>&2
+			'has been specified. Adding "-i" to command'
 		action="-i"
 	else
-		echo '"--install" has not been specified. Adding "-u" to command' 1>&2
+		echo '"--install" has not been specified. Adding "-u" to command'
 		action="-u"
 	fi
-	cmd="$action $module"
+	cmd="$cmd $action $module"
 fi
 
-echo "Starting db container..." 1>&2
-echo docker compose up db
-echo "Shutting down odoo container..." 1>&2
-echo docker compose down odoo
+echo "Shutting down everything"
+docker compose down --remove-orphans
+
+echo "Starting db container..."
+docker compose up -d db
 
 if [[ $drop = 1 ]]; then
-	echo '"--drop" has been specified. Dropping postgres database...' 1>&2
-	echo docker compose exec db psql 'DROP DATABASE $POSTGRES_DB;'
+	echo '"--drop" has been specified. Dropping postgres database...'
+	docker compose exec db dropdb --user=odoo odoo \
+		|| echo "Warning: failed to drop datatbase" 1>&2
 fi
 
-if [[ $cmd = "" ]]; then
-	echo "Starting odoo container..." 1>&2
-else
-	echo "Starting odoo container with \"$cmd\" parameters..." 1>&2
-fi
-echo docker compose up odoo "$cmd"
+echo "Starting odoo container with \"$cmd\" parameters..."
+docker compose run --service-ports odoo $cmd
