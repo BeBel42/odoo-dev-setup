@@ -35,7 +35,7 @@ services:
     volumes:
       - ./entrypoint.bash:/app/entrypoint.bash
       - ./enterprise:/app/enterprise
-      - ./odoo:/app/odoo
+      - ./community:/app/community
       - ./tutorials:/app/tutorials
       - ./venv:/app/venv
       - ./.odoorc:/app/.odoorc

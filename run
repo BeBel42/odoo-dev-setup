@@ -6,6 +6,9 @@
 set -e
 set -u
 
+ # TODO add a way to toggle those?
+default_args="--dev all --with-demo"
+
 error() {
 	error_message="
 $0 usage:
@@ -27,7 +30,7 @@ drop=0
 install=0
 help=0
 module=""
-cmd="--dev all" # TODO add --nodev parameter to disable this
+cmd="$default_args"
 
 # parse script parameters
 while [[ "$#" -gt 0 ]]; do

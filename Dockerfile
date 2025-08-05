@@ -2,7 +2,7 @@ FROM phusion/baseimage:noble-1.0.2
 
 ENV ODOO_DIR=/app
 
-WORKDIR $ODOO_DIR/odoo
+WORKDIR $ODOO_DIR/community
 
 RUN apt-get update -y
 RUN apt-get install -y \
@@ -21,8 +21,8 @@ RUN apt-get install -y \
 RUN npm install -g rtlcss
 
 # The setup/debinstall.sh script will parse the debian/control file and install the found packages.
-COPY ./odoo/setup/debinstall.sh ./setup/debinstall.sh
-COPY ./odoo/debian/control ./debian/control
+COPY ./community/setup/debinstall.sh ./setup/debinstall.sh
+COPY ./community/debian/control ./debian/control
 RUN ./setup/debinstall.sh
 # Cleaning files (will be refilled by volume later)
 RUN rm -rf ./setup ./debian

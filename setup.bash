@@ -10,12 +10,25 @@ set -u
 PROJECT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
 # clone and setup each project
-for i in odoo enterprise tutorials; do
+for i in community enterprise tutorials; do
 	echo "Setting up $i project..."
-	[ ! -d "$PROJECT_DIR/$i" ] && git clone --depth 1 "git@github.com:odoo/$i.git"
+	# community edition should be cloned from "odoo" git repo
+	CLONE_URL="git@github.com:odoo/$([[ $i == 'community' ]] && echo "odoo.git" || echo "$i.git")"
+	[ ! -d "$PROJECT_DIR/$i" ] && git clone --depth 1 $CLONE_URL $i
 	cd "$PROJECT_DIR/$i"
-	git config --global --add safe.directory "$PROJECT_DIR/$i"
-	git remote add dev "git@github.com:odoo-dev/$i.git" || echo "Skipping remote creation"
+
+    # Check if the directory is already in the safe list
+    if ! git config --global --get-all safe.directory | grep -q "$PROJECT_DIR/$i"; then
+        # If not, add it
+        git config --global --add safe.directory "$PROJECT_DIR/$i"
+        echo "Added $PROJECT_DIR/$i to safe.directory"
+    else
+        echo "$PROJECT_DIR/$i is already in safe.directory"
+    fi
+
+	# community edition should be pushed to "odoo" git repo
+	DEV_URL="git@github.com:odoo-dev/$([[ $i == 'community' ]] && echo "odoo.git" || echo "$i.git")"
+	git remote add dev $DEV_URL || echo "Skipping remote creation"
 	git remote set-url --push origin you_should_not_push_on_this_repository
 	rm -f "$PROJECT_DIR/$i/pyrightconfig.json"
 	ln -s "$PROJECT_DIR/pyrightconfig.json" "$PROJECT_DIR/$i/pyrightconfig.json"
@@ -25,8 +38,8 @@ done
 
 # add odoo symlink for better code completion
 for i in enterprise tutorials; do
-	rm -f "$PROJECT_DIR/$i/odoo" # to avoid symlink bug in ./odoo/odoo/odoo
-	ln -s "$PROJECT_DIR/odoo/odoo" "$PROJECT_DIR/$i/odoo"
+	rm -f "$PROJECT_DIR/$i/odoo" # to avoid symlink bug in ./community/odoo/odoo
+	ln -s "$PROJECT_DIR/community/odoo" "$PROJECT_DIR/$i/odoo"
 done
 
 # create global venv and install dependencies
@@ -35,4 +48,8 @@ cd "$PROJECT_DIR"
 echo "Installing debugpy..."
 ./venv/bin/python3 -m pip install debugpy 1>/dev/null
 echo "Installing odoo pip dependencies..."
-./venv/bin/python3 -m pip install -r ./odoo/requirements.txt 1>/dev/null
+./venv/bin/python3 -m pip install -r ./community/requirements.txt 1>/dev/null
+
+# TODO do something like:
+# community/odoo-bin tsconfig --addons-path community/addons,community/odoo/addons,enterprise > tsconfig.json
+# From docker
