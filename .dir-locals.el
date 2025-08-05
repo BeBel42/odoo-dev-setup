@@ -4,4 +4,4 @@
 ((nil .
   ((eval .
     (setq projectile-project-root
-          (locate-dominating-file (or (buffer-file-name) default-directory) ".dir-locals.el"))))))
+          (locate-dominating-file (or (buffer-file-name) default-directory) ".projectile"))))))
