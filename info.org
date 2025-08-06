@@ -1,0 +1,26 @@
+#+title: Info
+
+* Tasks
+** [l10n_in_Payroll] Fix the basic rule calculation condition in the Python code
+**18.0**
+PR:
+https://github.com/odoo/enterprise/pull/35602
+
+Task:
+https://www.odoo.com/odoo/my-tasks/30621833
+
+File:
+l10n_in_hr_payroll/data/hr_rule_parameters_data.xml
+
+Hint:
+https://github.com/odoo/enterprise/pull/35602#discussion_r1119774480
+
+Rule (Basic Salary, India: Regular Pay):
+=result = max(payslip._rule_parameter('l10n_in_basic_value'), payslip.paid_amount * payslip._rule_parameter('l10n_in_basic_percent') * payslip._rule_parameter('l10n_in_basic_days'))=
+Since payslip.paid_amout is 0, it thus does =max(700, 0)=
+
+
+** [Salary Config] Allow fields of salary config to be archived
+**master**
+archiver = mettre active = fields.boolean(default=false) dans model
+clean db = remove the fields you don't like (not a real dropdb _at all_)

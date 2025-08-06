@@ -19,6 +19,8 @@ $0 usage:
 		This will automatically reinstall the module.
 	-i | --install
 		Installs the module in the database.
+	-s | --stop
+		Stop all containers
 	-h | --help
 		Show this help prompt."
 	[[ "$1" = "" ]] || echo "$1" 1>&2
@@ -29,6 +31,7 @@ $0 usage:
 drop=0
 install=0
 help=0
+stop=0
 module=""
 cmd="$default_args"
 
@@ -41,6 +44,7 @@ while [[ "$#" -gt 0 ]]; do
 		;;
 	-d | --drop) drop=1 && install=1 ;;
 	-i | --install) install=1 ;;
+	-s | --stop) stop=1 ;;
 	-h | --help) help=1 ;;
 	*)
 		error "Error: unknown parameter passed: \"$1\""
@@ -53,6 +57,13 @@ done
 # show help prompt
 if [[ $help = 1 ]]; then
 	error ""
+	exit 0
+fi
+
+# just stop everything
+if [[ $stop = 1 ]]; then
+	echo "-s has been specified. Stopping all running containers."
+	docker compose down --remove-orphans && echo "Stopped all running containers."
 	exit 0
 fi
 

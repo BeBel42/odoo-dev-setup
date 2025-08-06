@@ -6,6 +6,7 @@
 
 set -e
 set -u
+set -x
 
 PROJECT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
@@ -14,7 +15,7 @@ for i in community enterprise tutorials; do
 	echo "Setting up $i project..."
 	# community edition should be cloned from "odoo" git repo
 	CLONE_URL="git@github.com:odoo/$([[ $i == 'community' ]] && echo "odoo.git" || echo "$i.git")"
-	[ ! -d "$PROJECT_DIR/$i" ] && git clone --depth 1 $CLONE_URL $i
+	[ ! -d "$PROJECT_DIR/$i" ] && git clone "$CLONE_URL" "$PROJECT_DIR/$i"
 	cd "$PROJECT_DIR/$i"
 
     # Check if the directory is already in the safe list
