@@ -7,3 +7,4 @@ db_password=dbpassword
 db_user=odoo
 dbfilter=odoo
 addons_path=community/addons/,enterprise/
+log_level=warn

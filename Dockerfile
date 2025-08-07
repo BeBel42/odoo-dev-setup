@@ -16,7 +16,8 @@ RUN apt-get install -y \
 	libldap2-dev \
 	python3-dev \
 	libsasl2-dev \
-	gcc
+	gcc \
+	python3-inotify
 
 RUN npm install -g rtlcss
 

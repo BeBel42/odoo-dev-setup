@@ -19,8 +19,15 @@ Rule (Basic Salary, India: Regular Pay):
 =result = max(payslip._rule_parameter('l10n_in_basic_value'), payslip.paid_amount * payslip._rule_parameter('l10n_in_basic_percent') * payslip._rule_parameter('l10n_in_basic_days'))=
 Since payslip.paid_amout is 0, it thus does =max(700, 0)=
 
+- empecher MONTHLY wage to be under the value
+- et retirer max dans rule
+- wage_hourly = hourly wage
+- wage = monthly wage
+- on master and not 18.0
+
 
 ** [Salary Config] Allow fields of salary config to be archived
 **master**
-archiver = mettre active = fields.boolean(default=false) dans model
+archiver = mettre: active = fields.boolean(default=false) dans model
 clean db = remove the fields you don't like (not a real dropdb _at all_)
+-i hr_contract_salary

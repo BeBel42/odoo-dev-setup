@@ -9,6 +9,7 @@ set -u
 set -x
 
 PROJECT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+cd "$PROJECT_DIR"
 
 # clone and setup each project
 for i in community enterprise tutorials; do
@@ -16,6 +17,8 @@ for i in community enterprise tutorials; do
 	# community edition should be cloned from "odoo" git repo
 	CLONE_URL="git@github.com:odoo/$([[ $i == 'community' ]] && echo "odoo.git" || echo "$i.git")"
 	[ ! -d "$PROJECT_DIR/$i" ] && git clone "$CLONE_URL" "$PROJECT_DIR/$i"
+
+	# need to go into repo to setup git
 	cd "$PROJECT_DIR/$i"
 
     # Check if the directory is already in the safe list
@@ -32,6 +35,9 @@ for i in community enterprise tutorials; do
 	git remote add dev $DEV_URL || echo "Skipping remote creation"
 	git remote set-url --push origin you_should_not_push_on_this_repository
 
+	# go back to main (root) dir
+	cd "$PROJECT_DIR"
+
 	echo "Done setting up $i project..."
 done
 
@@ -46,6 +52,8 @@ cd "$PROJECT_DIR"
 [ ! -d "$PROJECT_DIR/venv" ] && python3 -m venv "$PROJECT_DIR/venv"
 echo "Installing debugpy..."
 ./venv/bin/python3 -m pip install debugpy 1>/dev/null
+echo "Installing inotify..."
+./venv/bin/python3 -m pip install inotify 1>/dev/null
 echo "Installing odoo pip dependencies..."
 ./venv/bin/python3 -m pip install -r ./community/requirements.txt 1>/dev/null
 

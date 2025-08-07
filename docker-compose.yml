@@ -39,3 +39,5 @@ services:
       - ./tutorials:/app/tutorials
       - ./venv:/app/venv
       - ./.odoorc:/app/.odoorc
+      # where odoo stores its session data
+      - ./.odoo-share:/root/.local/share/Odoo/

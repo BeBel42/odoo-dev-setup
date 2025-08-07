@@ -7,7 +7,7 @@ set -e
 set -u
 
 # Options that do not work in .odoorc
-default_args="--dev all"
+default_args="--dev all --with-demo"
 
 error() {
 	error_message="

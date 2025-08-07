@@ -6,4 +6,9 @@ set -u
 
 cd "$ODOO_DIR/"
 # using exec to make it receive stop signals
-exec "$ODOO_DIR/venv/bin/python3" -m debugpy --listen 0.0.0.0:5678 "$ODOO_DIR/community/odoo-bin" --config "$ODOO_DIR/.odoorc" "$@"
+exec "$ODOO_DIR/venv/bin/python3" \
+	-Xfrozen_modules=off \
+	-m debugpy \
+	--listen 0.0.0.0:5678 \
+	"$ODOO_DIR/community/odoo-bin" \
+	--config "$ODOO_DIR/.odoorc" "$@"
