@@ -4,7 +4,7 @@
 - First setup the project (cloning may take some time)
   You'll need to do this only once.
 #+begin_src sh
-bash ./setup.bash
+./setup
 #+end_src
 
 - Once everything is set up, you can start Odoo using the =utility script=
@@ -21,16 +21,7 @@ Odoo now runs on =localhost:8069=
 #+end_src
 There is no need to manually shut down the docker container. The utility script will take care of that.
 ** Script details
-Here are the possible parameters for the utility script:
+To get more information about the =run= script, do:
 #+BEGIN_SRC
-./run usage:
-	-m | --module <module_name>
-		Select the module to update / install.
-	-d | --drop
-		Drop the database to start on an empty session.
-		This will automatically reinstall the specified module.
-	-i | --install
-		Installs the module in the database.
-	-h | --help
-		Show this help prompt.
+./run --help
 #+END_SRC

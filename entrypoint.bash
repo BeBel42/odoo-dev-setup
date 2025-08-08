@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# This is the entrypoint of the odoo docker container
+# Arguments to this script will be directly passed to odoo-bin
+
 set -e
 set -x
 set -u

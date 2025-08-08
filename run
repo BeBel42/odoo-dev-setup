@@ -3,11 +3,20 @@
 # Usage: this is a convenience script to quickly start and reload odoo.
 # It was made to prevent tiresome, manual operations to reboot the containers.
 
+# TODO doing a -t or -m without the second argument just gives:
+# "error: unbound variable". Make it more explicit
+
+# TODO make parameter to call setup script
+# put setup and entrypoint in a scripts/ dir so that there is
+# no need to have them on the root
+
+# TODO rename this script to ./o or ./r
+
 set -e
 set -u
 
 # Options that do not work in .odoorc
-default_args="--dev all --with-demo"
+default_args="--dev xml,reload,qweb,werkzeug"
 
 error() {
 	error_message="
@@ -21,6 +30,12 @@ $0 usage:
 		Installs the module in the database.
 	-s | --stop
 		Stop all containers
+	-t | --test [-][tag][/module][:class][.method][[params]]
+		Enables testing for filtered tests.
+		The '-' specifies whether to include or to exclude matched tests.
+		Example: -t :TestClass.test_func,/test_module,external
+		It is also possible to provide parameters to a test method that supports
+		them. Example: -t /web.test_js[mail]
 	-h | --help
 		Show this help prompt."
 	[[ "$1" = "" ]] || echo "$1" 1>&2
@@ -33,6 +48,8 @@ install=0
 help=0
 stop=0
 module=""
+test=""
+demo=0
 cmd="$default_args"
 
 # parse script parameters
@@ -42,9 +59,14 @@ while [[ "$#" -gt 0 ]]; do
 		module="$2"
 		shift
 		;;
+	-t | --test)
+		test="$2"
+		shift
+		;;
 	-d | --drop) drop=1 && install=1 ;;
 	-i | --install) install=1 ;;
 	-s | --stop) stop=1 ;;
+	-D | --demo) demo=1 ;;
 	-h | --help) help=1 ;;
 	*)
 		error "Error: unknown parameter passed: \"$1\""
@@ -71,7 +93,7 @@ fi
 if [[ "$module" = "" ]]; then
 	echo "Warning: missing module (-m) parameter.
          No module will be updated / installed." 1>&2
-else    # seeing if installing (-i) or updating (-u) module
+else # seeing if installing (-i) or updating (-u) module
 	if [[ $install = 1 ]]; then
 		echo "\"$( ([[ $drop = 1 ]] && echo '--drop') || echo '--install')\"" \
 			'has been specified. Adding "-i" to command'
@@ -83,6 +105,23 @@ else    # seeing if installing (-i) or updating (-u) module
 	cmd="$cmd $action $module"
 fi
 
+if ! [[ "$test" = "" ]]; then
+	echo '"-t" has been specified. Adding test arguments to cmd'
+	cmd="$cmd --stop-after-init --test-enable --test-tags=$test"
+	if [[ "$module" = "" ]]; then
+		echo "Warning: no module has been set to be \
+			tracked (-m) or installed (-i). Tests may not work." 1>&2
+	fi
+fi
+
+if [[ $demo = 1 ]]; then
+	echo "-D has been specified. Enabling demo data"
+	cmd="$cmd --with-demo"
+else
+	echo "Demo data is disabled"
+	cmd="$cmd --without-demo"
+fi
+
 echo "Shutting down everything"
 docker compose down --remove-orphans
 
@@ -91,8 +130,8 @@ docker compose up -d db
 
 if [[ $drop = 1 ]]; then
 	echo '"--drop" has been specified. Dropping postgres database...'
-	docker compose exec db dropdb --user=odoo odoo \
-		|| echo "Warning: failed to drop datatbase" 1>&2
+	docker compose exec db dropdb --user=odoo odoo ||
+		echo "Warning: failed to drop datatbase" 1>&2
 fi
 
 echo "Starting odoo container with \"$cmd\" parameters..."

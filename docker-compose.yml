@@ -25,6 +25,7 @@ services:
     ports:
       - "127.0.0.1:8069:8069" # odoo
       - "127.0.0.1:5678:5678" # debugpy
+      - "127.0.0.1:33315:33315" # debugpy
     build:
       context: .
       dockerfile: ./Dockerfile
