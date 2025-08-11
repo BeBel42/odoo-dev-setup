@@ -3,15 +3,6 @@
 # Usage: this is a convenience script to quickly start and reload odoo.
 # It was made to prevent tiresome, manual operations to reboot the containers.
 
-# TODO doing a -t or -m without the second argument just gives:
-# "error: unbound variable". Make it more explicit
-
-# TODO make parameter to call setup script
-# put setup and entrypoint in a scripts/ dir so that there is
-# no need to have them on the root
-
-# TODO rename this script to ./o or ./r
-
 set -e
 set -u
 

@@ -34,7 +34,7 @@ services:
         condition: service_healthy
         restart: true
     volumes:
-      - ./entrypoint.bash:/app/entrypoint.bash
+      - ./scripts/entrypoint.bash:/app/entrypoint.bash
       - ./enterprise:/app/enterprise
       - ./community:/app/community
       - ./tutorials:/app/tutorials
