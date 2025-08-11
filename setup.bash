@@ -2,11 +2,7 @@
 
 # execute this first, even before creating docker image
 
-# TODO remove pipfile if it still creates it
-
-set -e
-set -u
-set -x
+set -exu
 
 PROJECT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 cd "$PROJECT_DIR"
@@ -57,7 +53,3 @@ echo "Installing inotify..."
 ./venv/bin/python3 -m pip install inotify 1>/dev/null
 echo "Installing odoo pip dependencies..."
 ./venv/bin/python3 -m pip install -r ./community/requirements.txt 1>/dev/null
-
-# TODO do something like:
-# community/odoo-bin tsconfig --addons-path community/addons,community/odoo/addons,enterprise > tsconfig.json
-# From docker

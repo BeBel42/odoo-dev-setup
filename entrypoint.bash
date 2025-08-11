@@ -3,8 +3,7 @@
 # This is the entrypoint of the odoo docker container
 # Arguments to this script will be directly passed to odoo-bin
 
-set -e
-set -u
+set -eu
 
 cd "$ODOO_DIR/"
 odoo_command="$ODOO_DIR/community/odoo-bin --config $ODOO_DIR/.odoorc $*"

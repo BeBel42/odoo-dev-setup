@@ -3,8 +3,7 @@
 # Usage: this is a convenience script to quickly start and reload odoo.
 # It was made to prevent tiresome, manual operations to reboot the containers.
 
-set -e
-set -u
+set -eu
 
 # Options that do not work in .odoorc
 default_args="--dev xml,reload,qweb,werkzeug --limit-time-real 0"
