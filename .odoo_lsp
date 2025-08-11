@@ -1,5 +1,17 @@
 {
   "module": {
-    "roots": ["community", "enterprise"]
+    "roots": [
+      "./community",
+      "./enterprise"
+    ]
+  },
+  "symbols": {
+    "limit": 80
+  },
+  "references": {
+    "limit": 80
+  },
+  "completions": {
+    "limit": 200
   }
 }

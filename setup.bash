@@ -41,11 +41,12 @@ for i in community enterprise tutorials; do
 	echo "Done setting up $i project..."
 done
 
-# add odoo symlink for better code completion
-for i in enterprise tutorials; do
-	rm -f "$PROJECT_DIR/$i/odoo" # to avoid symlink bug in ./community/odoo/odoo
-	ln -s "$PROJECT_DIR/community/odoo" "$PROJECT_DIR/$i/odoo"
-done
+# No need for this since I now use odoo lsp
+# # add odoo symlink for better code completion
+# for i in enterprise tutorials; do
+# 	rm -f "$PROJECT_DIR/$i/odoo" # to avoid symlink bug in ./community/odoo/odoo
+# 	ln -s "$PROJECT_DIR/community/odoo" "$PROJECT_DIR/$i/odoo"
+# done
 
 # create global venv and install dependencies
 cd "$PROJECT_DIR"

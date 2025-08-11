@@ -7,13 +7,14 @@ set -e
 set -u
 
 # Options that do not work in .odoorc
-default_args="--dev xml,reload,qweb,werkzeug"
+default_args="--dev xml,reload,qweb,werkzeug --limit-time-real 0"
 
 error() {
 	error_message="
 $0 usage:
 	-m | --module <module_name>
 		Select the module to update / install.
+		It can also be a comma-separated module_name list.
 	-d | --drop
 		Drop the database to start on an empty session.
 		This will automatically reinstall the module.
