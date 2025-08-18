@@ -1,8 +1,7 @@
 {
   "module": {
     "roots": [
-      "./community",
-      "./enterprise"
+      "./.odoo_lsp"
     ]
   },
   "symbols": {

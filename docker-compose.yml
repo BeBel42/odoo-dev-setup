@@ -13,7 +13,7 @@ services:
     restart: on-failure:10
     healthcheck:
       test: pg_isready
-      interval: 10s
+      interval: 5s
       retries: 5
       start_period: 1s
       timeout: 5s
@@ -22,10 +22,7 @@ services:
       - /var/run/postgresql:/var/run/postgresql
 
   odoo:
-    ports:
-      - "127.0.0.1:8069:8069" # odoo
-      - "127.0.0.1:5678:5678" # debugpy
-      - "127.0.0.1:33315:33315" # debugpy
+    network_mode: host # because debugpy uses ephemeral ports
     build:
       context: .
       dockerfile: ./Dockerfile

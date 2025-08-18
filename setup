@@ -2,7 +2,7 @@
 
 # execute this first, even before creating docker image
 
-set -exu
+set -eu
 
 PROJECT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 cd "$PROJECT_DIR"
@@ -17,14 +17,14 @@ for i in community enterprise tutorials; do
 	# need to go into repo to setup git
 	cd "$PROJECT_DIR/$i"
 
-    # Check if the directory is already in the safe list
-    if ! git config --global --get-all safe.directory | grep -q "$PROJECT_DIR/$i"; then
-        # If not, add it
-        git config --global --add safe.directory "$PROJECT_DIR/$i"
-        echo "Added $PROJECT_DIR/$i to safe.directory"
-    else
-        echo "$PROJECT_DIR/$i is already in safe.directory"
-    fi
+	# Check if the directory is already in the safe list
+	if ! git config --global --get-all safe.directory | grep -q "$PROJECT_DIR/$i"; then
+		# If not, add it
+		git config --global --add safe.directory "$PROJECT_DIR/$i"
+		echo "Added $PROJECT_DIR/$i to safe.directory"
+	else
+		echo "$PROJECT_DIR/$i is already in safe.directory"
+	fi
 
 	# community edition should be pushed to "odoo" git repo
 	DEV_URL="git@github.com:odoo-dev/$([[ $i == 'community' ]] && echo "odoo.git" || echo "$i.git")"
@@ -47,9 +47,17 @@ done
 # create global venv and install dependencies
 cd "$PROJECT_DIR"
 [ ! -d "$PROJECT_DIR/venv" ] && python3 -m venv "$PROJECT_DIR/venv"
-echo "Installing debugpy..."
-./venv/bin/python3 -m pip install debugpy 1>/dev/null
-echo "Installing inotify..."
-./venv/bin/python3 -m pip install inotify 1>/dev/null
-echo "Installing odoo pip dependencies..."
+
+# Extra python dependencies that were missing in requirements.txt
+packages=(
+	"debugpy"
+	"inotify"
+	"pdfminer"     # for attachment indexation of PDF documents
+	"paramiko"     # for l10n_be_hr_payroll
+	"phonenumbers" # for test_l10n_be_hr_payroll_account
+)
+echo "Installing extra python dependencies in venv..."
+./venv/bin/python3 -m pip install "${packages[@]}" 1>/dev/null
+
+echo "Installing requirements.txt..."
 ./venv/bin/python3 -m pip install -r ./community/requirements.txt 1>/dev/null

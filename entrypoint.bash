@@ -6,7 +6,7 @@
 set -eu
 
 cd "$ODOO_DIR/"
-odoo_command="$ODOO_DIR/community/odoo-bin --config $ODOO_DIR/.odoorc $*"
+odoo_command="$ODOO_DIR/community/odoo-bin --config=$ODOO_DIR/.odoorc $*"
 
 echo -e "\033[0;35m$odoo_command\033[0m"
 
@@ -14,5 +14,5 @@ echo -e "\033[0;35m$odoo_command\033[0m"
 exec "$ODOO_DIR/venv/bin/python3" \
 	-Xfrozen_modules=off \
 	-m debugpy \
-	--listen 0.0.0.0:5678 \
+	--listen localhost:5678 \
 	$odoo_command
