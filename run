@@ -3,10 +3,6 @@
 # Usage: this is a convenience script to quickly start and reload odoo.
 # It was made to prevent tiresome, manual operations to reboot the containers.
 
-# TODO make debugpy only on flag
-# debugpy sometimes crashes on code change
-# maybe switch to simpler debugger and add an --attach flag?
-
 set -eu
 
 PROJECT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
@@ -36,6 +32,8 @@ $0 usage:
 		them. Example: -t /web.test_js[mail]
 	--odoo-help
 		Show the help prompt from odoo-bin
+	--debug
+		Enables debugpy. May crash on live code change.
 	--odoo-version
 		Show the odoo version
 	-h | --help
@@ -54,6 +52,7 @@ test=""
 demo=0
 odoo_help=0
 odoo_version=0
+enable_debug=0
 cmd="$default_args"
 
 # parse script parameters
@@ -73,6 +72,7 @@ while [[ "$#" -gt 0 ]]; do
 	-D | --demo) demo=1 ;;
 	--odoo-help) odoo_help=1 ;;
 	--odoo-version) odoo_version=1 ;;
+	--debug) enable_debug=1 ;;
 	-h | --help) help=1 ;;
 	*)
 		error "Error: unknown parameter passed: \"$1\""
@@ -168,4 +168,4 @@ fi
 
 
 echo "Starting odoo container with \"$cmd\" parameters..."
-docker compose run --service-ports odoo $cmd
+docker compose run -e "ENABLE_DEBUG=$enable_debug" --service-ports odoo $cmd

@@ -1,0 +1,88 @@
+#+title: Tasks
+
+* TODO [[https://www.odoo.com/odoo/my-tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
+**master**
+Chatter seems to be mail_message.py
+OR mail_thread.py (hr_version inherits it)
+Adding =tracking=True= in a python field makes the chatter send a message each time it is modified
+
+in 18.3, the summary changes are in =enterprise/hr_contract_salary/controllers/main.py:849=
+In the same file, the function is used. But I can't find a way to get the same logging as in the picture
+
+The diff message is in send_diff_email:
+=enterprise/hr_contract_salary/controllers/main.py:899=
+To get it, you have to sign a new _offer_ in the Recruitment app.
+I did it with Billy Kyle
+
+=-m l10n_be_hr_payroll,hr_contract_salary=
+Xavier (xbo) connait les trucks sur les tracking values (groups specifiques + perms, etc.)
+
+WIP on branch *master-hr_contract_salary-add_diff_message_on_employee-mlef*
+
+
+* TODO [[https://www.odoo.com/odoo/my-tasks/5026228][[hr_holidays] Add back a well-formatted "Extra Hours" section in the Time Off dashboard]]
+Made from [[https://www.odoo.com/odoo/all-tasks/4774528][task 4774528]]
+=-m hr_attendance,hr_holidays,hr_contract=
+
+
+* [?] [[https://www.odoo.com/odoo/my-tasks/4774528][[Attendance] Support Tolerance-Based Extra Hours Calculation Without Active Contract]]
+=-m hr_attendance,hr_holidays,hr_contract=
+=community/addons/hr_holidays/static/src/dashboard/time_off_card.xml= pour le format mauvais du time off dashboard
+** Review SUGA - May 12, 2025:
+38:00 / week = 7:36 hours a day
+So 10:00 = 10:00 - 7:36 = 2:24 hours of overtime
+
+On a 40h / week contract, extra hours seems legit
+*DO NOT* drop the DB! I have done tests.
+
+*The contract does not change anything.*
+It's just the *working hours* under _Employee/WorkInfo/Schedule/Working Hours_
+
+
+* HOLD [[https://www.odoo.com/odoo/my-tasks/5013546][Employee] Migrate all "general" data to demo data]]
+General data: =community/addons/hr/data/hr_data.xml=
+Demo data: =community/addons/hr/data/hr_demo.xml=
+Task is awaiting for some talks. Arthur knows a bit about it. He comes back from holidays on the 13 of aug
+
+
+
+* HOLD [[https://www.odoo.com/odoo/my-tasks/4980966][[l10n_in_Payroll] Fix the basic rule calculation condition in the Python code]]
+**18.0**
+PR:
+https://github.com/odoo/enterprise/pull/35602
+
+Task:
+https://www.odoo.com/odoo/my-tasks/30621833
+
+File:
+l10n_in_hr_payroll/data/hr_rule_parameters_data.xml
+
+Hint:
+https://github.com/odoo/enterprise/pull/35602#discussion_r1119774480
+
+Rule (Basic Salary, India: Regular Pay):
+=result = max(payslip._rule_parameter('l10n_in_basic_value'), payslip.paid_amount * payslip._rule_parameter('l10n_in_basic_percent') * payslip._rule_parameter('l10n_in_basic_days'))=
+Since payslip.paid_amout is 0, it thus does =max(700, 0)=
+
+- empecher MONTHLY wage to be under the value
+- et retirer max dans rule
+- wage_hourly = hourly wage
+- wage = monthly wage
+- on master and not 18.0
+
+
+
+
+* DONE [[https://www.odoo.com/odoo/my-tasks/4901052][[Salary Config] Allow fields of salary config to be archived]]
+**master**
+archiver = mettre: active = fields.boolean(default=false) dans model
+clean db = remove the fields you don't like (not a real dropdb _at all_)
+-i hr_contract_salary
+
+
+
+
+* File Configuration
+# Local Variables:
+# eval: (org-overview)
+# End:
