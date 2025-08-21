@@ -21,8 +21,29 @@ WIP on branch *master-hr_contract_salary-add_diff_message_on_employee-mlef*
 
 
 * TODO [[https://www.odoo.com/odoo/my-tasks/5026228][[hr_holidays] Add back a well-formatted "Extra Hours" section in the Time Off dashboard]]
+DONE? Check runbot + create PR
 Made from [[https://www.odoo.com/odoo/all-tasks/4774528][task 4774528]]
+
+Branch: =master-hr_holidays_attendance-add_well_formatted_extra_hours-mlef=
+
 =-m hr_attendance,hr_holidays,hr_contract=
+
+- Add the employee.total_overtime if > 0 and if overtime is not checked on Hide on Dashboard && Deduct Extra Hours is checked
+
+** Talk with bedo
+hr_employee
+pour leave types qui demandent pas allocations & qui sont coches sur "deduct extra hours", dans _get_consumed_leaves(), je dois rajouter dans var envoyee sur discord, mais False au lieu de [allocation] (False c'est l'allocation qui n'en es pas une)
+
+=allocations_leaves_consumed[<employee>][<holiday_status>][False]=
+
+Je dois faire le allocations_data.update({}) mais dans false
+
+*Extra stuff to do*
+Time off type > Si coche / decoche requires allocation, alors decoche / coche hide on dashboard
+Idem pour deduct extra hours
+- Do a computed property, stored readonly=false so that it change (and can still be changed by user) the checkbox
+
+
 
 
 * [?] [[https://www.odoo.com/odoo/my-tasks/4774528][[Attendance] Support Tolerance-Based Extra Hours Calculation Without Active Contract]]
