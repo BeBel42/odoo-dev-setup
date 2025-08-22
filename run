@@ -129,7 +129,7 @@ fi
 
 if ! [[ "$test" = "" ]]; then
 	echo '"-t" has been specified. Adding test arguments to cmd'
-	cmd="$cmd --stop-after-init --test-enable --test-tags=$test"
+	cmd="$cmd --stop-after-init --log-level=info --test-enable --test-tags=$test"
 	if [[ "$module" = "" ]]; then
 		echo "Warning: no module has been set to be \
 			tracked (-m) or installed (-i). Tests may not work." 1>&2
@@ -150,12 +150,22 @@ docker compose down --remove-orphans
 echo "Starting db container..."
 docker compose up -d db
 
-if [[ $drop = 1 ]]; then
-	echo '"--drop" has been specified. Dropping postgres database...'
-	docker compose exec db dropdb --user=odoo odoo ||
-		echo "Warning: failed to drop datatbase" 1>&2
+# Wait for database to be up
+tries=1
+while (! docker compose ps | grep -qE "[^a-zA-Z](db|postgres)[^a-zA-Z].*?\sUp\s") && [ $tries -lt 5 ]; do
+	sleep 0.5
+	tries=$(("$tries" + 1))
+	echo "Checking database availability ($tries)..."
+done
+if [ $tries = 5 ]; then
+	echo "Error: could not start database" 1>&2
+	exit 1
 fi
 
+if [[ $drop = 1 ]]; then
+	echo '"--drop" has been specified. Dropping postgres database...'
+	docker compose exec db dropdb --user=odoo odoo || echo "Warning: failed to drop datatbase" 1>&2
+fi
 
 if [[ $odoo_version = 1 ]]; then
 	echo '--odoo-version has been specified. Overriding parameters to --version'
@@ -165,7 +175,6 @@ if [[ $odoo_help = 1 ]]; then
 	echo '--odoo-help has been specified. Overriding parameters to --help'
 	cmd="--help"
 fi
-
 
 echo "Starting odoo container with \"$cmd\" parameters..."
 docker compose run -e "ENABLE_DEBUG=$enable_debug" --service-ports odoo $cmd

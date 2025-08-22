@@ -5,8 +5,7 @@ ENV ODOO_DIR=/app
 
 WORKDIR $ODOO_DIR/community
 
-RUN apt-get update -y
-RUN apt-get install -y \
+RUN apt-get update -y && apt-get install -y \
 	python3 \
 	postgresql-client \
 	npm \
@@ -40,12 +39,18 @@ RUN if [ -z "${TARGETARCH}" ]; then \
     && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
 
+
 # The setup/debinstall.sh script will parse the debian/control file and install the found packages.
 COPY ./community/setup/debinstall.sh ./setup/debinstall.sh
 COPY ./community/debian/control ./debian/control
 RUN ./setup/debinstall.sh
 # Cleaning files (will be refilled by volume later)
 RUN rm -rf ./setup ./debian
+
+# Install google chrome for tour testing (it's what's used in the runbot)
+RUN curl -sSL https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o google-chrome.deb && \
+    apt-get install -y ./google-chrome.deb && \
+    rm -f google-chrome.deb
 
 # Set default user when running the container
 USER $ODOO_USER
@@ -58,3 +63,4 @@ ENTRYPOINT ["bash", "entrypoint.bash"]
 EXPOSE 8069 8071 8072
 # Debugpy
 EXPOSE 5678
+

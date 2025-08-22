@@ -26,10 +26,6 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    depends_on:
-      db:
-        condition: service_healthy
-        restart: true
     volumes:
       - ./entrypoint.bash:/app/entrypoint.bash
       - ./enterprise:/app/enterprise

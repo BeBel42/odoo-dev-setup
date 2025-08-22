@@ -55,6 +55,7 @@ packages=(
 	"pdfminer"     # for attachment indexation of PDF documents
 	"paramiko"     # for l10n_be_hr_payroll
 	"phonenumbers" # for test_l10n_be_hr_payroll_account
+	"websocket-client" # for tests using a browser
 )
 echo "Installing extra python dependencies in venv..."
 ./venv/bin/python3 -m pip install "${packages[@]}" 1>/dev/null
