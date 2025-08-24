@@ -57,7 +57,7 @@ USER $ODOO_USER
 WORKDIR $ODOO_DIR
 
 # Is mapped in docker-compose.yml
-ENTRYPOINT ["bash", "entrypoint.bash"]
+ENTRYPOINT ["bash", "scripts/entrypoint.bash"]
 
 # Odoo
 EXPOSE 8069 8071 8072

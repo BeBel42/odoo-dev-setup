@@ -27,7 +27,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
     volumes:
-      - ./entrypoint.bash:/app/entrypoint.bash
+      - ./scripts:/app/scripts
       - ./enterprise:/app/enterprise
       - ./community:/app/community
       - ./tutorials:/app/tutorials

@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-# execute this first, even before creating docker image
-
 set -eu
 
-PROJECT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+PROJECT_DIR=$ODOO_DIR
 cd "$PROJECT_DIR"
 
 # clone and setup each project

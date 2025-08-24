@@ -34,6 +34,8 @@ $0 usage:
 		Show the help prompt from odoo-bin
 	--debug
 		Enables debugpy. May crash on live code change.
+	--setup
+		Sets up the whole project + dependencies
 	--odoo-version
 		Show the odoo version
 	-h | --help
@@ -53,6 +55,7 @@ demo=0
 odoo_help=0
 odoo_version=0
 enable_debug=0
+setup=0
 cmd="$default_args"
 
 # parse script parameters
@@ -73,6 +76,7 @@ while [[ "$#" -gt 0 ]]; do
 	--odoo-help) odoo_help=1 ;;
 	--odoo-version) odoo_version=1 ;;
 	--debug) enable_debug=1 ;;
+	--setup) setup=1 ;;
 	-h | --help) help=1 ;;
 	*)
 		error "Error: unknown parameter passed: \"$1\""
@@ -85,6 +89,13 @@ done
 # show help prompt
 if [[ $help = 1 ]]; then
 	error ""
+	exit 0
+fi
+
+# Setup the whole project
+if [[ $setup = 1 ]]; then
+	echo '"--setup" specified. Calling setup.bash from inside the container...'
+	docker compose run --entrypoint './scripts/setup.bash' odoo
 	exit 0
 fi
 

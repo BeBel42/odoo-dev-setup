@@ -19,7 +19,7 @@ Xavier (xbo) connait les trucks sur les tracking values (groups specifiques + pe
 
 WIP on branch *master-hr_contract_salary-add_diff_message_on_employee-mlef*
 
-** talk with xavier
+** talk with xavier (xbo)
 Try to replace [[./enterprise/hr_contract_salary/controllers/main.py::714]]
 By =employee.create_version()=
 [[./community/addons/hr/models/hr_employee.py::383]]
