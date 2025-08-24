@@ -38,8 +38,6 @@ RUN if [ -z "${TARGETARCH}" ]; then \
     && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
     && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
-
-
 # The setup/debinstall.sh script will parse the debian/control file and install the found packages.
 COPY ./community/setup/debinstall.sh ./setup/debinstall.sh
 COPY ./community/debian/control ./debian/control
