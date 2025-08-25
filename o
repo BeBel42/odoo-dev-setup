@@ -5,8 +5,10 @@
 
 set -eu
 
-PROJECT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-cd "$PROJECT_DIR"
+project_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+cd "$project_dir"
+
+compose_file="$project_dir"/docker/docker-compose.yml
 
 # Options that do not work in .odoorc
 default_args="--dev=all --limit-time-real=0"
@@ -94,18 +96,18 @@ fi
 
 # Setup the whole project
 if [[ $setup = 1 ]]; then
-	echo '"--setup" specified. Calling setup.bash from inside the container...'
-	docker compose run --entrypoint './scripts/setup.bash' odoo
+	echo '"--setup" specified. Calling setup container...'
+	docker compose -f "$compose_file" run --build setup
 	exit 0
 fi
 
 check_possible_errors() {
 	echo -e "\e[33m" # start yellow text
-	cd "$PROJECT_DIR/community" &&
+	cd "$project_dir/community" &&
 		community_branch=$(git rev-parse --abbrev-ref HEAD)
-	cd "$PROJECT_DIR/enterprise" &&
+	cd "$project_dir/enterprise" &&
 		enterprise_branch=$(git rev-parse --abbrev-ref HEAD)
-	cd "$PROJECT_DIR"
+	cd "$project_dir"
 	[[ "$community_branch" == "$enterprise_branch" ]] ||
 		echo "Warning: community and enterprise branches differ.
 	community_branch=$community_branch
@@ -118,7 +120,7 @@ check_possible_errors
 # just stop everything
 if [[ $stop = 1 ]]; then
 	echo "-s has been specified. Stopping all running containers."
-	docker compose down --remove-orphans && echo "Stopped all running containers."
+	docker compose -f "$compose_file" down --remove-orphans && echo "Stopped all running containers."
 	exit 0
 fi
 
@@ -156,14 +158,14 @@ else
 fi
 
 echo "Shutting down everything"
-docker compose down --remove-orphans
+docker compose -f "$compose_file" down --remove-orphans
 
 echo "Starting db container..."
-docker compose up -d db
+docker compose -f "$compose_file" up -d db
 
 # Wait for database to be up
 tries=1
-while (! docker compose ps | grep -qE "[^a-zA-Z](db|postgres)[^a-zA-Z].*?\sUp\s") && [ $tries -lt 5 ]; do
+while (! docker compose -f "$compose_file" ps | grep -qE "[^a-zA-Z](db|postgres)[^a-zA-Z].*?\sUp\s") && [ $tries -lt 5 ]; do
 	sleep 0.5
 	tries=$(("$tries" + 1))
 	echo "Checking database availability ($tries)..."
@@ -175,7 +177,7 @@ fi
 
 if [[ $drop = 1 ]]; then
 	echo '"--drop" has been specified. Dropping postgres database...'
-	docker compose exec db dropdb --user=odoo odoo || echo "Warning: failed to drop datatbase" 1>&2
+	docker compose -f "$compose_file" exec db dropdb --user=odoo odoo || echo "Warning: failed to drop datatbase" 1>&2
 fi
 
 if [[ $odoo_version = 1 ]]; then
@@ -188,4 +190,4 @@ if [[ $odoo_help = 1 ]]; then
 fi
 
 echo "Starting odoo container with \"$cmd\" parameters..."
-docker compose run -e "ENABLE_DEBUG=$enable_debug" --service-ports odoo $cmd
+docker compose -f "$compose_file" run --build -e "ENABLE_DEBUG=$enable_debug" --service-ports odoo $cmd

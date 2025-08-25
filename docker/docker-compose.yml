@@ -18,30 +18,29 @@ services:
       start_period: 1s
       timeout: 5s
     volumes:
-      - ./db/volume/:/var/lib/postgresql/data
+      - ./volumes/db:/var/lib/postgresql/data
       - /var/run/postgresql:/var/run/postgresql
 
   odoo:
     network_mode: host # because debugpy uses ephemeral ports
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      context: ..
+      dockerfile: ./docker/Dockerfile.odoo
     volumes:
-      - ./scripts:/app/scripts
-      - ./enterprise:/app/enterprise
-      - ./community:/app/community
-      - ./tutorials:/app/tutorials
-      - ./venv:/app/venv
-      - ./.odoorc:/app/.odoorc
+      - ../enterprise:/app/enterprise
+      - ../community:/app/community
+      - ../tutorials:/app/tutorials
+      - ../venv:/app/venv
+      - ../.odoorc:/app/.odoorc
       # where odoo stores its session data
-      - ./.odoo-share:/root/.local/share/Odoo/
+      - ./volumes/.odoo-share:/root/.local/share/Odoo/
 
-  # TODO make a dockerfile for this
   setup:
-    image: postgres:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile.setup
     volumes:
-      - ./scripts:/app/scripts
-      - ./enterprise:/app/enterprise
-      - ./community:/app/community
-      - ./tutorials:/app/tutorials
-      - ./venv:/app/venv
+      - ../enterprise:/app/enterprise
+      - ../community:/app/community
+      - ../tutorials:/app/tutorials
+      - ../venv:/app/venv

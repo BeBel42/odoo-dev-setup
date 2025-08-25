@@ -5,7 +5,7 @@
 
 set -eu
 
-cd "$ODOO_DIR/"
+cd "$ODOO_DIR"
 odoo_command="$ODOO_DIR/community/odoo-bin --config=$ODOO_DIR/.odoorc $*"
 
 echo -e "\033[0;35m$odoo_command\033[0m"

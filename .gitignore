@@ -2,8 +2,7 @@
 .idea
 *.log
 tmp/
-/db/volume
 
 /venv/
 
-/.odoo-share/
+/docker/volumes/
