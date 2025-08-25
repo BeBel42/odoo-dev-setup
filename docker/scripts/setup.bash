@@ -9,7 +9,7 @@ for i in community enterprise tutorials; do
 	echo "Setting up $i project..."
 	# community edition should be cloned from "odoo" git repo
 	CLONE_URL="git@github.com:odoo/$([[ $i == 'community' ]] && echo "odoo.git" || echo "$i.git")"
-	[ ! -d "$ODOO_DIR/$i" ] && git clone "$CLONE_URL" "$ODOO_DIR/$i"
+	[ ! -d "$ODOO_DIR/$i/.git" ] && git clone "$CLONE_URL" "$ODOO_DIR/$i"
 
 	# need to go into repo to setup git
 	cd "$ODOO_DIR/$i"
@@ -43,19 +43,19 @@ done
 
 # create global venv and install dependencies
 cd "$ODOO_DIR"
-[ ! -d "$ODOO_DIR/venv" ] && python3 -m venv "$ODOO_DIR/venv"
+{ [ ! -d "$ODOO_DIR/venv" ] || [ -z "$(ls -A "$ODOO_DIR/venv")" ]; } && python3 -m venv "$ODOO_DIR/venv"
 
 # Extra python dependencies that were missing in requirements.txt
 packages=(
 	"debugpy"
 	"inotify"
-	"pdfminer"     # for attachment indexation of PDF documents
-	"paramiko"     # for l10n_be_hr_payroll
-	"phonenumbers" # for test_l10n_be_hr_payroll_account
+	"pdfminer"         # for attachment indexation of PDF documents
+	"paramiko"         # for l10n_be_hr_payroll
+	"phonenumbers"     # for test_l10n_be_hr_payroll_account
 	"websocket-client" # for tests using a browser
 )
 echo "Installing extra python dependencies in venv..."
 "$ODOO_DIR/venv/bin/python3" -m pip install "${packages[@]}" 1>/dev/null
 
 echo "Installing requirements.txt..."
-exec "$ODOO_DIR/venv/bin/python3" -m pip install -r ./community/requirements.txt 1>/dev/null
+exec "$ODOO_DIR/venv/bin/python3" -m pip install -r "$ODOO_DIR/community/requirements.txt" 1>/dev/null
