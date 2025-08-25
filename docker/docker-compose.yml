@@ -44,3 +44,4 @@ services:
       - ../community:/app/community
       - ../tutorials:/app/tutorials
       - ../venv:/app/venv
+      - ~/.ssh:/root/.ssh:ro
