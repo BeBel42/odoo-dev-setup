@@ -33,6 +33,7 @@ After that, delete the old diff message you made
 * TODO [[https://www.odoo.com/odoo/my-tasks/5026228][[hr_holidays] Add back a well-formatted "Extra Hours" section in the Time Off dashboard]]
 Made from [[https://www.odoo.com/odoo/all-tasks/4774528][task 4774528]]
 
+
 Branch: =master-hr_holidays_attendance-add_well_formatted_extra_hours-mlef=
 
 =-m hr_attendance,hr_holidays,hr_contract=
@@ -40,7 +41,10 @@ Branch: =master-hr_holidays_attendance-add_well_formatted_extra_hours-mlef=
 - Add the employee.total_overtime if > 0 and if overtime is not checked on Hide on Dashboard && Deduct Extra Hours is checked
   This spec has been changed when talking with bedo
 
-[[https://runbot.odoo.com/runbot/batch/2095917/build/87408979][FIX the Runbot Issues!]]
+** TODO add tests
+
+** DONE [[https://runbot.odoo.com/runbot/batch/2095917/build/87408979][FIX the Runbot Issues!]]
+=./o -m hr_attendance,hr_holidays,hr_contract -t :TestExpiringLeaves=
 
 ** Talk with bedo
 hr_employee
@@ -70,6 +74,7 @@ Et apres dans la get_allocation_data overriden, dans le if (pas le else) je rajo
 
 
 Et retirer dans la condition le =or not leave_type.requires_allocation=
+
 
 
 * WAIT [[[https://www.odoo.com/odoo/my-tasks/5013546][Employee] Migrate all "general" data to demo data]]
