@@ -101,6 +101,7 @@ if [[ $setup = 1 ]]; then
 	# Files created from container are chowned to root. Let's change that
 	echo "Setting owner of project to $USER..."
 	sudo chown -R "$USER:$USER" .
+	echo "Done setting up project."
 	exit 0
 fi
 
