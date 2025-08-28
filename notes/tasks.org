@@ -1,6 +1,11 @@
 #+title: Tasks
 
-* TODO [[https://www.odoo.com/odoo/my-tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5048292][[Appraisal] Default employee_id on goal creation]]
+=-m hr_appraisal=
+Version *16.0*
+Put on context when clicking on "Goals" from employee the employee id, if directly click on "Goals" then leave the employee field empty.
+
+* WAIT [[https://www.odoo.com/odoo/my-tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
 **master**
 Chatter seems to be mail_message.py
 OR mail_thread.py (hr_version inherits it)
@@ -18,6 +23,9 @@ I did it with Billy Kyle
 Xavier (xbo) connait les trucs sur les tracking values (groups specifiques + perms, etc.)
 
 WIP on branch *master-hr_contract_salary-add_diff_message_on_employee-mlef*
+
+** FIXME recent PRs made changes on code I am supposed to delete
+[[project:enterprise/hr_contract_salary/controllers/main.py::683][enterprise/hr_contract_salary/controllers/main.py::683]]
 
 ** talk with xavier (xbo)
 Try to replace [[project:enterprise/hr_contract_salary/controllers/main.py::714]]
