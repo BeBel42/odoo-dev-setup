@@ -30,6 +30,11 @@ $0 usage:
 		Example: -t :TestClass.test_func,/test_module,external
 		It is also possible to provide parameters to a test method that supports
 		them. Example: -t /web.test_js[mail]
+	-c | --checkout <branch>
+		Checkout all odoo repositories to <branch>
+	-p | --pull
+		Pull all odoo repositories to the latest changes.
+		This will be executed after \"--checkout\" if both are specified.
 	--odoo-help
 		Show the help prompt from odoo-bin
 	--debug
@@ -55,6 +60,8 @@ demo=0
 odoo_help=0
 odoo_version=0
 enable_debug=0
+checkout_branch=""
+pull_branch=0
 setup=0
 cmd="$default_args"
 
@@ -69,6 +76,11 @@ while [[ "$#" -gt 0 ]]; do
 		test="$2"
 		shift
 		;;
+	-c | --checkout)
+		checkout_branch="$2"
+		shift
+		;;
+	-p | --pull) pull_branch=1 ;;
 	-d | --drop) drop=1 && install=1 ;;
 	-i | --install) install=1 ;;
 	-s | --stop) stop=1 ;;
@@ -105,21 +117,64 @@ if [[ $setup = 1 ]]; then
 	exit 0
 fi
 
-check_possible_errors() {
-	echo -e "\e[33m" # start yellow text
+warn_user_if_needed() {
 	cd "$project_dir/community" &&
 		community_branch=$(git rev-parse --abbrev-ref HEAD)
 	cd "$project_dir/enterprise" &&
 		enterprise_branch=$(git rev-parse --abbrev-ref HEAD)
 	cd "$project_dir"
-	[[ "$community_branch" == "$enterprise_branch" ]] ||
+	if ! [[ "$community_branch" == "$enterprise_branch" ]]; then
+		echo -e "\e[33m" # start yellow text
 		echo "Warning: community and enterprise branches differ.
 	community_branch=$community_branch
 	enterprise_branch=$enterprise_branch" 1>&2
-	echo -e "\e[0m" # end yellow text
+		echo -e "\e[0m" # end yellow text
+	fi
 }
 
-check_possible_errors
+# everything related to -p | --pull and -c | --checkout
+handle_branch_switch() {
+	# define the directories
+	community_dir="$project_dir/community"
+	enterprise_dir="$project_dir/enterprise"
+
+	# check for unstaged or staged changes in a git repo
+	for dir in "$community_dir" "$enterprise_dir"; do
+		cd "$dir"
+		if ! git diff --cached --quiet; then
+			echo "Error: you cannot pull/checkout when there are staged changes in $dir."
+			cd - >/dev/null
+			exit 1
+		fi
+		if ! git diff --quiet; then
+			echo "Error: you cannot pull/checkout when there are unstaged changes in $dir."
+			cd - >/dev/null
+			exit 1
+		fi
+		cd - >/dev/null
+	done
+
+	# Switch branches in both repositories
+	for dir in "$community_dir" "$enterprise_dir"; do
+		cd "$dir"
+		if [[ $checkout_branch != "" ]]; then
+			echo '"-c" has been specified.' "Checking out $dir to $checkout_branch..."
+			git checkout "$checkout_branch"
+		fi
+		if [[ $pull_branch = 1 ]]; then
+			echo '"-p" has been specified.' "Pulling $dir to latest changes..."
+			git pull --ff-only
+		fi
+		cd - >/dev/null
+	done
+
+	echo "Done git operations."
+	exit 0
+}
+
+warn_user_if_needed
+
+[[ $checkout_branch != "" || $pull_branch = 1 ]] && handle_branch_switch
 
 # just stop everything
 if [[ $stop = 1 ]]; then

@@ -1,0 +1,87 @@
+#+title: Xpath
+
+* XPath Basics
+- XPath is a syntax for selecting nodes in XML documents.
+- Uses path expressions to navigate XML hierarchies.
+
+* Odoo examples
+#+begin_src xml
+<xpath expr="//field[@name='description']" position="after">
+    <field name="new_field"/>
+</xpath>
+#+end_src
+
+* XML Structure
+- Elements: ~<book>~
+- Attributes: ~<book id="101">~
+
+* XPath Syntax
+| Syntax | Description                            |
+|--------+----------------------------------------|
+| /      | Selects from the root node             |
+| //     | Selects nodes anywhere in the document |
+| @      | Selects attributes                     |
+| []     | Predicates for filtering               |
+| text() | Selects the text content of a node     |
+
+* Predicates
+- Filter nodes using conditions: ~[condition]~
+- Examples:
+  - ~/bookstore/book[1]~ (first book)
+  - ~//book[@id="101"]~ (book with id="101")
+  - ~//book[price>30]~ (books with price > 30)
+  - ~//book[contains(title, "XPath")]~ (books with "XPath" in title)
+  - ~//book[starts-with(title, "Advanced")]~ (books with title starting with "Advanced")
+
+* Axes
+- Axes define relationships between nodes.
+- Syntax: ~::~ (e.g., ~child::book~, ~ancestor::bookstore~)
+
+| Axis       | Description                           | Example                      |
+|------------+---------------------------------------+------------------------------|
+| child      | Selects all child nodes               | ~/bookstore/child::book~       |
+| parent     | Selects the parent node               | ~/book/parent::bookstore~      |
+| ancestor   | Selects all ancestor nodes            | ~/book/ancestor::bookstore~    |
+| descendant | Selects all descendant nodes          | ~/bookstore/descendant::title~ |
+| following  | Selects nodes after the current node  | ~/book/following::book~        |
+| preceding  | Selects nodes before the current node | ~/book/preceding::book~        |
+
+* Functions
+| Function      | Description                                | Example                                |
+|---------------+--------------------------------------------+----------------------------------------|
+| text()        | Selects the text content of a node         | ~/book/title/text()~                     |
+| contains()    | Checks if a string contains a substring    | ~//book[contains(title, "XPath")]~       |
+| starts-with() | Checks if a string starts with a substring | ~//book[starts-with(title, "Advanced")]~ |
+| count()       | Counts the number of nodes                 | ~count(//book)~                          |
+| sum()         | Sums the values of nodes                   | ~sum(//book/price)~                      |
+
+* Example XML
+#+begin_src xml
+<bookstore>
+  <book id="101">
+    <title>XPath Basics</title>
+    <author>John Doe</author>
+    <price>29.99</price>
+  </book>
+  <book id="102">
+    <title>Advanced XPath</title>
+    <author>Jane Smith</author>
+    <price>49.99</price>
+  </book>
+</bookstore>
+#+END_src
+
+* Example XPath Queries
+| Query                                  | Result                                        |
+|----------------------------------------+-----------------------------------------------|
+| /bookstore/book/title                  | Selects all ~<title>~ elements                  |
+| //book[@id="102"]/author               | Selects the author of the book with id="102"  |
+| //book[price>30]/title                 | Selects titles of books with price > 30       |
+| //book[contains(title, "XPath")]/title | Selects titles containing "XPath"             |
+| //book/title/text()                    | Selects the text of all ~<title>~ elements      |
+| //book/ancestor::bookstore             | Selects the ~<bookstore>~ ancestor of all books |
+
+* Common Pitfalls
+- Case sensitivity: XPath is case-sensitive.
+- Namespace handling: Account for namespaces in XPath expressions.
+- Dynamic content: XPath may not work as expected on dynamically generated content.

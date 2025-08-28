@@ -28,9 +28,47 @@ Vals (in theory) are the same as the one passed in old code.
 After that, with the small [[https://github.com/odoo/odoo/pull/222744/files#diff-1c37517a76b393d1d30c2b03e96611643a747d12c13b086653989f4068c660b2R447-R450][pr he sent]] tracking values should take care of it. Maybe git pull to get the changes.
 
 After that, delete the old diff message you made
+* WAIT [[https://www.odoo.com/odoo/my-tasks/4980966][[l10n_in_Payroll] Fix the basic rule calculation condition in the Python code]]
+**18.0**
+PR:
+https://github.com/odoo/enterprise/pull/35602
+
+Task:
+https://www.odoo.com/odoo/my-tasks/30621833
+
+File:
+l10n_in_hr_payroll/data/hr_rule_parameters_data.xml
+
+Hint:
+https://github.com/odoo/enterprise/pull/35602#discussion_r1119774480
+
+Rule (Basic Salary, India: Regular Pay):
+=result = max(payslip._rule_parameter('l10n_in_basic_value'), payslip.paid_amount * payslip._rule_parameter('l10n_in_basic_percent') * payslip._rule_parameter('l10n_in_basic_days'))=
+Since payslip.paid_amout is 0, it thus does =max(700, 0)=
+
+- empecher MONTHLY wage to be under the value
+- et retirer max dans rule
+- wage_hourly = hourly wage
+- wage = monthly wage
+- on master and not 18.0
 
 
-* TODO [[https://www.odoo.com/odoo/my-tasks/5026228][[hr_holidays] Add back a well-formatted "Extra Hours" section in the Time Off dashboard]]
+
+
+
+* WAIT [[[https://www.odoo.com/odoo/my-tasks/5013546][Employee] Migrate all "general" data to demo data]]
+General data: =community/addons/hr/data/hr_data.xml=
+Demo data: =community/addons/hr/data/hr_demo.xml=
+Task is awaiting for some talks. Arthur knows a bit about it. He comes back from holidays on the 13 of aug
+
+
+* DONE [[https://www.odoo.com/odoo/my-tasks/5042323][[Payroll] Work entries]]
+=-m hr_payroll=
+The code that check if the work entry is not validated before deletion can be found at:
+- [[./community/addons/hr_work_entry/static/src/views/work_entry_calendar/work_entry_calendar_controller.js::151]] (for work entries view from employees)
+  - [[./enterprise/hr_work_entry_enterprise/static/src/work_entries_gantt_renderer.js::272]] (for work entries view from payroll)
+
+* DONE [[https://www.odoo.com/odoo/my-tasks/5026228][[hr_holidays] Add back a well-formatted "Extra Hours" section in the Time Off dashboard]]
 Made from [[https://www.odoo.com/odoo/all-tasks/4774528][task 4774528]]
 
 
@@ -41,7 +79,7 @@ Branch: =master-hr_holidays_attendance-add_well_formatted_extra_hours-mlef=
 - Add the employee.total_overtime if > 0 and if overtime is not checked on Hide on Dashboard && Deduct Extra Hours is checked
   This spec has been changed when talking with bedo
 
-** TODO add tests
+** DONE add tests
 
 ** DONE [[https://runbot.odoo.com/runbot/batch/2095917/build/87408979][FIX the Runbot Issues!]]
 =./o -m hr_attendance,hr_holidays,hr_contract -t :TestExpiringLeaves=
@@ -75,42 +113,6 @@ Et apres dans la get_allocation_data overriden, dans le if (pas le else) je rajo
 
 Et retirer dans la condition le =or not leave_type.requires_allocation=
 
-
-
-* WAIT [[[https://www.odoo.com/odoo/my-tasks/5013546][Employee] Migrate all "general" data to demo data]]
-General data: =community/addons/hr/data/hr_data.xml=
-Demo data: =community/addons/hr/data/hr_demo.xml=
-Task is awaiting for some talks. Arthur knows a bit about it. He comes back from holidays on the 13 of aug
-
-
-
-* WAIT [[https://www.odoo.com/odoo/my-tasks/4980966][[l10n_in_Payroll] Fix the basic rule calculation condition in the Python code]]
-**18.0**
-PR:
-https://github.com/odoo/enterprise/pull/35602
-
-Task:
-https://www.odoo.com/odoo/my-tasks/30621833
-
-File:
-l10n_in_hr_payroll/data/hr_rule_parameters_data.xml
-
-Hint:
-https://github.com/odoo/enterprise/pull/35602#discussion_r1119774480
-
-Rule (Basic Salary, India: Regular Pay):
-=result = max(payslip._rule_parameter('l10n_in_basic_value'), payslip.paid_amount * payslip._rule_parameter('l10n_in_basic_percent') * payslip._rule_parameter('l10n_in_basic_days'))=
-Since payslip.paid_amout is 0, it thus does =max(700, 0)=
-
-- empecher MONTHLY wage to be under the value
-- et retirer max dans rule
-- wage_hourly = hourly wage
-- wage = monthly wage
-- on master and not 18.0
-
-
-
-
 * DONE [[https://www.odoo.com/odoo/my-tasks/4774528][[Attendance] Support Tolerance-Based Extra Hours Calculation Without Active Contract]]
 =-m hr_attendance,hr_holidays,hr_contract=
 =community/addons/hr_holidays/static/src/dashboard/time_off_card.xml= pour le format mauvais du time off dashboard
@@ -133,7 +135,28 @@ clean db = remove the fields you don't like (not a real dropdb _at all_)
 
 
 
-* File Configuration
+* Configuration
 # Local Variables:
 # eval: (org-overview)
 # End:
+
+#+name: Count number of tasks
+#+begin_src elisp :results none
+(save-excursion
+  (goto-char (point-min))
+  (let ((counts (make-hash-table :test 'equal)))
+    (while (re-search-forward "^\\* \\([^[:space:]]+\\)" nil t)
+      (let ((word (match-string 1)))
+        (unless (string= word "Configuration")
+          (puthash "Total" (1+ (or (gethash "Total" counts 0) 0)) counts)
+          (puthash word (1+ (or (gethash word counts 0) 0)) counts)
+		  )))
+    (message (mapconcat
+              (lambda (pair)
+                (format "%s: %d" (car pair) (cdr pair)))
+              (loop for k being the hash-keys of counts
+                    using (hash-value v)
+                    collect (cons k v))
+              "\n")
+             )))
+#+END_src
