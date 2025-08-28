@@ -6,23 +6,23 @@ Chatter seems to be mail_message.py
 OR mail_thread.py (hr_version inherits it)
 Adding =tracking=True= in a python field makes the chatter send a message each time it is modified
 
-in 18.3, the summary changes are in [[./enterprise/hr_contract_salary/controllers/main.py::849]]
+in 18.3, the summary changes are in [[project:enterprise/hr_contract_salary/controllers/main.py::849]]
 In the same file, the function is used. But I can't find a way to get the same logging as in the picture
 
 The diff message is in send_diff_email:
-[[./enterprise/hr_contract_salary/controllers/main.py::899]]
+[[project:enterprise/hr_contract_salary/controllers/main.py::899]]
 To get it, you have to sign a new _offer_ in the Recruitment app.
 I did it with Billy Kyle
 
 =-m l10n_be_hr_payroll,hr_contract_salary=
-Xavier (xbo) connait les trucks sur les tracking values (groups specifiques + perms, etc.)
+Xavier (xbo) connait les trucs sur les tracking values (groups specifiques + perms, etc.)
 
 WIP on branch *master-hr_contract_salary-add_diff_message_on_employee-mlef*
 
 ** talk with xavier (xbo)
-Try to replace [[./enterprise/hr_contract_salary/controllers/main.py::714]]
+Try to replace [[project:enterprise/hr_contract_salary/controllers/main.py::714]]
 By =employee.create_version()=
-[[./community/addons/hr/models/hr_employee.py::383]]
+[[project:community/addons/hr/models/hr_employee.py::383]]
 Vals (in theory) are the same as the one passed in old code.
 
 After that, with the small [[https://github.com/odoo/odoo/pull/222744/files#diff-1c37517a76b393d1d30c2b03e96611643a747d12c13b086653989f4068c660b2R447-R450][pr he sent]] tracking values should take care of it. Maybe git pull to get the changes.
@@ -65,8 +65,8 @@ Task is awaiting for some talks. Arthur knows a bit about it. He comes back from
 * DONE [[https://www.odoo.com/odoo/my-tasks/5042323][[Payroll] Work entries]]
 =-m hr_payroll=
 The code that check if the work entry is not validated before deletion can be found at:
-- [[./community/addons/hr_work_entry/static/src/views/work_entry_calendar/work_entry_calendar_controller.js::151]] (for work entries view from employees)
-  - [[./enterprise/hr_work_entry_enterprise/static/src/work_entries_gantt_renderer.js::272]] (for work entries view from payroll)
+- [[project:community/addons/hr_work_entry/static/src/views/work_entry_calendar/work_entry_calendar_controller.js::151]] (for work entries view from employees)
+  - [[project:enterprise/hr_work_entry_enterprise/static/src/work_entries_gantt_renderer.js::272]] (for work entries view from payroll)
 
 * DONE [[https://www.odoo.com/odoo/my-tasks/5026228][[hr_holidays] Add back a well-formatted "Extra Hours" section in the Time Off dashboard]]
 Made from [[https://www.odoo.com/odoo/all-tasks/4774528][task 4774528]]
@@ -136,10 +136,6 @@ clean db = remove the fields you don't like (not a real dropdb _at all_)
 
 
 * Configuration
-# Local Variables:
-# eval: (org-overview)
-# End:
-
 #+name: Count number of tasks
 #+begin_src elisp :results none
 (save-excursion
@@ -160,3 +156,7 @@ clean db = remove the fields you don't like (not a real dropdb _at all_)
               "\n")
              )))
 #+END_src
+
+# Local Variables:
+# eval: (org-overview)
+# End:
