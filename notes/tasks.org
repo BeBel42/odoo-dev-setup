@@ -7,6 +7,7 @@ Branch: =saas-18.2-default_employee_id_on_goal_creation-mlef=
 Put on context when clicking on "Goals" from employee the employee id, if directly click on "Goals" then leave the employee field empty.
 [[project:enterprise/hr_appraisal/views/hr_appraisal_views.xml::27][Goals smart button]]
 [[project:enterprise/hr_appraisal/models/hr_appraisal.py::536][Context passed to action]]
+** TODO Check Runbot to fix issues (normally done otherwise)
 
 * WAIT [[https://www.odoo.com/odoo/my-tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
 **master**
