@@ -1,0 +1,69 @@
+#+title: Upgrade
+
+* How To Upgrade Locally
+
+- Make sure you have the *upgrade* and *upgrade-util* repositories downloaded and updated to the latest master version.
+- This tutorial assumes you have a folder that contains *odoo*, *enterprise*, *upgrade*, and *upgrade-util* side by side. If you have something different, you might need to change some commands.
+- All steps are performed through the terminal/command line.
+
+** 1. Create 2 databases with all the relevant modules installed in the previous version.
+   For example, if you are making a PR for 18.5 that includes a change in *hr_payroll*, you will want to make a database in the last minor version (18.4) and last major version (18.0). For brevity, only 18.0 is demonstrated here, but the steps are identical for 18.4.
+
+   *** 1.1 Switch to your base branch (e.g., 18.0) in both *odoo* and *enterprise*.
+     #+BEGIN_SRC sh
+     cd ~/path/to/your/odoo && \
+     git switch 18.0 && \
+     cd ../enterprise && \
+     git switch 18.0 && \
+     cd ../odoo
+     #+END_SRC
+
+   *** 1.2 Create your database, ideally with demo data.
+     #+BEGIN_SRC sh
+     ./odoo-bin --addons-path="addons/,../enterprise" -i hr_payroll -d upgrade18 --stop-after-init
+     #+END_SRC
+
+   *** 1.3 If you are also running/testing upgrade tests, initialize the tests at this step.
+     #+BEGIN_SRC sh
+     ./odoo-bin \
+      --addons-path="addons,../enterprise/" \
+      -d upgrade18 \
+      --upgrade-path=../upgrade-util/src,../upgrade/migrations \
+      --test-tags upgrade.test_prepare \
+      --stop-after-init
+     #+END_SRC
+
+** 2. Create a template of your database (optional but recommended for faster iteration).
+   #+BEGIN_SRC sh
+   createdb -T upgrade18 upgrade18_template
+   #+END_SRC
+
+** 3. Switch back to your PR branch.
+   #+BEGIN_SRC sh
+   cd ~/path/to/your/odoo && \
+   git switch master-hr_payroll-your_pr_name-quadrigram && \
+   cd ../enterprise && \
+   git switch master-hr_payroll-your_pr_name-quadrigram  && \
+   cd ../odoo
+   #+END_SRC
+
+** 4. Run the upgrade command.
+   #+BEGIN_SRC sh
+   dropdb upgrade18 &&\
+   createdb -T  upgrade18_template upgrade18 &&\
+   ./odoo-bin \
+        --addons-path=../enterprise,addons \
+        -d upgrade18 \
+        --upgrade-path=../upgrade-util/src,../upgrade/migrations \
+        -u all
+   #+END_SRC
+
+** 5. If you are also running/testing upgrade tests, check the results at this point.
+   #+BEGIN_SRC sh
+   ./odoo-bin \
+      --addons-path="addons,../enterprise" \
+      -d upgrade18 \
+      --upgrade-path=../upgrade-util/src,../upgrade/migrations \
+      --test-tags upgrade.test_check \
+      --stop-after-init
+   #+END_SRC

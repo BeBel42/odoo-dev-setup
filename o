@@ -35,6 +35,15 @@ $0 usage:
 	-p | --pull
 		Pull all odoo repositories to the latest changes.
 		This will be executed after \"--checkout\" if both are specified.
+	--template <template_name>
+		Will drop the current db and refill it with <template_name>'s content
+	--save-template <template_name>
+		Will launch odoo, immediatly quit when odoo is done setting up the
+		modules, then save the current db as <template_name>
+	--drop-template <regex>
+		Drops all db templates matching <regex>
+	--db-list
+		List all postgres databases
 	--odoo-help
 		Show the help prompt from odoo-bin
 	--debug
@@ -63,7 +72,11 @@ enable_debug=0
 checkout_branch=""
 pull_branch=0
 setup=0
+template=""
+save_template=""
+drop_template_regex=""
 cmd="$default_args"
+db_list=0
 
 # parse script parameters
 while [[ "$#" -gt 0 ]]; do
@@ -80,6 +93,18 @@ while [[ "$#" -gt 0 ]]; do
 		checkout_branch="$2"
 		shift
 		;;
+	--template)
+		template="$2"
+		shift
+		;;
+	--save-template)
+		save_template="$2"
+		shift
+		;;
+	--drop-template)
+		drop_template_regex="$2"
+		shift
+		;;
 	-p | --pull) pull_branch=1 ;;
 	-d | --drop) drop=1 && install=1 ;;
 	-i | --install) install=1 ;;
@@ -88,6 +113,7 @@ while [[ "$#" -gt 0 ]]; do
 	--odoo-help) odoo_help=1 ;;
 	--odoo-version) odoo_version=1 ;;
 	--debug) enable_debug=1 ;;
+	--db-list) db_list=1 ;;
 	--setup) setup=1 ;;
 	-h | --help) help=1 ;;
 	*)
@@ -234,9 +260,38 @@ if [ $tries = 5 ]; then
 	exit 1
 fi
 
+if [[ $db_list = 1 ]]; then
+	echo '"--db-list" has been specified. List of all postgres databases:'
+	docker compose -f "$compose_file" exec db sh -c "psql --user=\$POSTGRES_USER -l"
+	exit $?
+fi
+
+# prefix prepended to all created / deleted database templates
+database_template_prefix="odoo_template_"
+
+if ! [[ "$drop_template_regex" = "" ]]; then
+	docker compose -f "$compose_file" exec db sh -c "psql --user=\$POSTGRES_USER -lqt | cut -d \| -f 1 | \
+		grep -E '$database_template_prefix""$drop_template_regex' |
+		xargs -n 1 dropdb --user=\$POSTGRES_USER --if-exists 2>/dev/null" &&
+		echo "All matched templates have been deleted" ||
+		echo "Warning: no template matched the given regex: $drop_template_regex" 1>&2
+	exit 0
+fi
+
 if [[ $drop = 1 ]]; then
 	echo '"--drop" has been specified. Dropping postgres database...'
-	docker compose -f "$compose_file" exec db dropdb --user=odoo odoo || echo "Warning: failed to drop datatbase" 1>&2
+	docker compose -f "$compose_file" exec db sh -c "dropdb --user=\$POSTGRES_USER \$POSTGRES_DB" &&
+		echo "Database dropped" ||
+		echo "Warning: failed to drop datatbase" 1>&2
+fi
+
+if ! [[ "$template" = "" ]]; then
+	echo "\"--template\" has been specified. Copying template $template to current db..."
+	docker compose -f "$compose_file" exec db sh -c "
+        dropdb --if-exists --user=\"\$POSTGRES_USER\" \"\$POSTGRES_DB\" && \
+        createdb --user=\"\$POSTGRES_USER\" -T \"$database_template_prefix""$template\" \"\$POSTGRES_DB\"
+    " && echo "Successfully copied template $template" ||
+		(echo "Error: could not use template $template" 1>&2 && exit 1)
 fi
 
 if [[ $odoo_version = 1 ]]; then
@@ -248,5 +303,30 @@ if [[ $odoo_help = 1 ]]; then
 	cmd="--help"
 fi
 
+if ! [[ "$test" = "" ]]; then
+	echo '"-t" has been specified. Adding test arguments to cmd'
+	cmd="$cmd --stop-after-init --log-level=info --test-enable --test-tags=$test"
+	if [[ "$module" = "" ]]; then
+		echo "Warning: no module has been set to be \
+			tracked (-m) or installed (-i). Tests may not work." 1>&2
+	fi
+fi
+
+if ! [[ "$save_template" = "" ]]; then
+	echo '"--save-template" has been specified. Adding arguments to cmd'
+	cmd="$cmd --stop-after-init --log-level=info"
+fi
+
 echo "Starting odoo container with \"$cmd\" parameters..."
-docker compose -f "$compose_file" run --build -e "ENABLE_DEBUG=$enable_debug" --service-ports odoo $cmd
+docker compose -f "$compose_file" run --build -e "ENABLE_DEBUG=$enable_debug" --service-ports odoo $cmd --stop-after-init
+
+# Template need to be saved after odoo-bin initializes the db
+if ! [[ "$save_template" = "" ]]; then
+	echo "--save-template specified. Saving db into template \"$save_template\""
+	# Need to drop the old save template to avoid errors when overriding it
+	docker compose -f "$compose_file" exec db sh -c "dropdb --if-exists --user=\$POSTGRES_USER '$database_template_prefix""$save_template' 2>/dev/null" ||
+		echo "Warning: failed to drop old \"$save_template\" template" 1>&2
+	docker compose -f "$compose_file" exec db sh -c "createdb --user \$POSTGRES_USER '$database_template_prefix""$save_template' \$POSTGRES_DB" &&
+		echo "Template saved" ||
+		echo "Warning: failed to create template datatbase" 1>&2
+fi
