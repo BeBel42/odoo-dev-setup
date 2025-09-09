@@ -1,5 +1,11 @@
 #+title: Upgrade
 
+#+begin_comment
+This file was shared by eian. It will explain how to do migration step manually.
+This is not a guide to do migrations with the ./o script.
+#+end_comment
+
+
 * How To Upgrade Locally
 
 - Make sure you have the *upgrade* and *upgrade-util* repositories downloaded and updated to the latest master version.

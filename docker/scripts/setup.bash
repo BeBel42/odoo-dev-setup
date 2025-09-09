@@ -5,7 +5,7 @@ set -eu
 cd "$ODOO_DIR"
 
 # clone and setup each project
-for i in community enterprise tutorials; do
+for i in community enterprise tutorials upgrade upgrade-util; do
 	echo "Setting up $i project..."
 	# community edition should be cloned from "odoo" git repo
 	CLONE_URL="git@github.com:odoo/$([[ $i == 'community' ]] && echo "odoo.git" || echo "$i.git")"
@@ -23,10 +23,12 @@ for i in community enterprise tutorials; do
 		echo "$ODOO_DIR/$i is already in safe.directory"
 	fi
 
-	# community edition should be pushed to "odoo" git repo
-	DEV_URL="git@github.com:odoo-dev/$([[ $i == 'community' ]] && echo "odoo.git" || echo "$i.git")"
-	git remote add dev $DEV_URL || echo "Skipping remote creation"
-	git remote set-url --push origin you_should_not_push_on_this_repository
+	if ! [[ $i = "upgrade" ]]; then # "upgrade" has no dev repo for some reason
+		# community edition should be pushed to "odoo" git repo
+		DEV_URL="git@github.com:odoo-dev/$([[ $i == 'community' ]] && echo "odoo.git" || echo "$i.git")"
+		git remote add dev $DEV_URL || echo "Skipping remote creation"
+		git remote set-url --push origin you_should_not_push_on_this_repository
+	fi
 
 	# go back to main (root) dir
 	cd "$ODOO_DIR"

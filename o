@@ -24,6 +24,8 @@ $0 usage:
 		Installs the module in the database.
 	-s | --stop
 		Stop all containers
+	-u | --upgrade
+		Run upgrade scripts for module (specified with -m)
 	-t | --test [-][tag][/module][:class][.method][[params]]
 		Enables testing for filtered tests.
 		The '-' specifies whether to include or to exclude matched tests.
@@ -77,6 +79,7 @@ save_template=""
 drop_template_regex=""
 cmd="$default_args"
 db_list=0
+upgrade=0
 
 # parse script parameters
 while [[ "$#" -gt 0 ]]; do
@@ -106,6 +109,7 @@ while [[ "$#" -gt 0 ]]; do
 		shift
 		;;
 	-p | --pull) pull_branch=1 ;;
+	-u | --upgrade) upgrade=1 ;;
 	-d | --drop) drop=1 && install=1 ;;
 	-i | --install) install=1 ;;
 	-s | --stop) stop=1 ;;
@@ -240,6 +244,11 @@ if [[ $demo = 1 ]]; then
 else
 	echo "Demo data is disabled"
 	cmd="$cmd --without-demo=True"
+fi
+
+if [[ $upgrade = 1 ]]; then
+	echo "-u has been specified. Enabling upgrade..."
+	cmd="$cmd --upgrade-path=upgrade-util/src,upgrade/migrations"
 fi
 
 echo "Shutting down everything"
