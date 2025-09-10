@@ -37,6 +37,8 @@ $0 usage:
 	-p | --pull
 		Pull all odoo repositories to the latest changes.
 		This will be executed after \"--checkout\" if both are specified.
+	-b | --bash
+	   Launches bash in the odoo container (e.g.: to use odoo-bin manually)
 	--template <template_name>
 		Will drop the current db and refill it with <template_name>'s content
 	--save-template <template_name>
@@ -80,6 +82,7 @@ drop_template_regex=""
 cmd="$default_args"
 db_list=0
 upgrade=0
+run_bash=0
 
 # parse script parameters
 while [[ "$#" -gt 0 ]]; do
@@ -109,6 +112,7 @@ while [[ "$#" -gt 0 ]]; do
 		shift
 		;;
 	-p | --pull) pull_branch=1 ;;
+	-b | --bash) run_bash=1 ;;
 	-u | --upgrade) upgrade=1 ;;
 	-d | --drop) drop=1 && install=1 ;;
 	-i | --install) install=1 ;;
@@ -248,7 +252,7 @@ fi
 
 if [[ $upgrade = 1 ]]; then
 	echo "-u has been specified. Enabling upgrade..."
-	cmd="$cmd --upgrade-path=upgrade-util/src,upgrade/migrations"
+	cmd="$cmd --upgrade-path=upgrade-util/src,upgrade/migrations --stop-after-init --log-level=info"
 fi
 
 echo "Shutting down everything"
@@ -326,16 +330,21 @@ if ! [[ "$save_template" = "" ]]; then
 	cmd="$cmd --stop-after-init --log-level=info"
 fi
 
-echo "Starting odoo container with \"$cmd\" parameters..."
-docker compose -f "$compose_file" run --build -e "ENABLE_DEBUG=$enable_debug" --service-ports odoo $cmd --stop-after-init
+if [[ $run_bash = 1 ]]; then
+	echo "\"-b\" has been specified. Launching bash console from odoo container..."
+	docker compose -f "$compose_file" run --build --service-ports --entrypoint="/bin/bash" odoo
+else
+	echo "Starting odoo container with \"$cmd\" parameters..."
+	docker compose -f "$compose_file" run --build -e "ENABLE_DEBUG=$enable_debug" --service-ports odoo $cmd
+fi
 
 # Template need to be saved after odoo-bin initializes the db
 if ! [[ "$save_template" = "" ]]; then
 	echo "--save-template specified. Saving db into template \"$save_template\""
 	# Need to drop the old save template to avoid errors when overriding it
-	docker compose -f "$compose_file" exec db sh -c "dropdb --if-exists --user=\$POSTGRES_USER '$database_template_prefix""$save_template' 2>/dev/null" ||
+	docker compose -f "$compose_file" exec db sh -c "dropdb --if-exists --user=\"\$POSTGRES_USER\" '$database_template_prefix""$save_template' 2>/dev/null" ||
 		echo "Warning: failed to drop old \"$save_template\" template" 1>&2
-	docker compose -f "$compose_file" exec db sh -c "createdb --user \$POSTGRES_USER '$database_template_prefix""$save_template' \$POSTGRES_DB" &&
+	docker compose -f "$compose_file" exec db sh -c "createdb --user=\"\$POSTGRES_USER\" -T \"\$POSTGRES_DB\" '$database_template_prefix""$save_template'" &&
 		echo "Template saved" ||
 		echo "Warning: failed to create template datatbase" 1>&2
 fi

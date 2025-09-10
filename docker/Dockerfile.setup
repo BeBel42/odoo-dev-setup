@@ -15,5 +15,8 @@ RUN apt-get update -y && apt-get install -y \
 	libsasl2-dev \
 	gcc
 
+# To allow git operations in odoo repos
+RUN git config --global --add safe.directory "*"
+
 COPY ./scripts/setup.bash ./setup.bash
 ENTRYPOINT ["bash", "./setup.bash"]

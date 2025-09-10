@@ -48,6 +48,9 @@ RUN curl -sSL https://dl.google.com/linux/direct/google-chrome-stable_current_am
     apt-get install -y ./google-chrome.deb && \
     rm -f google-chrome.deb
 
+# To allow git operations in odoo repos
+RUN git config --global --add safe.directory "*"
+
 # Set default user when running the container
 USER $ODOO_USER
 WORKDIR $ODOO_DIR
