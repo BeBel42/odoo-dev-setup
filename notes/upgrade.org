@@ -1,12 +1,28 @@
 #+title: Upgrade
 
+* How to upgrade using =./o=
+** Upgrade without tests
+#+begin_src
+./o -c <older_branch>
+./o --save-template <template_name> -d -D -m <module_to_test_migration_on>
+./o -c <newer_branch>
+./o --template <template_name> -m all -u
+#+end_src
+** Upgrade with tests
+#+begin_src
+./o -c <older_branch>
+./o -d -D -m <module_to_test_migration_on>
+./o --save-template <template_name> -u -t upgrade.test_prepare
+./o -c <newer_branch>
+./o --template <template_name> -m all -u
+./o -u -t upgrade.test_check
+#+end_src
+
+* How To Upgrade Locally (manual setup)
 #+begin_comment
 This file was shared by eian. It will explain how to do migration step manually.
 This is not a guide to do migrations with the ./o script.
 #+end_comment
-
-
-* How To Upgrade Locally
 
 - Make sure you have the *upgrade* and *upgrade-util* repositories downloaded and updated to the latest master version.
 - This tutorial assumes you have a folder that contains *odoo*, *enterprise*, *upgrade*, and *upgrade-util* side by side. If you have something different, you might need to change some commands.

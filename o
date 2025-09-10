@@ -300,10 +300,10 @@ fi
 
 if ! [[ "$template" = "" ]]; then
 	echo "\"--template\" has been specified. Copying template $template to current db..."
-	docker compose -f "$compose_file" exec db sh -c "
+	(docker compose -f "$compose_file" exec db sh -c "
         dropdb --if-exists --user=\"\$POSTGRES_USER\" \"\$POSTGRES_DB\" && \
         createdb --user=\"\$POSTGRES_USER\" -T \"$database_template_prefix""$template\" \"\$POSTGRES_DB\"
-    " && echo "Successfully copied template $template" ||
+    " && echo "Successfully copied template $template") ||
 		(echo "Error: could not use template $template" 1>&2 && exit 1)
 fi
 
