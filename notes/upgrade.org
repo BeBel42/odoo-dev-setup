@@ -11,7 +11,7 @@
 ** Upgrade with tests
 #+begin_src
 ./o -c <older_branch>
-./o -d -D -m <module_to_test_migration_on>
+./o -d -m <module_to_test_migration_on> --init-only
 ./o --save-template <template_name> -u -t upgrade.test_prepare
 ./o -c <newer_branch>
 ./o --template <template_name> -m all -u

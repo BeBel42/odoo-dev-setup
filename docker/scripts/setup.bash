@@ -50,6 +50,7 @@ cd "$ODOO_DIR"
 # Extra python dependencies that were missing in requirements.txt
 packages=(
 	"debugpy"
+	"ipdb"
 	"inotify"
 	"pdfminer"         # for attachment indexation of PDF documents
 	"paramiko"         # for l10n_be_hr_payroll

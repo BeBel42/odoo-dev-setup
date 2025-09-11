@@ -52,6 +52,8 @@ $0 usage:
 		Show the help prompt from odoo-bin
 	--debug
 		Enables debugpy. May crash on live code change.
+	--init-only
+		Stops odoo after init (e.g.: to only set database)
 	--setup
 		Sets up the whole project + dependencies
 	--odoo-version
@@ -83,6 +85,7 @@ cmd="$default_args"
 db_list=0
 upgrade=0
 run_bash=0
+init_only=0
 
 # parse script parameters
 while [[ "$#" -gt 0 ]]; do
@@ -120,6 +123,7 @@ while [[ "$#" -gt 0 ]]; do
 	-D | --demo) demo=1 ;;
 	--odoo-help) odoo_help=1 ;;
 	--odoo-version) odoo_version=1 ;;
+	--init-only) init_only=1 ;;
 	--debug) enable_debug=1 ;;
 	--db-list) db_list=1 ;;
 	--setup) setup=1 ;;
@@ -307,15 +311,6 @@ if ! [[ "$template" = "" ]]; then
 		(echo "Error: could not use template $template" 1>&2 && exit 1)
 fi
 
-if [[ $odoo_version = 1 ]]; then
-	echo '--odoo-version has been specified. Overriding parameters to --version'
-	cmd="--version"
-fi
-if [[ $odoo_help = 1 ]]; then
-	echo '--odoo-help has been specified. Overriding parameters to --help'
-	cmd="--help"
-fi
-
 if ! [[ "$test" = "" ]]; then
 	echo '"-t" has been specified. Adding test arguments to cmd'
 	cmd="$cmd --stop-after-init --log-level=info --test-enable --test-tags=$test"
@@ -330,6 +325,20 @@ if ! [[ "$save_template" = "" ]]; then
 	cmd="$cmd --stop-after-init --log-level=info"
 fi
 
+if [[ $init_only = 1 ]]; then
+	echo '"--init-only" has been specified. Adding arguments to cmd'
+	cmd="$cmd --stop-after-init --log-level=info"
+fi
+
+if [[ $odoo_version = 1 ]]; then
+	echo '--odoo-version has been specified. Overriding parameters to --version'
+	cmd="--version"
+fi
+if [[ $odoo_help = 1 ]]; then
+	echo '--odoo-help has been specified. Overriding parameters to --help'
+	cmd="--help"
+fi
+
 if [[ $run_bash = 1 ]]; then
 	echo "\"-b\" has been specified. Launching bash console from odoo container..."
 	docker compose -f "$compose_file" run --build --service-ports --entrypoint="/bin/bash" odoo
@@ -337,6 +346,8 @@ else
 	echo "Starting odoo container with \"$cmd\" parameters..."
 	docker compose -f "$compose_file" run --build -e "ENABLE_DEBUG=$enable_debug" --service-ports odoo $cmd
 fi
+
+echo -e "\nOdoo docker compose process has exited with code $?\n"
 
 # Template need to be saved after odoo-bin initializes the db
 if ! [[ "$save_template" = "" ]]; then

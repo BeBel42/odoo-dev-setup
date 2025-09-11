@@ -22,14 +22,13 @@ Since payslip.paid_amout is 0, it thus does =max(700, 0)=
 - wage = monthly wage
 - on master and not 18.0
 
-** TODO after unstuck:
-*** [ ] l10n_in_basic_value is not actually the minimum wage but the minimum basic salary (will be at the right of the payroll form in the payroll tab). I will have to change all the comments / commits / variables saying it's a minimum wage
+** Talk with David PO
+*** [ ] Should ask suga for minimum wage (the monthly, the hourly and the fixed one) and use those values instead
 *** [ ] The constraint will have to be applied to all wage types. Not just monthly
+*** [ ] Do not add case at right of payroll tab
+*** [ ] Remove "From l10n_basic_value" from ui error message
 *** [ ] The test will have to be changed accordingly
-*** [ ] There will be a need for a migration (convert all old employees to have a basic salary of at least l10n_in_basic_value) (edited)
-
-
-
+*** [ ] Migrate it all to 19.0 (19.1?)
 
 * WAIT [[https://www.odoo.com/odoo/my-tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
 **master**
@@ -141,7 +140,7 @@ clean db = remove the fields you don't like (not a real dropdb _at all_)
 
 
 
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5048292][[Appraisal] Default employee_id on goal creation]]
+* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5048292][[Appraisal] Default employee_id on goal creation]]
 =-m hr_appraisal=
 Version *saas-18.2*
 Branch: =saas-18.2-default_employee_id_on_goal_creation-mlef=
