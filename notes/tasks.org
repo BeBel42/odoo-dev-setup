@@ -1,34 +1,15 @@
 #+title: Tasks
 
-* TODO [[https://www.odoo.com/odoo/my-tasks/4980966][[l10n_in_Payroll] Fix the basic rule calculation condition in the Python code]]
-**18.0**
-=master-l10n_in_hr_payroll-minimum_wage_check-mlef=
-PR:
-https://github.com/odoo/enterprise/pull/35602
+* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5048292][[Appraisal] Default employee_id on goal creation]]
+[[https://github.com/odoo/enterprise/pull/93522][pr]]
+=-m hr_appraisal=
+Version *saas-18.2*
+Branch: =saas-18.2-default_employee_id_on_goal_creation-mlef=
+Put on context when clicking on "Goals" from employee the employee id, if directly click on "Goals" then leave the employee field empty.
+[[project:enterprise/hr_appraisal/views/hr_appraisal_views.xml::27][Goals smart button]]
+[[project:enterprise/hr_appraisal/models/hr_appraisal.py::536][Context passed to action]]
 
-File:
-l10n_in_hr_payroll/data/hr_rule_parameters_data.xml
-
-Hint:
-https://github.com/odoo/enterprise/pull/35602#discussion_r1119774480
-
-Rule (Basic Salary, India: Regular Pay):
-=result = max(payslip._rule_parameter('l10n_in_basic_value'), payslip.paid_amount * payslip._rule_parameter('l10n_in_basic_percent') * payslip._rule_parameter('l10n_in_basic_days'))=
-Since payslip.paid_amout is 0, it thus does =max(700, 0)=
-
-- empecher MONTHLY wage to be under the value
-- et retirer max dans rule
-- wage_hourly = hourly wage
-- wage = monthly wage
-- on master and not 18.0
-
-** Talk with David PO
-*** [ ] Should ask suga for minimum wage (the monthly, the hourly and the fixed one) and use those values instead
-*** [ ] The constraint will have to be applied to all wage types. Not just monthly
-*** [ ] Do not add case at right of payroll tab
-*** [ ] Remove "From l10n_basic_value" from ui error message
-*** [ ] The test will have to be changed accordingly
-*** [ ] Migrate it all to 19.0 (19.1?)
+** TODO put back in correct state after runbot passes
 
 * WAIT [[https://www.odoo.com/odoo/my-tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
 **master**
@@ -66,6 +47,41 @@ General data: =community/addons/hr/data/hr_data.xml=
 Demo data: =community/addons/hr/data/hr_demo.xml=
 Task is awaiting for some talks. Arthur knows a bit about it. He comes back from holidays on the 13 of aug
 
+
+* DONE [[https://www.odoo.com/odoo/my-tasks/4980966][[l10n_in_Payroll] Fix the basic rule calculation condition in the Python code]]
++18.0+ *master*
+=master-l10n_in_hr_payroll-minimum_wage_check-mlef=
+PR:
+https://github.com/odoo/enterprise/pull/35602
+
+File:
+l10n_in_hr_payroll/data/hr_rule_parameters_data.xml
+
+Hint:
+https://github.com/odoo/enterprise/pull/35602#discussion_r1119774480
+
+Rule (Basic Salary, India: Regular Pay):
+=result = max(payslip._rule_parameter('l10n_in_basic_value'), payslip.paid_amount * payslip._rule_parameter('l10n_in_basic_percent') * payslip._rule_parameter('l10n_in_basic_days'))=
+Since payslip.paid_amout is 0, it thus does =max(700, 0)=
+
+- empecher MONTHLY wage to be under the value
+- et retirer max dans rule
+- wage_hourly = hourly wage
+- wage = monthly wage
+- on master and not 18.0
+
+** [X]
+should I continue with what I was doing? Like the check, migration, etc.?
+If so, the hourly_wage needs to be converted to a monthly wage to be checked against l10n_in_basic_value (?)
+-> Update: it has been CANCELLED
+
+** Talk with David PO
+***  Should ask suga for minimum wage (the monthly, the hourly and the fixed one) and use those values instead
+***  The constraint will have to be applied to all wage types. Not just monthly
+***  Do not add case at right of payroll tab
+***  Remove "From l10n_basic_value" from ui error message
+***  The test will have to be changed accordingly
+***  Migrate it all to 19.0 (19.1?)
 
 * DONE [[https://www.odoo.com/odoo/my-tasks/5042323][[Payroll] Work entries]]
 =-m hr_payroll=
@@ -139,15 +155,6 @@ clean db = remove the fields you don't like (not a real dropdb _at all_)
 
 
 
-
-* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5048292][[Appraisal] Default employee_id on goal creation]]
-=-m hr_appraisal=
-Version *saas-18.2*
-Branch: =saas-18.2-default_employee_id_on_goal_creation-mlef=
-Put on context when clicking on "Goals" from employee the employee id, if directly click on "Goals" then leave the employee field empty.
-[[project:enterprise/hr_appraisal/views/hr_appraisal_views.xml::27][Goals smart button]]
-[[project:enterprise/hr_appraisal/models/hr_appraisal.py::536][Context passed to action]]
-** DONE Check Runbot to fix issues (normally done otherwise)
 
 * Configuration
 #+name: Count number of tasks

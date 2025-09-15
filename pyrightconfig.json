@@ -3,6 +3,11 @@
 	"reportUnknownVariableType": false,
 	"reportUnknownMemberType": false,
 	"reportUntypedFunctionDecorator": false,
+	"reportUnknownParameterType": false,
+	"reportUnknownArgumentType": false,
+	"reportMissingParameterType": false,
+	"reportUntypedBaseClass": false,
+	"reportUntypedClassDecorator": false,
     "venvPath": "./",
     "venv": "venv"
 }

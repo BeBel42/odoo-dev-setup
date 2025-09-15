@@ -39,6 +39,8 @@ $0 usage:
 		This will be executed after \"--checkout\" if both are specified.
 	-b | --bash
 	   Launches bash in the odoo container (e.g.: to use odoo-bin manually)
+	--shell
+	   Attaches a shell process to current odoo instance
 	--template <template_name>
 		Will drop the current db and refill it with <template_name>'s content
 	--save-template <template_name>
@@ -48,6 +50,9 @@ $0 usage:
 		Drops all db templates matching <regex>
 	--db-list
 		List all postgres databases
+	--no-restart
+		Runs command as 'docker exec' instead of stopping old containers and
+		replacing them with a new 'docker run' instance.
 	--odoo-help
 		Show the help prompt from odoo-bin
 	--debug
@@ -86,6 +91,8 @@ db_list=0
 upgrade=0
 run_bash=0
 init_only=0
+shell=0
+no_restart=0
 
 # parse script parameters
 while [[ "$#" -gt 0 ]]; do
@@ -121,7 +128,9 @@ while [[ "$#" -gt 0 ]]; do
 	-i | --install) install=1 ;;
 	-s | --stop) stop=1 ;;
 	-D | --demo) demo=1 ;;
+	--no-restart) no_restart=1 ;;
 	--odoo-help) odoo_help=1 ;;
+	--shell) shell=1 ;;
 	--odoo-version) odoo_version=1 ;;
 	--init-only) init_only=1 ;;
 	--debug) enable_debug=1 ;;
@@ -214,9 +223,10 @@ warn_user_if_needed
 
 [[ $checkout_branch != "" || $pull_branch = 1 ]] && handle_branch_switch
 
+
 # just stop everything
 if [[ $stop = 1 ]]; then
-	echo "-s has been specified. Stopping all running containers."
+	echo '"-s" has been specified. Stopping all running containers.'
 	docker compose -f "$compose_file" down --remove-orphans && echo "Stopped all running containers."
 	exit 0
 fi
@@ -259,11 +269,13 @@ if [[ $upgrade = 1 ]]; then
 	cmd="$cmd --upgrade-path=upgrade-util/src,upgrade/migrations --stop-after-init --log-level=info"
 fi
 
-echo "Shutting down everything"
-docker compose -f "$compose_file" down --remove-orphans
+if [[ $no_restart = 0 ]]; then
+	echo "Shutting down everything"
+	docker compose -f "$compose_file" down --remove-orphans
 
-echo "Starting db container..."
-docker compose -f "$compose_file" up -d db
+	echo "Starting db container..."
+	docker compose -f "$compose_file" up -d db
+fi
 
 # Wait for database to be up
 tries=1
@@ -273,7 +285,7 @@ while (! docker compose -f "$compose_file" ps | grep -qE "[^a-zA-Z](db|postgres)
 	echo "Checking database availability ($tries)..."
 done
 if [ $tries = 5 ]; then
-	echo "Error: could not start database" 1>&2
+	echo "Error: could not verify database availability" 1>&2
 	exit 1
 fi
 
@@ -334,18 +346,35 @@ if [[ $odoo_version = 1 ]]; then
 	echo '--odoo-version has been specified. Overriding parameters to --version'
 	cmd="--version"
 fi
+
+if [[ $shell = 1 ]]; then
+	echo '"--shell" has ben specified. Overriding parameters to "shell"'
+	cmd="shell"
+fi
+
 if [[ $odoo_help = 1 ]]; then
 	echo '--odoo-help has been specified. Overriding parameters to --help'
 	cmd="--help"
 fi
 
+docker_entrypoint=""
+docker_build="--build"
+docker_run_exec="run"
+# attach to process if no restart
+if [[ $no_restart = 1 ]]; then
+	echo "\"--no-restart\" has been specified. Changing \"docker run\" to \"docker exec\""
+	docker_run_exec="exec"
+	docker_build=""
+fi
+# remove cmd if using bash
 if [[ $run_bash = 1 ]]; then
 	echo "\"-b\" has been specified. Launching bash console from odoo container..."
-	docker compose -f "$compose_file" run --build --service-ports --entrypoint="/bin/bash" odoo
-else
-	echo "Starting odoo container with \"$cmd\" parameters..."
-	docker compose -f "$compose_file" run --build -e "ENABLE_DEBUG=$enable_debug" --service-ports odoo $cmd
+	docker_entrypoint='--entrypoint="/bin/bash"'
+	cmd=""
 fi
+
+echo "Starting odoo container with \"$cmd\" parameters..."
+docker compose -f "$compose_file" $docker_run_exec $docker_build -e "ENABLE_DEBUG=$enable_debug" --service-ports $docker_entrypoint odoo $cmd
 
 echo -e "\nOdoo docker compose process has exited with code $?\n"
 
