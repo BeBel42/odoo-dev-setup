@@ -32,11 +32,15 @@ $0 usage:
 		Example: -t :TestClass.test_func,/test_module,external
 		It is also possible to provide parameters to a test method that supports
 		them. Example: -t /web.test_js[mail]
+	--checkout-community <branch>
+		Checkout community repository to <branch>
+	--checkout-enterprise <branch>
+		Checkout enterprise repository to <branch>
 	-c | --checkout <branch>
-		Checkout all odoo repositories to <branch>
+		Checkout all (unspecified) odoo repositories to <branch>
 	-p | --pull
 		Pull all odoo repositories to the latest changes.
-		This will be executed after \"--checkout\" if both are specified.
+		This will be executed after \"--checkout\" flags if both are specified.
 	-b | --bash
 	   Launches bash in the odoo container (e.g.: to use odoo-bin manually)
 	--shell
@@ -81,6 +85,8 @@ odoo_help=0
 odoo_version=0
 enable_debug=0
 checkout_branch=""
+checkout_community=""
+checkout_enterprise=""
 pull_branch=0
 setup=0
 template=""
@@ -103,6 +109,14 @@ while [[ "$#" -gt 0 ]]; do
 		;;
 	-t | --test)
 		test="$2"
+		shift
+		;;
+	--checkout-community)
+		checkout_community="$2"
+		shift
+		;;
+	--checkout-enterprise)
+		checkout_enterprise="$2"
 		shift
 		;;
 	-c | --checkout)
@@ -179,15 +193,32 @@ warn_user_if_needed() {
 	fi
 }
 
-# everything related to -p | --pull and -c | --checkout
+# everything related to git checkout and pull
 handle_branch_switch() {
 	# define the directories
 	community_dir="$project_dir/community"
 	enterprise_dir="$project_dir/enterprise"
 
-	# check for unstaged or staged changes in a git repo
-	for dir in "$community_dir" "$enterprise_dir"; do
-		cd "$dir"
+	# default to "-c" value if not specified
+	[[ "$checkout_community" = "" ]] && checkout_community="$checkout_branch"
+	[[ "$checkout_enterprise" = "" ]] && checkout_enterprise="$checkout_branch"
+
+	# define arrays for mapping of branches to directories
+	dirs=("$community_dir" "$enterprise_dir")
+	branches=("$checkout_community" "$checkout_enterprise")
+
+	# check for unstaged or staged changes in git repositories
+	for i in "${!dirs[@]}"; do
+		dir="${dirs[$i]}"
+		branch="${branches[$i]}"
+
+		# no need to do anything for this dir
+		if [[ $pull_branch = 0 && "$branch" = "" ]]; then
+			echo "No need to do git operations for $dir"
+			continue
+		fi
+
+		cd "$dir" || exit 1
 		if ! git diff --cached --quiet; then
 			echo "Error: you cannot pull/checkout when there are staged changes in $dir."
 			cd - >/dev/null
@@ -202,11 +233,13 @@ handle_branch_switch() {
 	done
 
 	# Switch branches in both repositories
-	for dir in "$community_dir" "$enterprise_dir"; do
-		cd "$dir"
-		if [[ $checkout_branch != "" ]]; then
-			echo '"-c" has been specified.' "Checking out $dir to $checkout_branch..."
-			git checkout "$checkout_branch"
+	for i in "${!dirs[@]}"; do
+		dir="${dirs[$i]}"
+		branch="${branches[$i]}"
+		cd "$dir" || exit 1
+		if [[ $branch != "" ]]; then
+			echo "Checking out $dir to $branch..."
+			git checkout "$branch"
 		fi
 		if [[ $pull_branch = 1 ]]; then
 			echo '"-p" has been specified.' "Pulling $dir to latest changes..."
@@ -215,13 +248,20 @@ handle_branch_switch() {
 		cd - >/dev/null
 	done
 
-	echo "Done git operations."
-	exit 0
+	echo "Done Git operations."
 }
 
-warn_user_if_needed
+# it's annoying me most of the time...
+#warn_user_if_needed
 
-[[ $checkout_branch != "" || $pull_branch = 1 ]] && handle_branch_switch
+# Do git operations if needed
+if [[ $pull_branch = 1 ||
+	"$checkout_community" != "" ||
+	"$checkout_enterprise" != "" ||
+	"$checkout_branch" != "" ]]; then
+	handle_branch_switch
+	exit 0
+fi
 
 
 # just stop everything
