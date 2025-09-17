@@ -319,7 +319,7 @@ fi
 
 # Wait for database to be up
 tries=1
-while (! docker compose -f "$compose_file" ps | grep -qE "[^a-zA-Z](db|postgres)[^a-zA-Z].*?\sUp\s") && [ $tries -lt 5 ]; do
+while (! docker compose -f "$compose_file" exec db pg_isready) && [ $tries -lt 5 ]; do
 	sleep 0.5
 	tries=$(("$tries" + 1))
 	echo "Checking database availability ($tries)..."

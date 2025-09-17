@@ -5,8 +5,15 @@
 ../o --checkout-community master-hr-recruitment-survey-expire-ksni \
      --checkout-enterprise master >&2
 #+end_src
+#+begin_src bash
+./o -m hr_recruitment_survey --template interviews
+#+end_src
+
+#+RESULTS:
+
 [[https://github.com/odoo/odoo/pull/210980][Community PR]]
 [[https://runbot.odoo.com/runbot/bundle/master-hr-recruitment-survey-expire-ksni-371641][Runbot]]
+/Prakash/ has given great info in the discord channel
 
 * WAIT [[https://www.odoo.com/odoo/my-tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
 **master**
@@ -45,7 +52,7 @@ Demo data: =community/addons/hr/data/hr_demo.xml=
 Task is awaiting for some talks. Arthur knows a bit about it. He comes back from holidays on the 13 of aug
 
 
-* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5048292][[Appraisal] Default employee_id on goal creation]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5048292][[Appraisal] Default employee_id on goal creation]]
 #+begin_src bash :results silent
 ../o --checkout-community saas-18.2 \
      --checkout-enterprise saas-18.2-default_employee_id_on_goal_creation-mlef >&2
@@ -99,9 +106,15 @@ The code that check if the work entry is not validated before deletion can be fo
 - [[project:community/addons/hr_work_entry/static/src/views/work_entry_calendar/work_entry_calendar_controller.js::151]] (for work entries view from employees)
   - [[project:enterprise/hr_work_entry_enterprise/static/src/work_entries_gantt_renderer.js::272]] (for work entries view from payroll)
 
-* DONE [[https://www.odoo.com/odoo/my-tasks/5026228][[hr_holidays] Add back a well-formatted "Extra Hours" section in the Time Off dashboard]]
+* FIXME [[https://www.odoo.com/odoo/my-tasks/5026228][[hr_holidays] Add back a well-formatted "Extra Hours" section in the Time Off dashboard]]
 Made from [[https://www.odoo.com/odoo/all-tasks/4774528][task 4774528]]
-
+#+begin_src bash :results silent
+../o --checkout-community master-hr_holidays_attendance-add_well_formatted_extra_hours-mlef \
+     --checkout-enterprise master >&2
+#+end_src
+#+begin_src bash
+./o -m hr_attendance,hr_holidays,hr_contract
+#+end_src
 
 Branch: =master-hr_holidays_attendance-add_well_formatted_extra_hours-mlef=
 
@@ -110,11 +123,14 @@ Branch: =master-hr_holidays_attendance-add_well_formatted_extra_hours-mlef=
 - Add the employee.total_overtime if > 0 and if overtime is not checked on Hide on Dashboard && Deduct Extra Hours is checked
   This spec has been changed when talking with bedo
 
+** FIXME extra hours does not appear on the dashboard anymore...
 ** DONE add tests
 
 ** DONE [[https://runbot.odoo.com/runbot/batch/2095917/build/87408979][FIX the Runbot Issues!]]
 =./o -m hr_attendance,hr_holidays,hr_contract -t :TestExpiringLeaves=
 
+** DONE Natalie's code crashes (unable to test via gui)
+[[project:community/addons/hr_holidays_attendance/models/hr_employee.py::17][community/addons/hr_holidays_attendance/models/hr_employee.py::17]]
 ** Talk with bedo
 hr_employee
 pour leave types qui demandent pas allocations & qui sont coches sur "deduct extra hours", dans _get_consumed_leaves(), je dois rajouter dans var envoyee sur discord, mais False au lieu de [allocation] (False c'est l'allocation qui n'en es pas une)
