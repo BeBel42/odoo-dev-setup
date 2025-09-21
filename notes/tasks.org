@@ -65,7 +65,7 @@ Put on context when clicking on "Goals" from employee the employee id, if direct
 [[project:enterprise/hr_appraisal/views/hr_appraisal_views.xml::27][Goals smart button]]
 [[project:enterprise/hr_appraisal/models/hr_appraisal.py::536][Context passed to action]]
 
-* DONE [[https://www.odoo.com/odoo/my-tasks/4980966][[l10n_in_Payroll] Fix the basic rule calculation condition in the Python code]]
+* CANCEL [[https://www.odoo.com/odoo/my-tasks/4980966][[l10n_in_Payroll] Fix the basic rule calculation condition in the Python code]]
 +18.0+ *master*
 =master-l10n_in_hr_payroll-minimum_wage_check-mlef=
 PR:
@@ -160,7 +160,7 @@ Et apres dans la get_allocation_data overriden, dans le if (pas le else) je rajo
 
 Et retirer dans la condition le =or not leave_type.requires_allocation=
 
-* DONE [[https://www.odoo.com/odoo/my-tasks/4774528][[Attendance] Support Tolerance-Based Extra Hours Calculation Without Active Contract]]
+* CANCEL [[https://www.odoo.com/odoo/my-tasks/4774528][[Attendance] Support Tolerance-Based Extra Hours Calculation Without Active Contract]]
 =-m hr_attendance,hr_holidays,hr_contract=
 =community/addons/hr_holidays/static/src/dashboard/time_off_card.xml= pour le format mauvais du time off dashboard
 ** Review SUGA - May 12, 2025:
@@ -182,6 +182,7 @@ clean db = remove the fields you don't like (not a real dropdb _at all_)
 
 
 
+* CANCEL [[https://www.odoo.com/odoo/project/1251/tasks/4879294][[Payroll] When selecting employees from payrun, remove launch plan]]
 * Configuration
 #+name: Count number of tasks
 #+begin_src elisp :results none
