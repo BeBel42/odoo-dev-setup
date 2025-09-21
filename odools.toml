@@ -1,0 +1,5 @@
+[[config]]
+name = "default"
+odoo_path = '/home/martin/Projects/odoo/community/'
+addons_path = ['./enterprise'] # community is implied by odoo_path
+# in eglot-workspace-configuration, you can setup Odoo.selectedProfile to change profiles
