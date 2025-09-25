@@ -14,6 +14,11 @@ for i in community enterprise tutorials upgrade upgrade-util; do
 	# need to go into repo to setup git
 	cd "$ODOO_DIR/$i"
 
+	# To pass CLA runbot tests
+	echo "Setting git user + email"
+	git config user.name "Martin Lefèvre (mlef)"
+	git config user.email mlef@odoo.com
+
 	# Check if the directory is already in the safe list
 	if ! git config --global --get-all safe.directory | grep -q "$ODOO_DIR/$i"; then
 		# If not, add it
@@ -35,13 +40,6 @@ for i in community enterprise tutorials upgrade upgrade-util; do
 
 	echo "Done setting up $i project..."
 done
-
-# No need for this since I now use odoo lsp
-# # add odoo symlink for better code completion
-# for i in enterprise tutorials; do
-# 	rm -f "$ODOO_DIR/$i/odoo" # to avoid symlink bug in ./community/odoo/odoo
-# 	ln -s "$ODOO_DIR/community/odoo" "$ODOO_DIR/$i/odoo"
-# done
 
 # create global venv and install dependencies
 cd "$ODOO_DIR"

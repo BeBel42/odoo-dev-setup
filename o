@@ -289,7 +289,7 @@ fi
 
 if ! [[ "$test" = "" ]]; then
 	echo '"-t" has been specified. Adding test arguments to cmd'
-	cmd="$cmd --stop-after-init --log-level=info --test-enable --test-tags=$test"
+	cmd="$cmd --log-level=info --test-enable --test-tags=$test"
 	if [[ "$module" = "" ]]; then
 		echo "Warning: no module has been set to be \
 			tracked (-m) or installed (-i). Tests may not work." 1>&2

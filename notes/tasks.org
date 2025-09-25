@@ -1,19 +1,91 @@
 #+title: Tasks
 
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/4784231][[Recruitment] Make the interview links expire when a candidate is refused/archived or has signed]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
+[[https://www.odoo.com/odoo/project.task/5079964][Autre lien de tache related]]
+Y a deja eu une tache qui a fix le probleme en 18.3 que quand on changeait le num de l'entreprise, celui de l'employe etait change...
+Ca fonctionne mais en 18.4, [[https://drive.google.com/file/d/1hufZwcVHU0nWbCTP7eSEY6KL0irC3qIm/view][le num de tel change encore quand on fait une operation avec une server action (update current version)]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/4762527][[Employee] Prevent Traceback When HR Users Access Shared Employee Links]]
+Branch =18.0-fix_employee_share_permission_link-mlef=
 #+begin_src bash :results silent
-../o --checkout-community master-hr-recruitment-survey-expire-ksni \
+../o --checkout-community 18.0-fix_employee_share_permission_link-mlef \
+     --checkout-enterprise master >&2
+#+end_src
+#+begin_src bash :results silent
+./o -m hr --template hr
+#+end_src
+uncommenting all =private_car_plate= in [[project:community/addons/hr/views/hr_employee_views.xml::20][This file]] removes the traceback
+In the network console tab, get_views returns public employee profile for private window, and employee for admin window.
+So why still permission error when removing private_car_plate?
+** Talk with Arthur
+~group_hr_manager~ and ~group_hr_user~ are the only groups that can access private employee view
+Try to see in js if user is in those groups before page load, else redirect to public employee view
+Dans js y a doAction() pour faire une action pour ouvrir public employee
+
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5106638][[hr_attendance] Extra hours smart button gives stacktrace]]
+- [[project:community/addons/hr_attendance/views/hr_employee_view.xml::131][where check_in defined for list view]]
+#+begin_src bash :results silent
+../o --checkout-community master-fix_extra_hours_stack_trace-mlef \
+     --checkout-enterprise master >&2
+#+end_src
+
+check_in seems to be defined in attendances and not allocations...
+** [[project:community/addons/hr_attendance/static/src/views/extra_hours_list_view.js::30][community/addons/hr_attendance/static/src/views/extra_hours_list_view.js::30]]
+shouldDisplay is true when display_extra_hours is true
+check_in is in domain from searchModel
+
+* DONE [[https://www.odoo.com/odoo/my-tasks/5026228][[hr_holidays] Add back a well-formatted "Extra Hours" section in the Time Off dashboard]]
+Made from [[https://www.odoo.com/odoo/all-tasks/4774528][task 4774528]]
+#+begin_src bash :results silent
+../o --checkout-community master-hr_holidays_attendance-add_well_formatted_extra_hours-mlef \
      --checkout-enterprise master >&2
 #+end_src
 #+begin_src bash
-./o -m hr_recruitment_survey --template interviews
+./o -m hr_holidays_attendance --template holidays_attendance
 #+end_src
 
-#+RESULTS:
+Branch: =master-hr_holidays_attendance-add_well_formatted_extra_hours-mlef=
 
-[[https://github.com/odoo/odoo/pull/210980][Community PR]]
-[[https://runbot.odoo.com/runbot/bundle/master-hr-recruitment-survey-expire-ksni-371641][Runbot]]
-/Prakash/ has given great info in the discord channel
+=-m hr_attendance,hr_holidays,hr_contract=
+
+- Add the employee.total_overtime if > 0 and if overtime is not checked on Hide on Dashboard && Deduct Extra Hours is checked
+  This spec has been changed when talking with bedo
+
+** DONE extra hours does not appear on the dashboard anymore...
+** DONE add tests
+
+** DONE [[https://runbot.odoo.com/runbot/batch/2095917/build/87408979][FIX the Runbot Issues!]]
+=./o -m hr_attendance,hr_holidays,hr_contract -t :TestExpiringLeaves=
+
+** DONE Natalie's code crashes (unable to test via gui)
+[[project:community/addons/hr_holidays_attendance/models/hr_employee.py::17][community/addons/hr_holidays_attendance/models/hr_employee.py::17]]
+** Talk with bedo
+hr_employee
+pour leave types qui demandent pas allocations & qui sont coches sur "deduct extra hours", dans _get_consumed_leaves(), je dois rajouter dans var envoyee sur discord, mais False au lieu de [allocation] (False c'est l'allocation qui n'en es pas une)
+
+=allocations_leaves_consumed[<employee>][<holiday_status>][False]=
+
+Je dois faire le allocations_data.update({}) mais dans false
+
+*Extra stuff to do*
+Time off type > Si coche / decoche requires allocation, alors decoche / coche hide on dashboard
+Idem pour deduct extra hours
+- Do a computed property, stored readonly=false so that it change (and can still be changed by user) the checkbox
+
+
+** Talk with bedo 2
+garder changements ligne 586 dans hr employee:
+#+BEGIN_SRC
+leave_type_data[False]['virtual_leaves_taken'] += allocated_time
+leave_type_data[False]['virtual_remaining_leaves'] -= allocated_time
+if leave.state == 'validate':
+    leave_type_data[False]['remaining_leaves'] -= allocated_time
+    leave_type_data[False]['leaves_taken'] += allocated_time
+#+END_SRC
+Prendre tous les overtime_Ids de l;employee et y prendre leur duration_real
+Et apres dans la get_allocation_data overriden, dans le if (pas le else) je rajoute ca sur max_Leaves, virtual_remaining_leaves and remaining_leaves
+
+
+Et retirer dans la condition le =or not leave_type.requires_allocation=
 
 * WAIT [[https://www.odoo.com/odoo/my-tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
 **master**
@@ -51,6 +123,21 @@ General data: =community/addons/hr/data/hr_data.xml=
 Demo data: =community/addons/hr/data/hr_demo.xml=
 Task is awaiting for some talks. Arthur knows a bit about it. He comes back from holidays on the 13 of aug
 
+
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/4784231][[Recruitment] Make the interview links expire when a candidate is refused/archived or has signed]]
+#+begin_src bash :results silent
+../o --checkout-community master-hr-recruitment-survey-expire-ksni \
+     --checkout-enterprise master >&2
+#+end_src
+#+begin_src bash
+./o -m hr_recruitment_survey --template interviews
+#+end_src
+
+#+RESULTS:
+
+[[https://github.com/odoo/odoo/pull/210980][Community PR]]
+[[https://runbot.odoo.com/runbot/bundle/master-hr-recruitment-survey-expire-ksni-371641][Runbot]]
+/Prakash/ has given great info in the discord channel
 
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5048292][[Appraisal] Default employee_id on goal creation]]
 #+begin_src bash :results silent
@@ -105,60 +192,6 @@ If so, the hourly_wage needs to be converted to a monthly wage to be checked aga
 The code that check if the work entry is not validated before deletion can be found at:
 - [[project:community/addons/hr_work_entry/static/src/views/work_entry_calendar/work_entry_calendar_controller.js::151]] (for work entries view from employees)
   - [[project:enterprise/hr_work_entry_enterprise/static/src/work_entries_gantt_renderer.js::272]] (for work entries view from payroll)
-
-* FIXME [[https://www.odoo.com/odoo/my-tasks/5026228][[hr_holidays] Add back a well-formatted "Extra Hours" section in the Time Off dashboard]]
-Made from [[https://www.odoo.com/odoo/all-tasks/4774528][task 4774528]]
-#+begin_src bash :results silent
-../o --checkout-community master-hr_holidays_attendance-add_well_formatted_extra_hours-mlef \
-     --checkout-enterprise master >&2
-#+end_src
-#+begin_src bash
-./o -m hr_attendance,hr_holidays,hr_contract
-#+end_src
-
-Branch: =master-hr_holidays_attendance-add_well_formatted_extra_hours-mlef=
-
-=-m hr_attendance,hr_holidays,hr_contract=
-
-- Add the employee.total_overtime if > 0 and if overtime is not checked on Hide on Dashboard && Deduct Extra Hours is checked
-  This spec has been changed when talking with bedo
-
-** FIXME extra hours does not appear on the dashboard anymore...
-** DONE add tests
-
-** DONE [[https://runbot.odoo.com/runbot/batch/2095917/build/87408979][FIX the Runbot Issues!]]
-=./o -m hr_attendance,hr_holidays,hr_contract -t :TestExpiringLeaves=
-
-** DONE Natalie's code crashes (unable to test via gui)
-[[project:community/addons/hr_holidays_attendance/models/hr_employee.py::17][community/addons/hr_holidays_attendance/models/hr_employee.py::17]]
-** Talk with bedo
-hr_employee
-pour leave types qui demandent pas allocations & qui sont coches sur "deduct extra hours", dans _get_consumed_leaves(), je dois rajouter dans var envoyee sur discord, mais False au lieu de [allocation] (False c'est l'allocation qui n'en es pas une)
-
-=allocations_leaves_consumed[<employee>][<holiday_status>][False]=
-
-Je dois faire le allocations_data.update({}) mais dans false
-
-*Extra stuff to do*
-Time off type > Si coche / decoche requires allocation, alors decoche / coche hide on dashboard
-Idem pour deduct extra hours
-- Do a computed property, stored readonly=false so that it change (and can still be changed by user) the checkbox
-
-
-** Talk with bedo 2
-garder changements ligne 586 dans hr employee:
-#+BEGIN_SRC
-leave_type_data[False]['virtual_leaves_taken'] += allocated_time
-leave_type_data[False]['virtual_remaining_leaves'] -= allocated_time
-if leave.state == 'validate':
-    leave_type_data[False]['remaining_leaves'] -= allocated_time
-    leave_type_data[False]['leaves_taken'] += allocated_time
-#+END_SRC
-Prendre tous les overtime_Ids de l;employee et y prendre leur duration_real
-Et apres dans la get_allocation_data overriden, dans le if (pas le else) je rajoute ca sur max_Leaves, virtual_remaining_leaves and remaining_leaves
-
-
-Et retirer dans la condition le =or not leave_type.requires_allocation=
 
 * CANCEL [[https://www.odoo.com/odoo/my-tasks/4774528][[Attendance] Support Tolerance-Based Extra Hours Calculation Without Active Contract]]
 =-m hr_attendance,hr_holidays,hr_contract=

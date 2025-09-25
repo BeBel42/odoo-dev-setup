@@ -2,7 +2,7 @@
 name = "default"
 odoo_path = "/home/martin/Projects/odoo/community"
 addons_path = ["/home/martin/Projects/odoo/enterprise"]
-python_path = "/home/martin/Projects/odoo/venv/bin/python" # check if correct
+python_path = "/home/martin/Projects/odoo/venv/bin/python"
 additional_stubs = ["/home/martin/Desktop/odoo-ls/typeshed/stubs"]
 
 
