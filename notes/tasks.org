@@ -1,10 +1,17 @@
 #+title: Tasks
 
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
+#+begin_src bash :results silent
+../o --checkout-community saas-18.4-overridden_cron_work_phone-mlef \
+     --checkout-enterprise saas-18.4 >&2
+#+end_src
 [[https://www.odoo.com/odoo/project.task/5079964][Autre lien de tache related]]
 Y a deja eu une tache qui a fix le probleme en 18.3 que quand on changeait le num de l'entreprise, celui de l'employe etait change...
 Ca fonctionne mais en 18.4, [[https://drive.google.com/file/d/1hufZwcVHU0nWbCTP7eSEY6KL0irC3qIm/view][le num de tel change encore quand on fait une operation avec une server action (update current version)]]
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/4762527][[Employee] Prevent Traceback When HR Users Access Shared Employee Links]]
+[[project:community/addons/hr/models/hr_employee.py::376][Where version is updated]]
+[[project:community/addons/hr/models/hr_employee.py::587][Where phone is overridden]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/4762527][[Employee] Prevent Traceback When HR Users Access Shared Employee Links]]
 Branch =18.0-fix_employee_share_permission_link-mlef=
 #+begin_src bash :results silent
 ../o --checkout-community 18.0-fix_employee_share_permission_link-mlef \
