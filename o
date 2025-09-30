@@ -165,6 +165,17 @@ if [[ $help = 1 ]]; then
 	exit 0
 fi
 
+# Will execute whenever the script finishes
+on_script_exit() {
+	odoo_icon_path="$project_dir/images/odoo_logo_small.png"
+	if type notify-send 1>&2 2>/dev/null; then
+		notify-send "Odoo" "Script execution finished" -t 2000 -u low -i "$odoo_icon_path"
+	else
+		echo "Warning: notify-send is not installed on your system. Notifications won't be sent." 1>&2
+	fi
+}
+trap "on_script_exit" EXIT
+
 compose_file="$project_dir"/docker/docker-compose.yml
 
 # Setup the whole project
@@ -262,7 +273,6 @@ if [[ $pull_branch = 1 ||
 	handle_branch_switch
 	exit 0
 fi
-
 
 # just stop everything
 if [[ $stop = 1 ]]; then
@@ -416,10 +426,7 @@ fi
 echo "Starting odoo container with \"$cmd\" parameters..."
 docker compose -f "$compose_file" $docker_run_exec $docker_build -e "ENABLE_DEBUG=$enable_debug" --service-ports $docker_entrypoint odoo $cmd
 
-echo -e "\nOdoo docker compose process has exited with code $?\n"
-
-# Template need to be saved after odoo-bin initializes the db
-if ! [[ "$save_template" = "" ]]; then
+if [[ ! "$save_template" = "" ]]; then
 	echo "--save-template specified. Saving db into template \"$save_template\""
 	# Need to drop the old save template to avoid errors when overriding it
 	docker compose -f "$compose_file" exec db sh -c "dropdb --if-exists --user=\"\$POSTGRES_USER\" '$database_template_prefix""$save_template' 2>/dev/null" ||

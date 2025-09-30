@@ -1,6 +1,11 @@
 #+title: Tasks
 
 * TODO [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
+#+begin_src bash :results silent
+../o --checkout-community master-no_recruitment_employee_refactor-mlef \
+     --checkout-enterprise master >&2
+#+end_src
+
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
 #+begin_src bash :results silent
 ../o --checkout-community saas-18.4-overridden_cron_work_phone-mlef \
