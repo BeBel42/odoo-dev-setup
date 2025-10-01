@@ -1,6 +1,22 @@
 #+title: Tasks
 
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-make_overview_page_faster-mlef >&2
+#+end_src
+template name: =hr_attendance_1000=
+#+begin_src python
+for i in range(2000):
+    self.env['hr.employee'].create({
+        'name': f'Beep Boop {i}'
+    })
+    print(i)
+print('committing...')
+self.env.cr.commit()
+#+end_src
+[[project:enterprise/hr_attendance_gantt/views/hr_attendance_gantt.xml::71][Where I would put groups_limit="20"]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
 #+begin_src bash :results silent
 ../o --checkout-community master-no_recruitment_employee_refactor-mlef \
      --checkout-enterprise master >&2
@@ -218,7 +234,11 @@ On a 40h / week contract, extra hours seems legit
 *The contract does not change anything.*
 It's just the *working hours* under _Employee/WorkInfo/Schedule/Working Hours_
 
-* DONE [[https://www.odoo.com/odoo/my-tasks/4901052][[Salary Config] Allow fields of salary config to be archived]]
+* FIXME [[https://www.odoo.com/odoo/my-tasks/4901052][[Salary Config] Allow fields of salary config to be archived]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-hr_contract_salary-archivable_salaries-mlef >&2
+#+end_src
 **master**
 archiver = mettre: active = fields.boolean(default=false) dans model
 clean db = remove the fields you don't like (not a real dropdb _at all_)

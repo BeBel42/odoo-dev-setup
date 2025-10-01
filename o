@@ -14,7 +14,7 @@ default_args="--dev=all --limit-time-real=0"
 error() {
 	error_message="
 $0 usage:
-	-m | --module <module_name>
+	-m | --module <module_list>
 		Select the module to update / install.
 		It can also be a comma-separated module_name list.
 	-d | --drop
@@ -36,6 +36,12 @@ $0 usage:
 		Checkout community repository to <branch>
 	--checkout-enterprise <branch>
 		Checkout enterprise repository to <branch>
+	--populate <models_list>
+		Allows to duplicate existing data in a given database.
+		Can be used for testing and benchmarking when large tables are needed.
+	--populate-factor <factors_list>
+		List of populate factors. In case a factor is missing for a model, the
+		last factor in the list will be used. Defaults to 1000.
 	-c | --checkout <branch>
 		Checkout all (unspecified) odoo repositories to <branch>
 	-p | --pull
@@ -44,7 +50,7 @@ $0 usage:
 	-b | --bash
 	   Launches bash in the odoo container (e.g.: to use odoo-bin manually)
 	--shell
-	   Attaches a shell process to current odoo instance
+	   Launches the odoo python shell
 	--template <template_name>
 		Will drop the current db and refill it with <template_name>'s content
 	--save-template <template_name>
@@ -99,6 +105,8 @@ run_bash=0
 init_only=0
 shell=0
 no_restart=0
+populate_models=""
+populate_factors=1000
 
 # parse script parameters
 while [[ "$#" -gt 0 ]]; do
@@ -121,6 +129,14 @@ while [[ "$#" -gt 0 ]]; do
 		;;
 	-c | --checkout)
 		checkout_branch="$2"
+		shift
+		;;
+	--populate)
+		populate_models="$2"
+		shift
+		;;
+	--populate-factor)
+		populate_factors="$2"
 		shift
 		;;
 	--template)
@@ -168,7 +184,7 @@ fi
 # Will execute whenever the script finishes
 on_script_exit() {
 	odoo_icon_path="$project_dir/images/odoo_logo_small.png"
-	if type notify-send 1>&2 2>/dev/null; then
+	if type notify-send 1>/dev/null 2>&1; then
 		notify-send "Odoo" "Script execution finished" -t 2000 -u low -i "$odoo_icon_path"
 	else
 		echo "Warning: notify-send is not installed on your system. Notifications won't be sent." 1>&2
@@ -402,6 +418,12 @@ if [[ $shell = 1 ]]; then
 	cmd="shell"
 fi
 
+if [[ $populate_models != "" ]]; then
+	echo '"--populate" has ben specified. Overriding cmd parameters...'
+	echo "Set to populate $populate_models by a factor of $populate_factors"
+	cmd="populate --models $populate_models --factors $populate_factors"
+fi
+
 if [[ $odoo_help = 1 ]]; then
 	echo '--odoo-help has been specified. Overriding parameters to --help'
 	cmd="--help"
@@ -410,11 +432,14 @@ fi
 docker_entrypoint=""
 docker_build="--build"
 docker_run_exec="run"
+docker_service_ports="--service-ports"
 # attach to process if no restart
 if [[ $no_restart = 1 ]]; then
-	echo "\"--no-restart\" has been specified. Changing \"docker run\" to \"docker exec\""
+	echo "\"--no-restart\" has been specified. Changing docker command.."
 	docker_run_exec="exec"
 	docker_build=""
+	docker_service_ports=""
+	cmd="bash ./entrypoint.bash $cmd"
 fi
 # remove cmd if using bash
 if [[ $run_bash = 1 ]]; then
@@ -424,7 +449,7 @@ if [[ $run_bash = 1 ]]; then
 fi
 
 echo "Starting odoo container with \"$cmd\" parameters..."
-docker compose -f "$compose_file" $docker_run_exec $docker_build -e "ENABLE_DEBUG=$enable_debug" --service-ports $docker_entrypoint odoo $cmd
+docker compose -f "$compose_file" $docker_run_exec $docker_build -e "ENABLE_DEBUG=$enable_debug" $docker_service_ports $docker_entrypoint odoo $cmd
 
 if [[ ! "$save_template" = "" ]]; then
 	echo "--save-template specified. Saving db into template \"$save_template\""
