@@ -243,6 +243,7 @@ It's just the *working hours* under _Employee/WorkInfo/Schedule/Working Hours_
 archiver = mettre: active = fields.boolean(default=false) dans model
 clean db = remove the fields you don't like (not a real dropdb _at all_)
 -i hr_contract_salary
+** TODO check runbot (should be ok and done)
 
 
 
