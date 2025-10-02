@@ -76,7 +76,7 @@ $0 usage:
 	-h | --help
 		Show this help prompt."
 	[[ "$1" = "" ]] || echo "$1" 1>&2
-	echo "$error_message" 1>&2
+	echo -e "$error_message" 1>&2
 }
 
 # default values
@@ -168,7 +168,7 @@ while [[ "$#" -gt 0 ]]; do
 	--setup) setup=1 ;;
 	-h | --help) help=1 ;;
 	*)
-		error "Error: unknown parameter passed: \"$1\""
+		error "\033[1;31mError\033[0m: unknown parameter passed: \"$1\""
 		exit 1
 		;;
 	esac
@@ -187,7 +187,7 @@ on_script_exit() {
 	if type notify-send 1>/dev/null 2>&1; then
 		notify-send "Odoo" "Script execution finished" -t 2000 -u low -i "$odoo_icon_path"
 	else
-		echo "Warning: notify-send is not installed on your system. Notifications won't be sent." 1>&2
+		echo -e "\033[1;33mWarning\033[0m: notify-send is not installed on your system. Notifications won't be sent." 1>&2
 	fi
 }
 trap "on_script_exit" EXIT
@@ -213,7 +213,7 @@ warn_user_if_needed() {
 	cd "$project_dir"
 	if ! [[ "$community_branch" == "$enterprise_branch" ]]; then
 		echo -e "\e[33m" # start yellow text
-		echo "Warning: community and enterprise branches differ.
+		echo -e "\033[1;33mWarning\033[0m: community and enterprise branches differ.
 	community_branch=$community_branch
 	enterprise_branch=$enterprise_branch" 1>&2
 		echo -e "\e[0m" # end yellow text
@@ -247,12 +247,12 @@ handle_branch_switch() {
 
 		cd "$dir" || exit 1
 		if ! git diff --cached --quiet; then
-			echo "Error: you cannot pull/checkout when there are staged changes in $dir."
+			echo -e "\033[1;31mError\033[0m: you cannot pull/checkout when there are staged changes in $dir."
 			cd - >/dev/null
 			exit 1
 		fi
 		if ! git diff --quiet; then
-			echo "Error: you cannot pull/checkout when there are unstaged changes in $dir."
+			echo -e "\033[1;31mError\033[0m: you cannot pull/checkout when there are unstaged changes in $dir."
 			cd - >/dev/null
 			exit 1
 		fi
@@ -299,7 +299,7 @@ fi
 
 # user did not mention module name (-m | --module <module_name>)
 if [[ "$module" = "" ]]; then
-	echo "Warning: missing module (-m) parameter.
+	echo -e "\033[1;33mWarning\033[0m: missing module (-m) parameter.
          No module will be updated / installed." 1>&2
 else # seeing if installing (-i) or updating (-u) module
 	if [[ $install = 1 ]]; then
@@ -317,7 +317,7 @@ if ! [[ "$test" = "" ]]; then
 	echo '"-t" has been specified. Adding test arguments to cmd'
 	cmd="$cmd --log-level=info --test-enable --test-tags=$test"
 	if [[ "$module" = "" ]]; then
-		echo "Warning: no module has been set to be \
+		echo -e "\033[1;33mWarning\033[0m: no module has been set to be \
 			tracked (-m) or installed (-i). Tests may not work." 1>&2
 	fi
 fi
@@ -351,7 +351,7 @@ while (! docker compose -f "$compose_file" exec db pg_isready) && [ $tries -lt 5
 	echo "Checking database availability ($tries)..."
 done
 if [ $tries = 5 ]; then
-	echo "Error: could not verify database availability" 1>&2
+	echo -e "\033[1;31mError\033[0m: could not verify database availability" 1>&2
 	exit 1
 fi
 
@@ -369,7 +369,7 @@ if ! [[ "$drop_template_regex" = "" ]]; then
 		grep -E '$database_template_prefix""$drop_template_regex' |
 		xargs -n 1 dropdb --user=\$POSTGRES_USER --if-exists 2>/dev/null" &&
 		echo "All matched templates have been deleted" ||
-		echo "Warning: no template matched the given regex: $drop_template_regex" 1>&2
+		echo -e "\033[1;33mWarning\033[0m: no template matched the given regex: $drop_template_regex" 1>&2
 	exit 0
 fi
 
@@ -377,7 +377,7 @@ if [[ $drop = 1 ]]; then
 	echo '"--drop" has been specified. Dropping postgres database...'
 	docker compose -f "$compose_file" exec db sh -c "dropdb --user=\$POSTGRES_USER \$POSTGRES_DB" &&
 		echo "Database dropped" ||
-		echo "Warning: failed to drop datatbase" 1>&2
+		echo -e "\033[1;33mWarning\033[0m: failed to drop datatbase" 1>&2
 fi
 
 if ! [[ "$template" = "" ]]; then
@@ -386,14 +386,14 @@ if ! [[ "$template" = "" ]]; then
         dropdb --if-exists --user=\"\$POSTGRES_USER\" \"\$POSTGRES_DB\" && \
         createdb --user=\"\$POSTGRES_USER\" -T \"$database_template_prefix""$template\" \"\$POSTGRES_DB\"
     " && echo "Successfully copied template $template") ||
-		(echo "Error: could not use template $template" 1>&2 && exit 1)
+		(echo -e "\033[1;31mError\033[0m: could not use template $template" 1>&2 && exit 1)
 fi
 
 if ! [[ "$test" = "" ]]; then
 	echo '"-t" has been specified. Adding test arguments to cmd'
 	cmd="$cmd --stop-after-init --log-level=info --test-enable --test-tags=$test"
 	if [[ "$module" = "" ]]; then
-		echo "Warning: no module has been set to be \
+		echo -e "\033[1;33mWarning\033[0m: no module has been set to be \
 			tracked (-m) or installed (-i). Tests may not work." 1>&2
 	fi
 fi
@@ -455,8 +455,8 @@ if [[ ! "$save_template" = "" ]]; then
 	echo "--save-template specified. Saving db into template \"$save_template\""
 	# Need to drop the old save template to avoid errors when overriding it
 	docker compose -f "$compose_file" exec db sh -c "dropdb --if-exists --user=\"\$POSTGRES_USER\" '$database_template_prefix""$save_template' 2>/dev/null" ||
-		echo "Warning: failed to drop old \"$save_template\" template" 1>&2
+		echo -e "\033[1;33mWarning\033[0m: failed to drop old \"$save_template\" template" 1>&2
 	docker compose -f "$compose_file" exec db sh -c "createdb --user=\"\$POSTGRES_USER\" -T \"\$POSTGRES_DB\" '$database_template_prefix""$save_template'" &&
 		echo "Template saved" ||
-		echo "Warning: failed to create template datatbase" 1>&2
+		echo -e "\033[1;33mWarning\033[0m: failed to create template datatbase" 1>&2
 fi

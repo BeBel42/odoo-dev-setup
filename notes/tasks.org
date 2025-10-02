@@ -6,6 +6,7 @@
      --checkout-enterprise master-make_overview_page_faster-mlef >&2
 #+end_src
 template name: =hr_attendance_1000=
+createdb: error: database creation failed: ERROR:  template database "odoo_template_hr_attendance_1000" does not exist
 #+begin_src python
 for i in range(2000):
     self.env['hr.employee'].create({
@@ -22,7 +23,7 @@ self.env.cr.commit()
      --checkout-enterprise master >&2
 #+end_src
 
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
+* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
 #+begin_src bash :results silent
 ../o --checkout-community saas-18.4-overridden_cron_work_phone-mlef \
      --checkout-enterprise saas-18.4 >&2
@@ -32,6 +33,12 @@ Y a deja eu une tache qui a fix le probleme en 18.3 que quand on changeait le nu
 Ca fonctionne mais en 18.4, [[https://drive.google.com/file/d/1hufZwcVHU0nWbCTP7eSEY6KL0irC3qIm/view][le num de tel change encore quand on fait une operation avec une server action (update current version)]]
 [[project:community/addons/hr/models/hr_employee.py::376][Where version is updated]]
 [[project:community/addons/hr/models/hr_employee.py::587][Where phone is overridden]]
+** Computes quand version change
+- [[project:community/addons/hr/models/hr_employee.py::585][community/addons/hr/models/hr_employee.py::585]] phones
+- [[project:community/addons/hr/models/hr_employee.py::698][community/addons/hr/models/hr_employee.py::698]] YES (all the image ones)
+  But seems like the compute function has a condition [[project:community/addons/hr/models/hr_employee.py::718][like I did]]
+- [[project:community/addons/hr/models/hr_employee.py::745][community/addons/hr/models/hr_employee.py::745]] YES but might change nothing (always same value)
+ 
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/4762527][[Employee] Prevent Traceback When HR Users Access Shared Employee Links]]
 Branch =18.0-fix_employee_share_permission_link-mlef=
 #+begin_src bash :results silent
@@ -48,7 +55,6 @@ So why still permission error when removing private_car_plate?
 ~group_hr_manager~ and ~group_hr_user~ are the only groups that can access private employee view
 Try to see in js if user is in those groups before page load, else redirect to public employee view
 Dans js y a doAction() pour faire une action pour ouvrir public employee
-
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5106638][[hr_attendance] Extra hours smart button gives stacktrace]]
 - [[project:community/addons/hr_attendance/views/hr_employee_view.xml::131][where check_in defined for list view]]
 #+begin_src bash :results silent
@@ -234,7 +240,7 @@ On a 40h / week contract, extra hours seems legit
 *The contract does not change anything.*
 It's just the *working hours* under _Employee/WorkInfo/Schedule/Working Hours_
 
-* FIXME [[https://www.odoo.com/odoo/my-tasks/4901052][[Salary Config] Allow fields of salary config to be archived]]
+* DONE [[https://www.odoo.com/odoo/my-tasks/4901052][[Salary Config] Allow fields of salary config to be archived]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
      --checkout-enterprise master-hr_contract_salary-archivable_salaries-mlef >&2
@@ -243,11 +249,6 @@ It's just the *working hours* under _Employee/WorkInfo/Schedule/Working Hours_
 archiver = mettre: active = fields.boolean(default=false) dans model
 clean db = remove the fields you don't like (not a real dropdb _at all_)
 -i hr_contract_salary
-** TODO check runbot (should be ok and done)
-
-
-
-
 * CANCEL [[https://www.odoo.com/odoo/project/1251/tasks/4879294][[Payroll] When selecting employees from payrun, remove launch plan]]
 * Configuration
 #+name: Count number of tasks
