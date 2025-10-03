@@ -1,29 +1,102 @@
 #+title: Tasks
 
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
+* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/5156978][[Payroll] Reports clean up]]
+=-m l10n_be_hr_payroll=
+Retire ton module prcq be_hr_payroll depend deja de hr_holidays donc tu peux override direct dans be_hr_payroll
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5156702][[mrp_workorder] Fix permission denied on Add Operator]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
 #+begin_src bash :results silent
-../o --checkout-community master \
-     --checkout-enterprise master-make_overview_page_faster-mlef >&2
+../o -c master-make_overview_page_faster-mlef >&2
 #+end_src
+*Don't forget that it's a two branch task*
 template name: =hr_attendance_1000=
-createdb: error: database creation failed: ERROR:  template database "odoo_template_hr_attendance_1000" does not exist
 #+begin_src python
-for i in range(2000):
+for i in range(1000):
     self.env['hr.employee'].create({
         'name': f'Beep Boop {i}'
     })
     print(i)
 print('committing...')
 self.env.cr.commit()
+print('Done')
 #+end_src
+when limit > total number of employees, then it does not display only 5 of them
+[[project:community/addons/web/models/models.py::844][community/addons/web/models/models.py::844]] <- is where expand_groups is completely ditched instead of partially used
 [[project:enterprise/hr_attendance_gantt/views/hr_attendance_gantt.xml::71][Where I would put groups_limit="20"]]
+** formatted_read_group_behavior test
+#+begin_src python
+test1 = self.with_context(read_group_expand=True).formatted_read_group(
+    domain=['|', '&', '&', ('check_in', '<', '2025-10-03 22:00:00'), '|', '&', ('check_in', '<', '2025-10-03 12:02:59'), ('check_out', '=', False), ('check_out', '>', '2025-10-02 22:00:00'), ('employee_id.active', '=', True), '&', ('check_out', '<', '2025-10-02 22:00:00'), ('check_in', '>', datetime.datetime(2025, 8, 3, 22, 0))],
+    groupby=('employee_id',),
+    aggregates=('id:array_agg',),
+    having=tuple(),
+    offset=0,
+    limit=20, # below 1021, will only return 5 employees
+    order="employee_id",
+)
+test2 = self.with_context(read_group_expand=True).formatted_read_group(
+    domain=['|', '&', '&', ('check_in', '<', '2025-10-03 22:00:00'), '|', '&', ('check_in', '<', '2025-10-03 12:02:59'), ('check_out', '=', False), ('check_out', '>', '2025-10-02 22:00:00'), ('employee_id.active', '=', True), '&', ('check_out', '<', '2025-10-02 22:00:00'), ('check_in', '>', datetime.datetime(2025, 8, 3, 22, 0))],
+    groupby=('employee_id',),
+    aggregates=('id:array_agg',),
+    having=tuple(),
+    offset=0,
+    limit=2000, # above 1021, will return all of them
+    order="employee_id",
+)
+test3 = self.with_context(read_group_expand=True).formatted_read_group(
+    domain=['|', '&', '&', ('check_in', '<', '2025-10-03 22:00:00'), '|', '&', ('check_in', '<', '2025-10-03 12:02:59'), ('check_out', '=', False), ('check_out', '>', '2025-10-02 22:00:00'), ('employee_id.active', '=', True), '&', ('check_out', '<', '2025-10-02 22:00:00'), ('check_in', '>', datetime.datetime(2025, 8, 3, 22, 0))],
+    groupby=('employee_id',),
+    aggregates=('id:array_agg',),
+    having=tuple(),
+    offset=0,
+    limit=None, # return all of them
+    order="employee_id",
+)
+#+end_src
+** Talk with Yurgen
+C'est [[project:community/addons/hr_attendance/models/hr_attendance.py::557][read_group_employee_id]] qui hacke read_group quand on groupe sur =employee_id=. Il devrait retourner tous mes employees (qui vont etre filtres par la pagination apres). Mais _il ne le fait pas_. Change ca.
+** SQL query that only gets 5 groups
+#+begin_src sql
+SELECT
+  "hr_attendance"."employee_id",
+  ARRAY_AGG(
+    "hr_attendance"."id"
+    ORDER BY
+      "hr_attendance"."id"
+  )
+FROM
+  "hr_attendance"
+  LEFT JOIN "hr_employee" AS "hr_attendance__employee_id" ON (
+    "hr_attendance"."employee_id" = "hr_attendance__employee_id"."id"
+  )
+WHERE
+  "hr_attendance__employee_id"."company_id" IN (1)
+GROUP BY
+  "hr_attendance"."employee_id",
+  "hr_attendance__employee_id"."name"
+ORDER BY
+  "hr_attendance__employee_id"."name"
+LIMIT
+  20
+#+end_src
+** Reason for filtering myself
+Everything is already fetched inf read_group_employee_id, so I can just fetch everything and filter myself.
+*** What I could do
+- Fetch the employees myself with filter
+- Get Ids of filtered employees
+- Use super().get_gantt_data() with a domain being the ids only
+- *NOTE:* tu dois afficher tous les employees de l'entreprise dont tu es manager, ou juste tous les employees de l'entreprise si tu es admin
+- *NOTE:* affiche tous ces employees sans condition si user_domain est TRUE, vu que de base tout le monde passe a ce moment-la donc osef des domains pour ca
+- Si user_domain est pas TRUE alors tu dois afficher que les employees avec des attendances qui matchent les domains
+** DONE tests don't work...
+** DONE [[project:community/addons/hr_attendance/tests/test_hr_attendance_process.py::78][This test fails]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
 #+begin_src bash :results silent
 ../o --checkout-community master-no_recruitment_employee_refactor-mlef \
      --checkout-enterprise master >&2
 #+end_src
 
-* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
 #+begin_src bash :results silent
 ../o --checkout-community saas-18.4-overridden_cron_work_phone-mlef \
      --checkout-enterprise saas-18.4 >&2
@@ -38,12 +111,12 @@ Ca fonctionne mais en 18.4, [[https://drive.google.com/file/d/1hufZwcVHU0nWbCTP7
 - [[project:community/addons/hr/models/hr_employee.py::698][community/addons/hr/models/hr_employee.py::698]] YES (all the image ones)
   But seems like the compute function has a condition [[project:community/addons/hr/models/hr_employee.py::718][like I did]]
 - [[project:community/addons/hr/models/hr_employee.py::745][community/addons/hr/models/hr_employee.py::745]] YES but might change nothing (always same value)
- 
+
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/4762527][[Employee] Prevent Traceback When HR Users Access Shared Employee Links]]
 Branch =18.0-fix_employee_share_permission_link-mlef=
 #+begin_src bash :results silent
 ../o --checkout-community 18.0-fix_employee_share_permission_link-mlef \
-     --checkout-enterprise master >&2
+     --checkout-enterprise 18.0 >&2
 #+end_src
 #+begin_src bash :results silent
 ./o -m hr --template hr
@@ -55,6 +128,8 @@ So why still permission error when removing private_car_plate?
 ~group_hr_manager~ and ~group_hr_user~ are the only groups that can access private employee view
 Try to see in js if user is in those groups before page load, else redirect to public employee view
 Dans js y a doAction() pour faire une action pour ouvrir public employee
+** DONE [[https://github.com/odoo/odoo/pull/228623#issuecomment-3381553847][Aerospacelab Issue]]
+[[project:enterprise/mrp_workorder/views/mrp_workorder_views.xml::459][Changer hr.employee en hr.employee.public]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5106638][[hr_attendance] Extra hours smart button gives stacktrace]]
 - [[project:community/addons/hr_attendance/views/hr_employee_view.xml::131][where check_in defined for list view]]
 #+begin_src bash :results silent
@@ -185,7 +260,15 @@ Branch: =saas-18.2-default_employee_id_on_goal_creation-mlef=
 Put on context when clicking on "Goals" from employee the employee id, if directly click on "Goals" then leave the employee field empty.
 [[project:enterprise/hr_appraisal/views/hr_appraisal_views.xml::27][Goals smart button]]
 [[project:enterprise/hr_appraisal/models/hr_appraisal.py::536][Context passed to action]]
-
+** DONE forward port (wait for [[https://runbot.odoo.com/runbot/bundle/19-0-saas-18-2-default-employee-id-on-goal-creation-mlef-468974-fw-406044][runbot]])
+- #96687 [FIX] hr_appraisal: Goal creation default employee
+#+begin_src bash :results silent
+../o --checkout-community 19.0 \
+     --checkout-enterprise 19.0-saas-18.2-default_employee_id_on_goal_creation-mlef-468974-fw >&2
+#+end_src
+#+begin_src bash
+./o -m hr_appraisal -d -t :TestHrAppraisalGoal
+#+end_src
 * CANCEL [[https://www.odoo.com/odoo/my-tasks/4980966][[l10n_in_Payroll] Fix the basic rule calculation condition in the Python code]]
 +18.0+ *master*
 =master-l10n_in_hr_payroll-minimum_wage_check-mlef=
@@ -240,7 +323,7 @@ On a 40h / week contract, extra hours seems legit
 *The contract does not change anything.*
 It's just the *working hours* under _Employee/WorkInfo/Schedule/Working Hours_
 
-* DONE [[https://www.odoo.com/odoo/my-tasks/4901052][[Salary Config] Allow fields of salary config to be archived]]
+* FIXME [[https://www.odoo.com/odoo/my-tasks/4901052][[Salary Config] Allow fields of salary config to be archived]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
      --checkout-enterprise master-hr_contract_salary-archivable_salaries-mlef >&2

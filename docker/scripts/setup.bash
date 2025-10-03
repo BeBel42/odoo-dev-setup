@@ -54,6 +54,7 @@ packages=(
 	"paramiko"         # for l10n_be_hr_payroll
 	"phonenumbers"     # for test_l10n_be_hr_payroll_account
 	"websocket-client" # for tests using a browser
+	"pyjwt"            # for l10n_be_hr_payroll
 )
 echo "Installing extra python dependencies in venv..."
 "$ODOO_DIR/venv/bin/python3" -m pip install "${packages[@]}" 1>/dev/null
