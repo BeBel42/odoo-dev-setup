@@ -1,4 +1,4 @@
-FROM phusion/baseimage:noble-1.0.2
+FROM phusion/baseimage:noble-1.0.2@sha256:b1b968db1eb391059048211e18df74062aa0777ffaecfd55f120ca34fdeb0630
 
 ENV ODOO_DIR=/app
 

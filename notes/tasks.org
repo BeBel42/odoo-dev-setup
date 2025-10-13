@@ -1,9 +1,15 @@
 #+title: Tasks
 
 * RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/5156978][[Payroll] Reports clean up]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-payroll-reports_clean_up-mlef >&2
+#+end_src
+
 =-m l10n_be_hr_payroll=
 Retire ton module prcq be_hr_payroll depend deja de hr_holidays donc tu peux override direct dans be_hr_payroll
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5156702][[mrp_workorder] Fix permission denied on Add Operator]]
+** DONE prevenir mec de Github
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
 #+begin_src bash :results silent
 ../o -c master-make_overview_page_faster-mlef >&2
@@ -96,7 +102,7 @@ Everything is already fetched inf read_group_employee_id, so I can just fetch ev
      --checkout-enterprise master >&2
 #+end_src
 
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
+* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
 #+begin_src bash :results silent
 ../o --checkout-community saas-18.4-overridden_cron_work_phone-mlef \
      --checkout-enterprise saas-18.4 >&2
@@ -332,6 +338,8 @@ It's just the *working hours* under _Employee/WorkInfo/Schedule/Working Hours_
 archiver = mettre: active = fields.boolean(default=false) dans model
 clean db = remove the fields you don't like (not a real dropdb _at all_)
 -i hr_contract_salary
+File where ribbon component is:
+[[project:community/addons/web/static/src/views/widgets/ribbon/ribbon.js::20][community/addons/web/static/src/views/widgets/ribbon/ribbon.js::20]]
 * CANCEL [[https://www.odoo.com/odoo/project/1251/tasks/4879294][[Payroll] When selecting employees from payrun, remove launch plan]]
 * Configuration
 #+name: Count number of tasks
