@@ -1,13 +1,47 @@
 #+title: Tasks
 
-* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/5156978][[Payroll] Reports clean up]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5162567][[Payroll] Work Entry Types screen]]
+#+begin_src bash :results silent
+../o -c master-payroll-change_work_entry_types_views-mlef >&2
+#+end_src
+=-m hr_work_entry,hr_payroll=
+[[project:community/addons/hr_work_entry/views/hr_work_entry_views.xml::244][base Work Entry Type form view]]
+[[project:enterprise/l10n_be_hr_payroll/views/hr_work_entry_views.xml::1][l10n_be work entry ptype form view main override]]
+[[project:enterprise/l10n_be_hr_payroll_sd_worx/views/hr_work_entry_type_views.xml::1][l10n_be work entry type form view SD Worx override]]
+** Spec
+*** [ ] [[https://link.excalidraw.com/l/65VNwvy7c4X/4LJSOZo8W3D][Change UX]]
+*** [ ] Set tooltips
+**** [ ] Payroll Code : "The code is used as a reference in salary rules. Careful, changing an existing code can lead to unwanted behaviors."
+**** [ ] Duration Rounding (old Rounding field) : "In the Payslip Worked Days, duration can be rounded if needed".
+**** [ ] Rounding Method : "According to the Duration Rounding, the duration will be rounded to closest, top, or bottom value".
+**** [ ] Unpaid in Structures : "If a Structure is selected, the work entry of this type will bot be valuated in the computation."
+**** [ ] Unpaid in Joint Committee : "If a Joint Committee is selected, the work entry of this type will not be valuated in the computation. This selection works in addition to the Unpaid in Structures, conditions are cumulative."
+**** [ ] Paid Time Off Eligibility (old Keep Time Off Right) : "The work entry type will be taken into account for the computation of the annual time off allocation"
+**** [ ] Time Credit : "Time Credit are specific work entry types used in the computation of the working rate in the working schedule. A Time Credit work entry type is considered as work."
+**** [ ] SDWorx : "Code must be 4 characters long."
+**** [ ] Meal Voucher + Representation Fees + Private Car Reimbursement : "The work entry type will make the day eligible to the related Benefit and increase the amount of days on the month."
+
+*** [X] Remove "Unforeseen Absence", check the code (gmf thinks it's never used)
+** DONE [[project:enterprise/hr_work_entry_holidays_enterprise/views/hr_work_entry_views.xml::50][This crashes when installing with hr_payroll]]
+It's because I removed the =time_off= group in the [[project:community/addons/hr_work_entry/views/hr_work_entry_views.xml::280][type view xml]]
+** TODO Make migrations for modified fields
+*** [ ] is_unforeseen has been deleted
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5156978][[Payroll] Reports clean up]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
      --checkout-enterprise master-payroll-reports_clean_up-mlef >&2
 #+end_src
+** [X] Remove work entries analysis & move Headcount https://tinyurl.com/22mgvmqx
+** [X] Move Paid Time Off Allocation to Time Off https://tinyurl.com/238nmtbn & https://tinyurl.com/2co433x9
+** [X] L10N_BE : Removal "Meal Voucher"
+** [X] Payroll : Move "time off" menu item https://tinyurl.com/28mjrxlm
+** [X] L10N_BE : Remove "Group Insurance Export" https://tinyurl.com/2y3zy2eg
+
 
 =-m l10n_be_hr_payroll=
 Retire ton module prcq be_hr_payroll depend deja de hr_holidays donc tu peux override direct dans be_hr_payroll
+** DONE Runbot tests fails
+=-m l10n_ch_hr_payroll,account -t .test_01_account_tax_groups_tour=
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5156702][[mrp_workorder] Fix permission denied on Add Operator]]
 ** DONE prevenir mec de Github
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
@@ -102,7 +136,7 @@ Everything is already fetched inf read_group_employee_id, so I can just fetch ev
      --checkout-enterprise master >&2
 #+end_src
 
-* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
 #+begin_src bash :results silent
 ../o --checkout-community saas-18.4-overridden_cron_work_phone-mlef \
      --checkout-enterprise saas-18.4 >&2
@@ -136,7 +170,7 @@ Try to see in js if user is in those groups before page load, else redirect to p
 Dans js y a doAction() pour faire une action pour ouvrir public employee
 ** DONE [[https://github.com/odoo/odoo/pull/228623#issuecomment-3381553847][Aerospacelab Issue]]
 [[project:enterprise/mrp_workorder/views/mrp_workorder_views.xml::459][Changer hr.employee en hr.employee.public]]
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5106638][[hr_attendance] Extra hours smart button gives stacktrace]]
+* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5106638][[hr_attendance] Extra hours smart button gives stacktrace]]
 - [[project:community/addons/hr_attendance/views/hr_employee_view.xml::131][where check_in defined for list view]]
 #+begin_src bash :results silent
 ../o --checkout-community master-fix_extra_hours_stack_trace-mlef \
@@ -329,7 +363,7 @@ On a 40h / week contract, extra hours seems legit
 *The contract does not change anything.*
 It's just the *working hours* under _Employee/WorkInfo/Schedule/Working Hours_
 
-* FIXME [[https://www.odoo.com/odoo/my-tasks/4901052][[Salary Config] Allow fields of salary config to be archived]]
+* DONE [[https://www.odoo.com/odoo/my-tasks/4901052][[Salary Config] Allow fields of salary config to be archived]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
      --checkout-enterprise master-hr_contract_salary-archivable_salaries-mlef >&2
@@ -340,6 +374,7 @@ clean db = remove the fields you don't like (not a real dropdb _at all_)
 -i hr_contract_salary
 File where ribbon component is:
 [[project:community/addons/web/static/src/views/widgets/ribbon/ribbon.js::20][community/addons/web/static/src/views/widgets/ribbon/ribbon.js::20]]
+** DONE forgot ribbon on benefits model
 * CANCEL [[https://www.odoo.com/odoo/project/1251/tasks/4879294][[Payroll] When selecting employees from payrun, remove launch plan]]
 * Configuration
 #+name: Count number of tasks
