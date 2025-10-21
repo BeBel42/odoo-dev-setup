@@ -36,6 +36,8 @@ $0 usage:
 		Checkout community repository to <branch>
 	--checkout-enterprise <branch>
 		Checkout enterprise repository to <branch>
+	--checkout-upgrade <branch>
+		Checkout upgrade repository to <branch>
 	--populate <models_list>
 		Allows to duplicate existing data in a given database.
 		Can be used for testing and benchmarking when large tables are needed.
@@ -43,7 +45,7 @@ $0 usage:
 		List of populate factors. In case a factor is missing for a model, the
 		last factor in the list will be used. Defaults to 1000.
 	-c | --checkout <branch>
-		Checkout all (unspecified) odoo repositories to <branch>
+		Checkout enterprise and community odoo repositories to <branch>
 	-p | --pull
 		Pull all odoo repositories to the latest changes.
 		This will be executed after \"--checkout\" flags if both are specified.
@@ -93,6 +95,7 @@ enable_debug=0
 checkout_branch=""
 checkout_community=""
 checkout_enterprise=""
+checkout_upgrade=""
 pull_branch=0
 setup=0
 template=""
@@ -125,6 +128,10 @@ while [[ "$#" -gt 0 ]]; do
 		;;
 	--checkout-enterprise)
 		checkout_enterprise="$2"
+		shift
+		;;
+	--checkout-upgrade)
+		checkout_upgrade="$2"
 		shift
 		;;
 	-c | --checkout)
@@ -225,14 +232,15 @@ handle_branch_switch() {
 	# define the directories
 	community_dir="$project_dir/community"
 	enterprise_dir="$project_dir/enterprise"
+	upgrade_dir="$project_dir/upgrade"
 
 	# default to "-c" value if not specified
 	[[ "$checkout_community" = "" ]] && checkout_community="$checkout_branch"
 	[[ "$checkout_enterprise" = "" ]] && checkout_enterprise="$checkout_branch"
 
 	# define arrays for mapping of branches to directories
-	dirs=("$community_dir" "$enterprise_dir")
-	branches=("$checkout_community" "$checkout_enterprise")
+	dirs=("$community_dir" "$enterprise_dir" "$upgrade_dir")
+	branches=("$checkout_community" "$checkout_enterprise" "$checkout_upgrade")
 
 	# check for unstaged or staged changes in git repositories
 	for i in "${!dirs[@]}"; do

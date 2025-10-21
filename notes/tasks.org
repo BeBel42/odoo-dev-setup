@@ -1,35 +1,52 @@
 #+title: Tasks
 
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5162567][[Payroll] Work Entry Types screen]]
+* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5162567][[Payroll] Work Entry Types screen]]
 #+begin_src bash :results silent
 ../o -c master-payroll-change_work_entry_types_views-mlef >&2
 #+end_src
 =-m hr_work_entry,hr_payroll=
+=-m hr_work_entry,hr_payroll,l10n_be_hr_payroll=
+=-m hr_work_entry,hr_payroll,l10n_be_hr_payroll,l10n_be_hr_payroll_group_s,l10n_be_hr_payroll_partena,l10n_be_hr_payroll_ucm,l10n_be_hr_payroll_sd_worx --template work_entry_be_all=
+=-m hr_work_entry,hr_payroll,l10n_it_hr_payroll,l10n_it_hr_payroll_group_s,l10n_it_hr_payroll_partena,l10n_it_hr_payroll_ucm,l10n_it_hr_payroll_sd_worx --template work_entry_it_all=
+
 [[project:community/addons/hr_work_entry/views/hr_work_entry_views.xml::244][base Work Entry Type form view]]
 [[project:enterprise/l10n_be_hr_payroll/views/hr_work_entry_views.xml::1][l10n_be work entry ptype form view main override]]
 [[project:enterprise/l10n_be_hr_payroll_sd_worx/views/hr_work_entry_type_views.xml::1][l10n_be work entry type form view SD Worx override]]
 ** Spec
-*** [ ] [[https://link.excalidraw.com/l/65VNwvy7c4X/4LJSOZo8W3D][Change UX]]
-*** [ ] Set tooltips
-**** [ ] Payroll Code : "The code is used as a reference in salary rules. Careful, changing an existing code can lead to unwanted behaviors."
-**** [ ] Duration Rounding (old Rounding field) : "In the Payslip Worked Days, duration can be rounded if needed".
-**** [ ] Rounding Method : "According to the Duration Rounding, the duration will be rounded to closest, top, or bottom value".
-**** [ ] Unpaid in Structures : "If a Structure is selected, the work entry of this type will bot be valuated in the computation."
-**** [ ] Unpaid in Joint Committee : "If a Joint Committee is selected, the work entry of this type will not be valuated in the computation. This selection works in addition to the Unpaid in Structures, conditions are cumulative."
-**** [ ] Paid Time Off Eligibility (old Keep Time Off Right) : "The work entry type will be taken into account for the computation of the annual time off allocation"
-**** [ ] Time Credit : "Time Credit are specific work entry types used in the computation of the working rate in the working schedule. A Time Credit work entry type is considered as work."
-**** [ ] SDWorx : "Code must be 4 characters long."
-**** [ ] Meal Voucher + Representation Fees + Private Car Reimbursement : "The work entry type will make the day eligible to the related Benefit and increase the amount of days on the month."
+*** [X] [[https://link.excalidraw.com/l/65VNwvy7c4X/4LJSOZo8W3D][Change UX]]
+**** [X] Form view
+I did not do other locales
+I did everything except *Unpaid in Joint Committee*
+Which is a new field with new logic. David proposed to make it in another task.
+**** [X] List view
+**** [X] Filters
+*** [X] Set tooltips
+**** [X] Payroll Code : "The code is used as a reference in salary rules. Careful, changing an existing code can lead to unwanted behaviors."
+**** [X] Duration Rounding (old Rounding field) : "In the Payslip Worked Days, duration can be rounded if needed".
+**** [X] Rounding Method : "According to the Duration Rounding, the duration will be rounded to closest, top, or bottom value".
+**** [X] Unpaid in Structures : "If a Structure is selected, the work entry of this type will bot be valuated in the computation."
+**** CANCEL Unpaid in Joint Committee : "If a Joint Committee is selected, the work entry of this type will not be valuated in the computation. This selection works in addition to the Unpaid in Structures, conditions are cumulative."
+**** [X] Paid Time Off Eligibility (old Keep Time Off Right) : "The work entry type will be taken into account for the computation of the annual time off allocation"
+**** [X] Time Credit : "Time Credit are specific work entry types used in the computation of the working rate in the working schedule. A Time Credit work entry type is considered as work."
+**** [X] SDWorx : "Code must be 4 characters long."
+**** [X] Meal Voucher + Representation Fees + Private Car Reimbursement : "The work entry type will make the day eligible to the related Benefit and increase the amount of days on the month."
 
 *** [X] Remove "Unforeseen Absence", check the code (gmf thinks it's never used)
 ** DONE [[project:enterprise/hr_work_entry_holidays_enterprise/views/hr_work_entry_views.xml::50][This crashes when installing with hr_payroll]]
 It's because I removed the =time_off= group in the [[project:community/addons/hr_work_entry/views/hr_work_entry_views.xml::280][type view xml]]
-** TODO Make migrations for modified fields
-*** [ ] is_unforeseen has been deleted
+** DONE Make migrations for modified fields
+*** [X] is_unforeseen has been deleted
+** CANCEL Joint committee now exists. Add it.
+** DONE maybe keep "Code" after like "SDWorx Code" in .py file and just remove it in form view.
+** DONE convert is_work (old bool) to work_type (Selection) in a migration
+[[project:community/addons/hr_work_entry/models/hr_work_entry_type.py::28][Where is_work has been changed to work_type]]
+
+[[project:upgrade/migrations/hr_work_entry/tests/test_work_type_reflects_is_work_19_1.py::6][File that tests it]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5156978][[Payroll] Reports clean up]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
-     --checkout-enterprise master-payroll-reports_clean_up-mlef >&2
+     --checkout-enterprise master-payroll-reports_clean_up-mlef \
+     --checkout-upgrade master-payroll-reports_clean_up-mlef >&2
 #+end_src
 ** [X] Remove work entries analysis & move Headcount https://tinyurl.com/22mgvmqx
 ** [X] Move Paid Time Off Allocation to Time Off https://tinyurl.com/238nmtbn & https://tinyurl.com/2co433x9
@@ -273,7 +290,7 @@ Demo data: =community/addons/hr/data/hr_demo.xml=
 Task is awaiting for some talks. Arthur knows a bit about it. He comes back from holidays on the 13 of aug
 
 
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/4784231][[Recruitment] Make the interview links expire when a candidate is refused/archived or has signed]]
+* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/4784231][[Recruitment] Make the interview links expire when a candidate is refused/archived or has signed]]
 #+begin_src bash :results silent
 ../o --checkout-community master-hr-recruitment-survey-expire-ksni \
      --checkout-enterprise master >&2
