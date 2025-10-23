@@ -6,7 +6,12 @@
 set -eu
 
 project_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+community_dir="$project_dir/community"
+enterprise_dir="$project_dir/enterprise"
+upgrade_dir="$project_dir/upgrade"
+
 cd "$project_dir"
+
 
 # Options that do not work in .odoorc
 default_args="--dev=all --limit-time-real=0"
@@ -51,6 +56,9 @@ $0 usage:
 		This will be executed after \"--checkout\" flags if both are specified.
 	-b | --bash
 	   Launches bash in the odoo container (e.g.: to use odoo-bin manually)
+	-r | --rebase <branch>
+	   Rebases current branches in enterprise/community onto <branch>
+	   if \"--pull\" is specified, pulls <branch> before rebasing onto it
 	--shell
 	   Launches the odoo python shell
 	--template <template_name>
@@ -97,6 +105,7 @@ checkout_community=""
 checkout_enterprise=""
 checkout_upgrade=""
 pull_branch=0
+rebase_branch=""
 setup=0
 template=""
 save_template=""
@@ -156,6 +165,10 @@ while [[ "$#" -gt 0 ]]; do
 		;;
 	--drop-template)
 		drop_template_regex="$2"
+		shift
+		;;
+	-r | --rebase)
+		rebase_branch="$2"
 		shift
 		;;
 	-p | --pull) pull_branch=1 ;;
@@ -227,13 +240,48 @@ warn_user_if_needed() {
 	fi
 }
 
+# Will take care of updating the current branch to target_branch
+# Unstaged changes will be handled using git stash
+rebase_current_branch() {
+	# Define the target branch
+	target_branch=$1
+
+	# Get the current branch name
+	current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+	if ! git diff-index --quiet HEAD --; then
+		echo "Stashing uncommitted changes..."
+		git stash push --include-untracked --message "auto-stash before rebase from $current_branch onto $target_branch"
+		stashed=1
+	else
+		stashed=0
+	fi
+
+	# Pull the latest changes into the target branch
+	if [[ $pull_branch = 1 ]]; then
+		echo "Fetching latest changes from origin/$target_branch..."
+		git fetch origin "$target_branch"
+		echo "Pulling latest changes into $target_branch..."
+		git checkout "$target_branch"
+		git pull origin "$target_branch"
+		git checkout "$current_branch"
+	else
+		echo "\"--pull\" has not been specified. $target_branch won't be pulled"
+	fi
+
+	echo "Rebasing $current_branch onto $target_branch..."
+	git rebase "$target_branch"
+
+	if [[ $stashed = 1 ]]; then
+		echo "Unstashing changes..."
+		git stash pop
+	fi
+
+	echo "$current_branch has been rebased on $target_branch in $(pwd)"
+}
+
 # everything related to git checkout and pull
 handle_branch_switch() {
-	# define the directories
-	community_dir="$project_dir/community"
-	enterprise_dir="$project_dir/enterprise"
-	upgrade_dir="$project_dir/upgrade"
-
 	# default to "-c" value if not specified
 	[[ "$checkout_community" = "" ]] && checkout_community="$checkout_branch"
 	[[ "$checkout_enterprise" = "" ]] && checkout_enterprise="$checkout_branch"
@@ -283,14 +331,23 @@ handle_branch_switch() {
 		cd - >/dev/null
 	done
 
-	echo "Done Git operations."
+	echo "Done git branch operations."
 }
 
 # it's annoying me most of the time...
 #warn_user_if_needed
 
 # Do git operations if needed
-if [[ $pull_branch = 1 ||
+if [[ $rebase_branch != "" ]]; then
+	echo "\"-r\" has been specified. Rebasing onto $rebase_branch"
+	cd "$community_dir"
+	rebase_current_branch "$rebase_branch"
+	cd "$project_dir"
+	cd "$enterprise_dir"
+	rebase_current_branch "$rebase_branch"
+	cd "$project_dir"
+	exit 0
+elif [[ $pull_branch = 1 ||
 	"$checkout_community" != "" ||
 	"$checkout_enterprise" != "" ||
 	"$checkout_branch" != "" ]]; then

@@ -2,7 +2,8 @@
 
 * FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5162567][[Payroll] Work Entry Types screen]]
 #+begin_src bash :results silent
-../o -c master-payroll-change_work_entry_types_views-mlef >&2
+../o -c master-payroll-change_work_entry_types_views-mlef \
+    --checkout-upgrade master-payroll-change_work_entry_types_views-mlef >&2
 #+end_src
 =-m hr_work_entry,hr_payroll=
 =-m hr_work_entry,hr_payroll,l10n_be_hr_payroll=
@@ -42,6 +43,14 @@ It's because I removed the =time_off= group in the [[project:community/addons/hr
 [[project:community/addons/hr_work_entry/models/hr_work_entry_type.py::28][Where is_work has been changed to work_type]]
 
 [[project:upgrade/migrations/hr_work_entry/tests/test_work_type_reflects_is_work_19_1.py::6][File that tests it]]
+** TODO stuff like sd_worx in list views is empty if belgian company not clicked
+Faut les cacher si belgique pas cochee
+Dans form view, faut les afficher que quand BE ou rien de selectionne
+*** TODO column_invisible does not work with fields. You will have to override the list view component and do a jsclass to override its behavior with JS
+** TODO change commit messages in all three branches + PR
+
+** WAIT Message envoyé dans discord framework js
+[[project:enterprise/l10n_be_hr_payroll_partena/views/hr_work_entry_type_views.xml::20][Exemple pris]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5156978][[Payroll] Reports clean up]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
@@ -153,7 +162,7 @@ Everything is already fetched inf read_group_employee_id, so I can just fetch ev
      --checkout-enterprise master >&2
 #+end_src
 
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
+* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
 #+begin_src bash :results silent
 ../o --checkout-community saas-18.4-overridden_cron_work_phone-mlef \
      --checkout-enterprise saas-18.4 >&2
@@ -168,6 +177,12 @@ Ca fonctionne mais en 18.4, [[https://drive.google.com/file/d/1hufZwcVHU0nWbCTP7
 - [[project:community/addons/hr/models/hr_employee.py::698][community/addons/hr/models/hr_employee.py::698]] YES (all the image ones)
   But seems like the compute function has a condition [[project:community/addons/hr/models/hr_employee.py::718][like I did]]
 - [[project:community/addons/hr/models/hr_employee.py::745][community/addons/hr/models/hr_employee.py::745]] YES but might change nothing (always same value)
+** RUNBOT merge conflict
+#+begin_src bash :results silent
+../o --checkout-community 19.0-saas-18.4-overridden_cron_work_phone-mlef-466288-fw \
+     --checkout-enterprise 19.0 >&2
+#+end_src
+[[https://runbot.odoo.com/runbot/bundle/190-saas-184-overridden-cron-work-phone-mlef-466288-fw-409728][Runbot link]]
 
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/4762527][[Employee] Prevent Traceback When HR Users Access Shared Employee Links]]
 Branch =18.0-fix_employee_share_permission_link-mlef=
