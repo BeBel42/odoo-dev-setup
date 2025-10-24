@@ -1,6 +1,6 @@
 #+title: Tasks
 
-* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5162567][[Payroll] Work Entry Types screen]]
+* [?] [[https://www.odoo.com/odoo/project/1251/tasks/5162567][[Payroll] Work Entry Types screen]]
 #+begin_src bash :results silent
 ../o -c master-payroll-change_work_entry_types_views-mlef \
     --checkout-upgrade master-payroll-change_work_entry_types_views-mlef >&2
@@ -43,13 +43,17 @@ It's because I removed the =time_off= group in the [[project:community/addons/hr
 [[project:community/addons/hr_work_entry/models/hr_work_entry_type.py::28][Where is_work has been changed to work_type]]
 
 [[project:upgrade/migrations/hr_work_entry/tests/test_work_type_reflects_is_work_19_1.py::6][File that tests it]]
-** TODO stuff like sd_worx in list views is empty if belgian company not clicked
+** DONE stuff like sd_worx in list views is empty if belgian company not clicked
 Faut les cacher si belgique pas cochee
 Dans form view, faut les afficher que quand BE ou rien de selectionne
-*** TODO column_invisible does not work with fields. You will have to override the list view component and do a jsclass to override its behavior with JS
+*** DONE column_invisible does not work with fields. You will have to override the list view component and do a jsclass to override its behavior with JS
+** TODO boolean_string does not support translations since it passes its text via "options"
 ** TODO change commit messages in all three branches + PR
+** TODO remove is_work and replace is_leave by selection named "category" => ["Working Time", "Absence"] (is_leave is used A LOT)
+BUT before that, contact yannick, after Mathias gives you [[https://www.odoo.com/odoo/project/1251/tasks/4199423][link of task where he advocates for that weird is_leave/is_work mirror]]
+*** WAIT yannick is currently in sick leave
 
-** WAIT Message envoyé dans discord framework js
+** DONE Message envoyé dans discord framework js
 [[project:enterprise/l10n_be_hr_payroll_partena/views/hr_work_entry_type_views.xml::20][Exemple pris]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5156978][[Payroll] Reports clean up]]
 #+begin_src bash :results silent
@@ -162,7 +166,7 @@ Everything is already fetched inf read_group_employee_id, so I can just fetch ev
      --checkout-enterprise master >&2
 #+end_src
 
-* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
 #+begin_src bash :results silent
 ../o --checkout-community saas-18.4-overridden_cron_work_phone-mlef \
      --checkout-enterprise saas-18.4 >&2
@@ -177,12 +181,14 @@ Ca fonctionne mais en 18.4, [[https://drive.google.com/file/d/1hufZwcVHU0nWbCTP7
 - [[project:community/addons/hr/models/hr_employee.py::698][community/addons/hr/models/hr_employee.py::698]] YES (all the image ones)
   But seems like the compute function has a condition [[project:community/addons/hr/models/hr_employee.py::718][like I did]]
 - [[project:community/addons/hr/models/hr_employee.py::745][community/addons/hr/models/hr_employee.py::745]] YES but might change nothing (always same value)
-** RUNBOT merge conflict
+** DONE merge conflict
 #+begin_src bash :results silent
 ../o --checkout-community 19.0-saas-18.4-overridden_cron_work_phone-mlef-466288-fw \
      --checkout-enterprise 19.0 >&2
 #+end_src
 [[https://runbot.odoo.com/runbot/bundle/190-saas-184-overridden-cron-work-phone-mlef-466288-fw-409728][Runbot link]]
+*** DONE above runbot broke because of my changes in merge conflict
+I removed a computed property on the mobile phone (oupsies), but idk if my test will work though
 
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/4762527][[Employee] Prevent Traceback When HR Users Access Shared Employee Links]]
 Branch =18.0-fix_employee_share_permission_link-mlef=
@@ -305,20 +311,24 @@ Demo data: =community/addons/hr/data/hr_demo.xml=
 Task is awaiting for some talks. Arthur knows a bit about it. He comes back from holidays on the 13 of aug
 
 
-* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/4784231][[Recruitment] Make the interview links expire when a candidate is refused/archived or has signed]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/4784231][[Recruitment] Make the interview links expire when a candidate is refused/archived or has signed]]
 #+begin_src bash :results silent
 ../o --checkout-community master-hr-recruitment-survey-expire-ksni \
      --checkout-enterprise master >&2
 #+end_src
-#+begin_src bash
+#+begin_src bash :results silent
 ./o -m hr_recruitment_survey --template interviews
 #+end_src
 
-#+RESULTS:
-
 [[https://github.com/odoo/odoo/pull/210980][Community PR]]
 [[https://runbot.odoo.com/runbot/bundle/master-hr-recruitment-survey-expire-ksni-371641][Runbot]]
-/Prakash/ has given great info in the discord channel
+/Prakash/ has given some info in the discord channel
+** TODO C'est du code d'indien, tu peux tout changer:
+*** [ ] Ajoute =cancelled= pour le state du [[project:community/addons/survey/models/survey_user_input.py::32][user input]] (maybe override in hr_recruitment_survey?)
+*** [ ] Et tu joues la dessus pour expire la survey.
+*** [ ] Tu peux aussi just delete le [[project:community/addons/survey/wizard/survey_invite.py::190][domain ajoute la]], on sait pas pk il a fait ca
+*** [ ] Change les tests aussi c'est de la m
+*** [ ] Tu peux changer le commit message aussi il est nul
 
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5048292][[Appraisal] Default employee_id on goal creation]]
 #+begin_src bash :results silent
