@@ -1,6 +1,22 @@
 #+title: Tasks
 
-* [?] [[https://www.odoo.com/odoo/project/1251/tasks/5162567][[Payroll] Work Entry Types screen]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5207567][[Payroll] Offers problem with Marc Demo + can't change contract templates?]]
+#+begin_src bash :results silent
+../o -c master >&2
+#+end_src
+#+begin_src bash :results silent
+./o -m hr_contract_salary_payroll
+#+end_src
+[[project:community/addons/hr/models/hr_version.py::266][where date error is thrown]]
+** TODO ask arpi because he made the function
+** Spec pas tres correcte
+Voir message david dans discord (a ete corrigee)
+
+Le truc ci-dessous devrait fonctionner pour que la version devienne un CDD finit au lieu d'un CDI en cours.
+[[project:enterprise/hr_contract_salary_payroll/models/hr_contract_salary_offer.py::91][enterprise/hr_contract_salary_payroll/models/hr_contract_salary_offer.py::91]]
+Mais c'est pas le cas?
+Aussi, pour faire l'estimation des payslips, ils font un truc bizarre ou ils font un savepoint de DB avant de faire tout ces trucs de CDD/CDI sur les versions, pour apres rollback
+* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5162567][[Payroll] Work Entry Types screen]]
 #+begin_src bash :results silent
 ../o -c master-payroll-change_work_entry_types_views-mlef \
     --checkout-upgrade master-payroll-change_work_entry_types_views-mlef >&2
@@ -9,6 +25,9 @@
 =-m hr_work_entry,hr_payroll,l10n_be_hr_payroll=
 =-m hr_work_entry,hr_payroll,l10n_be_hr_payroll,l10n_be_hr_payroll_group_s,l10n_be_hr_payroll_partena,l10n_be_hr_payroll_ucm,l10n_be_hr_payroll_sd_worx --template work_entry_be_all=
 =-m hr_work_entry,hr_payroll,l10n_it_hr_payroll,l10n_it_hr_payroll_group_s,l10n_it_hr_payroll_partena,l10n_it_hr_payroll_ucm,l10n_it_hr_payroll_sd_worx --template work_entry_it_all=
+
+Upgrade test:
+=./o --template hr_work_entry -m all -u=
 
 [[project:community/addons/hr_work_entry/views/hr_work_entry_views.xml::244][base Work Entry Type form view]]
 [[project:enterprise/l10n_be_hr_payroll/views/hr_work_entry_views.xml::1][l10n_be work entry ptype form view main override]]
@@ -47,14 +66,16 @@ It's because I removed the =time_off= group in the [[project:community/addons/hr
 Faut les cacher si belgique pas cochee
 Dans form view, faut les afficher que quand BE ou rien de selectionne
 *** DONE column_invisible does not work with fields. You will have to override the list view component and do a jsclass to override its behavior with JS
-** TODO boolean_string does not support translations since it passes its text via "options"
-** TODO change commit messages in all three branches + PR
-** TODO remove is_work and replace is_leave by selection named "category" => ["Working Time", "Absence"] (is_leave is used A LOT)
+** CANCEL boolean_string does not support translations since it passes its text via "options"
+** DONE change commit messages in all three branches + PR
+** DONE remove is_work and replace is_leave by required selection named "category" => ["Working Time", "Absence"] (is_leave is used A LOT)
 BUT before that, contact yannick, after Mathias gives you [[https://www.odoo.com/odoo/project/1251/tasks/4199423][link of task where he advocates for that weird is_leave/is_work mirror]]
-*** WAIT yannick is currently in sick leave
+*** DONE yannick is currently in sick leave
 
+*** DONE make migration to reflect previous is_leave (pas is_work) + test
 ** DONE Message envoyé dans discord framework js
 [[project:enterprise/l10n_be_hr_payroll_partena/views/hr_work_entry_type_views.xml::20][Exemple pris]]
+** FIXME I rebased and I have some issues (+check UI again)
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5156978][[Payroll] Reports clean up]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
@@ -208,18 +229,24 @@ Try to see in js if user is in those groups before page load, else redirect to p
 Dans js y a doAction() pour faire une action pour ouvrir public employee
 ** DONE [[https://github.com/odoo/odoo/pull/228623#issuecomment-3381553847][Aerospacelab Issue]]
 [[project:enterprise/mrp_workorder/views/mrp_workorder_views.xml::459][Changer hr.employee en hr.employee.public]]
-* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5106638][[hr_attendance] Extra hours smart button gives stacktrace]]
+* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/5106638][[hr_attendance] Extra hours smart button gives stacktrace]]
 - [[project:community/addons/hr_attendance/views/hr_employee_view.xml::131][where check_in defined for list view]]
 #+begin_src bash :results silent
-../o --checkout-community master-fix_extra_hours_stack_trace-mlef \
+../o --checkout-community 19.0-fix_extra_hours_stack_trace-mlef \
      --checkout-enterprise master >&2
 #+end_src
-
+=-m hr_holidays_attendance=
 check_in seems to be defined in attendances and not allocations...
 ** [[project:community/addons/hr_attendance/static/src/views/extra_hours_list_view.js::30][community/addons/hr_attendance/static/src/views/extra_hours_list_view.js::30]]
 shouldDisplay is true when display_extra_hours is true
 check_in is in domain from searchModel
 
+** [[project:community/addons/hr_attendance/models/hr_employee.py::220][Where get_overtime_data() is]]
+** DONE investigate mepe's complaints
+[[project:community/addons/hr_attendance/static/src/views/extra_hours_list_view.js::36][where get_overtime_data is called with wrong domain]]
+** DONE le domain uses =check_in= pour le start et end date. Donc la conversion ne devrait pas fonctionner correctement
+** DONE Error also happens in previous version. So make the change to these too.
+** DONE Move js file and python function to hr_holidays_attendance
 * DONE [[https://www.odoo.com/odoo/my-tasks/5026228][[hr_holidays] Add back a well-formatted "Extra Hours" section in the Time Off dashboard]]
 Made from [[https://www.odoo.com/odoo/all-tasks/4774528][task 4774528]]
 #+begin_src bash :results silent
@@ -311,7 +338,7 @@ Demo data: =community/addons/hr/data/hr_demo.xml=
 Task is awaiting for some talks. Arthur knows a bit about it. He comes back from holidays on the 13 of aug
 
 
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/4784231][[Recruitment] Make the interview links expire when a candidate is refused/archived or has signed]]
+* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/4784231][[Recruitment] Make the interview links expire when a candidate is refused/archived or has signed]]
 #+begin_src bash :results silent
 ../o --checkout-community master-hr-recruitment-survey-expire-ksni \
      --checkout-enterprise master >&2
@@ -323,12 +350,14 @@ Task is awaiting for some talks. Arthur knows a bit about it. He comes back from
 [[https://github.com/odoo/odoo/pull/210980][Community PR]]
 [[https://runbot.odoo.com/runbot/bundle/master-hr-recruitment-survey-expire-ksni-371641][Runbot]]
 /Prakash/ has given some info in the discord channel
-** TODO C'est du code d'indien, tu peux tout changer:
-*** [ ] Ajoute =cancelled= pour le state du [[project:community/addons/survey/models/survey_user_input.py::32][user input]] (maybe override in hr_recruitment_survey?)
-*** [ ] Et tu joues la dessus pour expire la survey.
-*** [ ] Tu peux aussi just delete le [[project:community/addons/survey/wizard/survey_invite.py::190][domain ajoute la]], on sait pas pk il a fait ca
-*** [ ] Change les tests aussi c'est de la m
-*** [ ] Tu peux changer le commit message aussi il est nul
+** DONE C'est du code d'indien, tu peux tout changer:
+*** [X] Ajoute =cancelled= pour le state du [[project:community/addons/survey/models/survey_user_input.py::32][user input]] (maybe override in hr_recruitment_survey?)
+*** [X] Et tu joues la dessus pour expire la survey.
+[[project:community/addons/survey/controllers/main.py::124][Ou survey redirect avec error]]
+*** [X] Tu peux aussi just delete le [[project:community/addons/survey/wizard/survey_invite.py::190][domain ajoute la]], on sait pas pk il a fait ca
+*** [X] Change les tests aussi c'est de la m
+*** [X] Tu peux changer le commit message aussi il est nul
+*** [X] Ptet tester quand c'est deleted aussi
 
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5048292][[Appraisal] Default employee_id on goal creation]]
 #+begin_src bash :results silent

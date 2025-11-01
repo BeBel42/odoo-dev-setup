@@ -263,7 +263,7 @@ rebase_current_branch() {
 		git fetch origin "$target_branch"
 		echo "Pulling latest changes into $target_branch..."
 		git checkout "$target_branch"
-		git pull origin "$target_branch"
+		git pull --ff-only origin "$target_branch"
 		git checkout "$current_branch"
 	else
 		echo "\"--pull\" has not been specified. $target_branch won't be pulled"
@@ -325,8 +325,9 @@ handle_branch_switch() {
 			git checkout "$branch"
 		fi
 		if [[ $pull_branch = 1 ]]; then
-			echo '"-p" has been specified.' "Pulling $dir to latest changes..."
-			git pull --ff-only
+			current_branch="$(git rev-parse --abbrev-ref HEAD)"
+			echo '"-p" has been specified.' "Pulling $dir ($current_branch) to latest changes..."
+			git pull --ff-only origin "$current_branch"
 		fi
 		cd - >/dev/null
 	done
