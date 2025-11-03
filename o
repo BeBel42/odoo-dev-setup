@@ -217,10 +217,11 @@ compose_file="$project_dir"/docker/docker-compose.yml
 # Setup the whole project
 if [[ $setup = 1 ]]; then
 	echo '"--setup" specified. Calling setup container...'
-	docker compose -f "$compose_file" run --build setup
+	docker compose -f "$compose_file" run --build --remove-orphans setup
 	# Files created from container are chowned to root. Let's change that
 	echo "Setting owner of project to $USER..."
 	sudo chown -R "$USER:$USER" .
+    ln -s --force ./community/ruff.toml ./ruff.toml
 	echo "Done setting up project."
 	exit 0
 fi

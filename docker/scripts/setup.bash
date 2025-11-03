@@ -4,6 +4,8 @@ set -eu
 
 cd "$ODOO_DIR"
 
+# TODO remove mlef by a read for name + odoo gram
+
 # clone and setup each project
 for i in community enterprise tutorials upgrade upgrade-util; do
 	echo "Setting up $i project..."
@@ -40,6 +42,10 @@ for i in community enterprise tutorials upgrade upgrade-util; do
 
 	echo "Done setting up $i project..."
 done
+
+# See https://github.com/odoo/odoo/wiki/Javascript-coding-guidelines#use-a-linter
+cd "$ODOO_DIR/community/addons/web/tooling/"
+bash enable.sh
 
 # create global venv and install dependencies
 cd "$ODOO_DIR"

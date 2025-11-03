@@ -13,7 +13,8 @@ RUN apt-get update -y && apt-get install -y \
 	libpq-dev \
 	libldap2-dev \
 	libsasl2-dev \
-	gcc
+	gcc \
+    npm
 
 # To allow git operations in odoo repos
 RUN git config --global --add safe.directory "*"
