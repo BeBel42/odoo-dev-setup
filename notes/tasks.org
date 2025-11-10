@@ -1,5 +1,13 @@
 #+title: Tasks
 
+* TODO work_entry_types screen is done now normally (update task without conflict)
+
+* RUNBOT [[https://www.odoo.com/odoo/my-tasks/5254322][[hr] test_version_cron_update_no_fields runbot build error]]
+#+begin_src bash :results silent
+../o --checkout-community saas-18.4-hr-fix_runbot_employee_build_error-mlef \
+     --checkout-enterprise saas-18.4 >&2
+#+end_src
+
 * TODO [[https://www.odoo.com/odoo/project/1251/tasks/5207567][[Payroll] Offers problem with Marc Demo + can't change contract templates?]]
 #+begin_src bash :results silent
 ../o -c master >&2
@@ -95,7 +103,7 @@ Retire ton module prcq be_hr_payroll depend deja de hr_holidays donc tu peux ove
 =-m l10n_ch_hr_payroll,account -t .test_01_account_tax_groups_tour=
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5156702][[mrp_workorder] Fix permission denied on Add Operator]]
 ** DONE prevenir mec de Github
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
+* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
 #+begin_src bash :results silent
 ../o -c master-make_overview_page_faster-mlef >&2
 #+end_src
@@ -181,6 +189,7 @@ Everything is already fetched inf read_group_employee_id, so I can just fetch ev
 - Si user_domain est pas TRUE alors tu dois afficher que les employees avec des attendances qui matchent les domains
 ** DONE tests don't work...
 ** DONE [[project:community/addons/hr_attendance/tests/test_hr_attendance_process.py::78][This test fails]]
+** FIXME Mathias review on both branches
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
 #+begin_src bash :results silent
 ../o --checkout-community master-no_recruitment_employee_refactor-mlef \
@@ -210,6 +219,7 @@ Ca fonctionne mais en 18.4, [[https://drive.google.com/file/d/1hufZwcVHU0nWbCTP7
 [[https://runbot.odoo.com/runbot/bundle/190-saas-184-overridden-cron-work-phone-mlef-466288-fw-409728][Runbot link]]
 *** DONE above runbot broke because of my changes in merge conflict
 I removed a computed property on the mobile phone (oupsies), but idk if my test will work though
+** DONE [[https://runbot.odoo.com/odoo/runbot.build.error/233942][Runbot error]]
 
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/4762527][[Employee] Prevent Traceback When HR Users Access Shared Employee Links]]
 Branch =18.0-fix_employee_share_permission_link-mlef=
