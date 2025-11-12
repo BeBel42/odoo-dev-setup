@@ -1,0 +1,44 @@
+#+title: Paraguay
+
+* Meeting notes
+All the header is mandatory (except company logo)
+Number below firma del empleado is national id (ask ziri again)
+Having a duplicate is mandatory
+Physical signature (they don't do digital ones)
+William is the guy from the video call
+** [[https://docs.google.com/document/d/1YCKR2I-pUZs7D3--MTbn8JZMKPona2pQDem9eyrfxnQ/edit?tab=t.h97anmapymfm][Gemini meeting summary]] <2025-11-07>
+#+TITLE: Meeting Notes - Collaboration on Paraguay Payroll Localization
+*** Summary
+Ziri Raha Ibnou-Cheikh introduced developers Martin and Ziri, who will work on the project, and William Eckerleben confirmed that all necessary payroll fields are in Odoo and that the required calculations are based on factors like day/night hours and Paraguay's minimum salary. William Eckerleben detailed the base payroll computation for Paraguay, mandatory pay slip requirements including two signed copies and specific header information, and tricky computations for sick time off. Ziri Raha Ibnou-Cheikh requested that William Eckerleben send all gathered information, including sample pay slip details, and estimated a four-month timeframe for a testable product, while William Eckerleben confirmed they would also share two main reports required for the labor minister and social security entity (EES).
+*** Details
+**** Project Introduction and Team Setup
+Ziri Raha Ibnou-Cheikh introduced the two developers, Martin and Ziri, who will be working on the project, noting that they speak Spanish, which may facilitate work with Spanish documentation. William Eckerleben mentioned having calculation information, including pay slips, salary, working days, and bonus details, which they plan to send in a more readable format, and confirmed that all necessary fields for the payroll calculations are already present in Odoo (00:00:00). The required calculations are based on factors like day/night hours and the minimum salary in Paraguay (00:01:50).
+
+**** Payroll Computation and Scope
+William Eckerleben stated that the provided computation is the base for every company in Paraguay, even though some companies might have additional specifics (00:03:34). They also explained the tricky and specific rules for sick time off computations, noting that the amount paid by the company depends on the number of days taken. William Eckerleben also shared a pay slip template detailing mandatory information for pay slips in Paraguay, which includes the IPS (social security) and MTESS (labor minister) numbers (00:05:04).
+
+**** Mandatory Pay Slip Requirements
+William Eckerleben emphasized that the pay slip must be presented in two copies: an original and a duplicate, as mandated by law for signing by both the company and the employee, with one copy kept by each party (00:07:01). They also confirmed that the header information on the pay slip, including a confirmation message, is mandatory by law in Paraguay, except for the company logo (00:08:31). Furthermore, William Eckerleben mentioned that electronic signatures are difficult in Paraguay, requiring documents to be printed and signed by hand (00:07:01).
+
+**** Next Steps and Development Schedule
+Ziri Raha Ibnou-Cheikh requested that William Eckerleben send all gathered information and, if possible, details about the work entries and time off for the sample pay slip to allow the developers to reproduce the scenario and verify the net salary calculation. The development team will work in master on version 19.1.2, and Ziri Raha Ibnou-Cheikh estimates that something shareable for testing could be available in two or three months, suggesting four months as a safer estimate. William Eckerleben confirmed they would also share information on two main reports required for the labor minister and the social security entity (EES) (00:10:29) (00:14:43).
+
+**** Information Sharing and Translation
+William Eckerleben confirmed that they would send the information and translation details, noting they would translate documentation into Spanish and then English, though Ziri Raha Ibnou-Cheikh stated that English translation is optional (00:11:59). William Eckerleben reiterated that they are not making promises to customers yet, as their goal is to grow the Paraguay country localization and potentially provide it in Odoo 20. William Eckerleben also provided a specific detail about the IPS (social security) contribution, noting that while the employer pays 25.5%, 9% is deducted from the employee's salary, and not all income concepts are taxable for IPS (00:14:43).
+
+**** Communication Plan
+Ziri Raha Ibnou-Cheikh stated they would create a development task and include William Eckerleben as a follower to ensure they see messages and updates. The meeting concluded with confirmation that the development work can begin, and the team will reach out with any questions (00:14:43).
+
+*** Suggested Next Steps
+- William Eckerleben will send the translated information and the implemented salary rules to calculate the base computation to Ziri Raha Ibnou-Cheikh.
+- William Eckerleben will send the information in Spanish and then translate and send it again in English.
+- Ziri Raha Ibnou-Cheikh will create a task and put William Eckerleben's email as a follower for updates.
+
+* Making a payroll locale tutos
+- [[https://www.odoo.com/de_DE/event/odoo-experience-2023-3735/track/mastering-payroll-localization-in-odoo-a-deep-dive-into-the-united-states-of-america-5843][Presentation video of USA locale]]
+- [[https://docs.google.com/presentation/d/1I7jEgtlXcz2tzreuCarGbIa-muydN2f1TerKNITRTPc/edit?slide=id.g277a65d3f5b_1_26#slide=id.g277a65d3f5b_1_26][Slides of USA video]]
+
+
+
+
+

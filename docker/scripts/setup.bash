@@ -45,7 +45,9 @@ done
 
 # See https://github.com/odoo/odoo/wiki/Javascript-coding-guidelines#use-a-linter
 cd "$ODOO_DIR/community/addons/web/tooling/"
-bash enable.sh
+mv "$ODOO_DIR/enable-eslint.bash" .
+bash enable-eslint.bash
+rm ./enable-eslint.bash
 
 # create global venv and install dependencies
 cd "$ODOO_DIR"
@@ -61,6 +63,7 @@ packages=(
 	"phonenumbers"     # for test_l10n_be_hr_payroll_account
 	"websocket-client" # for tests using a browser
 	"pyjwt"            # for l10n_be_hr_payroll
+    "pdfminer.six"     # for attachment_indexation
 )
 echo "Installing extra python dependencies in venv..."
 "$ODOO_DIR/venv/bin/python3" -m pip install "${packages[@]}" 1>/dev/null

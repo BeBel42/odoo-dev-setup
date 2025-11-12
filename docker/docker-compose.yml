@@ -47,5 +47,6 @@ services:
       - ../tutorials:/app/tutorials
       - ../upgrade:/app/upgrade
       - ../upgrade-util:/app/upgrade-util
+      - ../upgrade-util:/app/upgrade-util
       - ../venv:/app/venv
       - ~/.ssh:/root/.ssh:ro
