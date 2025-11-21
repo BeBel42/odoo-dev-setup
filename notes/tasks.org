@@ -413,8 +413,6 @@ After that, delete the old diff message you made
 General data: =community/addons/hr/data/hr_data.xml=
 Demo data: =community/addons/hr/data/hr_demo.xml=
 Task is awaiting for some talks. Arthur knows a bit about it. He comes back from holidays on the 13 of aug
-
-
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/4784231][[Recruitment] Make the interview links expire when a candidate is refused/archived or has signed]]
 #+begin_src bash :results silent
 ../o --checkout-community master-hr-recruitment-survey-expire-ksni \

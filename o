@@ -51,7 +51,10 @@ $0 usage:
 	-c | --checkout <branch>
 		Checkout enterprise and community odoo repositories to <branch>
 	-p | --pull
-		Pull all odoo repositories to the latest changes.
+		Pull community/enterprise odoo repositories to the latest changes.
+		This will be executed after \"--checkout\" flags if both are specified.
+	--pull-upgrade
+		Pull the upgrade odoo repository to the latest changes.
 		This will be executed after \"--checkout\" flags if both are specified.
 	-b | --bash
 	   Launches bash in the odoo container (e.g.: to use odoo-bin manually)
@@ -110,6 +113,7 @@ checkout_community=""
 checkout_enterprise=""
 checkout_upgrade=""
 pull_branch=0
+pull_upgrade=0
 rebase_branch=""
 setup=0
 template=""
@@ -180,6 +184,7 @@ while [[ "$#" -gt 0 ]]; do
         ;;
 
     -p | --pull) pull_branch=1 ;;
+    --pull-upgrade) pull_upgrade=1 ;;
     -b | --bash) run_bash=1 ;;
     -u | --upgrade) upgrade=1 ;;
     -d | --drop) drop=1 && install=1 ;;
@@ -347,14 +352,16 @@ handle_branch_switch() {
     # define arrays for mapping of branches to directories
     dirs=("$community_dir" "$enterprise_dir" "$upgrade_dir")
     branches=("$checkout_community" "$checkout_enterprise" "$checkout_upgrade")
+    pulls=("$pull_branch" "$pull_branch" "$pull_upgrade")
 
     # check for unstaged or staged changes in git repositories
     for i in "${!dirs[@]}"; do
         dir="${dirs[$i]}"
         branch="${branches[$i]}"
+        should_pull="${pulls[$i]}"
 
         # no need to do anything for this dir
-        if [[ $pull_branch = 0 && "$branch" = "" ]]; then
+        if [[ $should_pull = 0 && "$branch" = "" ]]; then
             echo "No need to do git operations for $dir"
             continue
         fi
@@ -377,12 +384,14 @@ handle_branch_switch() {
     for i in "${!dirs[@]}"; do
         dir="${dirs[$i]}"
         branch="${branches[$i]}"
+        should_pull="${pulls[$i]}"
+
         cd "$dir" || exit 1
         if [[ $branch != "" ]]; then
             echo "Checking out $dir to $branch..."
             git checkout "$branch"
         fi
-        if [[ $pull_branch = 1 ]]; then
+        if [[ $should_pull = 1 ]]; then
             current_branch="$(git rev-parse --abbrev-ref HEAD)"
             echo '"-p" has been specified.' "Pulling $dir ($current_branch) to latest changes..."
             git pull --ff-only origin "$current_branch"
@@ -407,6 +416,7 @@ if [[ $rebase_branch != "" ]]; then
     cd "$project_dir"
     exit 0
 elif [[ $pull_branch = 1 ||
+    $pull_upgrade = 1 ||
     "$checkout_community" != "" ||
     "$checkout_enterprise" != "" ||
     "$checkout_branch" != "" ]]; then
