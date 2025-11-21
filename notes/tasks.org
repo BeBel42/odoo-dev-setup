@@ -1,20 +1,29 @@
 #+title: Tasks
 
-* RUNBOT [[https://www.odoo.com/odoo/my-tasks/5254322][[hr] test_version_cron_update_no_fields runbot build error]]
+* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/5350522][[l10n_be_hr_payroll] hide_in_offer used in wrong module]]
+#+begin_src bash :results silent
+../o --checkout-community saas-18.4 \
+     --checkout-enterprise saas-18.4-l10n_be_hr_payroll-hide_in_offer_wrong_module-mlef >&2
+#+end_src
+Bug was created at: https://runbot.odoo.com/odoo/runbot.build.error/233591
+
+* DONE [hr] test_version_cron_update_no_fields runbot build error
+** DONE [[https://www.odoo.com/odoo/project/1251/tasks/5254322][[hr] test_version_cron_update_no_fields runbot build error]]
 #+begin_src bash :results silent
 ../o --checkout-community saas-18.4-hr-fix_runbot_employee_build_error-mlef \
      --checkout-enterprise saas-18.4 >&2
+#+end_src
+** DONE Again new error: https://runbot.odoo.com/odoo/runbot.build.error/233591
 * PROJ [[https://www.odoo.com/odoo/project/1251/tasks/5248917][l10n_py_hr_payroll]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
      --checkout-enterprise master-l10n_py_hr_payroll-zirah-mlef \
      --checkout-upgrade master >&2
->>>>>>> Stashed changes
 #+end_src
 
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5207567][[Payroll] Offers problem with Marc Demo + can't change contract templates?]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5207567][[Payroll] Offers problem with Marc Demo + can't change contract templates?]]
 #+begin_src bash :results silent
-../o -c master >&2
+../o -c 19.0-payroll-fix_offer_form_view-mlef
 #+end_src
 #+begin_src bash :results silent
 ./o -m hr_contract_salary_payroll
@@ -27,8 +36,33 @@ Mais c'est pas le cas?
 Aussi, pour faire l'estimation des payslips, ils font un truc bizarre ou ils font un savepoint de DB avant de faire tout ces trucs de CDD/CDI sur les versions, pour apres rollback
 ** Spec pas tres correcte
 Voir message david dans discord (a ete corrigee)
-** NOTE le stash que t'as c'est pour cette tache
-* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5162567][[Payroll] Work Entry Types screen]]
+** Rollback issues big refacto
+[[project:enterprise/hr_contract_salary_payroll/models/hr_contract_salary_offer.py::73][This is where overridden _get_version() is]]
+[[project:enterprise/hr_contract_salary_payroll/models/hr_contract_salary_offer.py::130][This is where all the state / rollback happens]]
+- Just try to make it work without it. Note that payslips are generated at some point.
+    Maybe use new? *Does new() not propagate for models created indirectly? idk*
+- The bug is there for unsaved stuff because the db rollback does not reset unsaved records (duh) 😭 
+** Bisect
+Faut faire:
+- Clicker sur "offers"
+- Changer de contract template
+- Reload
+- Aller back sur troy cruz
+- Effacer offre
+- Rappuyer sur smart button
+- Changer de contract template (le bug arrive la)
+  
+J'ai stop a master~2480. Meme bug que sur 19.0 la
+
+19.0 and master common ancester: 101027acc286596c956839deccab6a1b26e33e9d
+
+** Tour test
+=-m hr_contract_salary_payroll,l10n_us_hr_payroll=
+- It does not work, but when I execute it manually from the console it does...
+  Maybe the backend / fronted react differently when doing a real tour test
+** Cron that causes the issue in 19.0
+[[project:community/addons/hr_work_entry/models/hr_version.py::664][ir_cron_generate_missing_work_entries]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5162567][[Payroll] Work Entry Types screen]]
 #+begin_src bash :results silent
 ../o -c master-payroll-change_work_entry_types_views-mlef \
     --checkout-upgrade master-payroll-change_work_entry_types_views-mlef >&2
@@ -219,7 +253,7 @@ Everything is already fetched inf read_group_employee_id, so I can just fetch ev
 ** DONE tests don't work...
 ** DONE [[project:community/addons/hr_attendance/tests/test_hr_attendance_process.py::78][This test fails]]
 ** FIXME Mathias review on both branches
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
+* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
 #+begin_src bash :results silent
 ../o --checkout-community master-no_recruitment_employee_refactor-mlef \
      --checkout-enterprise master >&2
@@ -290,7 +324,7 @@ check_in is in domain from searchModel
 ** DONE le domain uses =check_in= pour le start et end date. Donc la conversion ne devrait pas fonctionner correctement
 ** DONE Error also happens in previous version. So make the change to these too.
 ** DONE Move js file and python function to hr_holidays_attendance
-* DONE [[https://www.odoo.com/odoo/my-tasks/5026228][[hr_holidays] Add back a well-formatted "Extra Hours" section in the Time Off dashboard]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5026228][[hr_holidays] Add back a well-formatted "Extra Hours" section in the Time Off dashboard]]
 Made from [[https://www.odoo.com/odoo/all-tasks/4774528][task 4774528]]
 #+begin_src bash :results silent
 ../o --checkout-community master-hr_holidays_attendance-add_well_formatted_extra_hours-mlef \
@@ -344,7 +378,7 @@ Et apres dans la get_allocation_data overriden, dans le if (pas le else) je rajo
 
 Et retirer dans la condition le =or not leave_type.requires_allocation=
 
-* WAIT [[https://www.odoo.com/odoo/my-tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
 **master**
 Chatter seems to be mail_message.py
 OR mail_thread.py (hr_version inherits it)
@@ -375,7 +409,7 @@ Vals (in theory) are the same as the one passed in old code.
 After that, with the small [[https://github.com/odoo/odoo/pull/222744/files#diff-1c37517a76b393d1d30c2b03e96611643a747d12c13b086653989f4068c660b2R447-R450][pr he sent]] tracking values should take care of it. Maybe git pull to get the changes.
 
 After that, delete the old diff message you made
-* WAIT [[[https://www.odoo.com/odoo/my-tasks/5013546][Employee] Migrate all "general" data to demo data]]
+* WAIT [[[https://www.odoo.com/odoo/project/1251/tasks/5013546][Employee] Migrate all "general" data to demo data]]
 General data: =community/addons/hr/data/hr_data.xml=
 Demo data: =community/addons/hr/data/hr_demo.xml=
 Task is awaiting for some talks. Arthur knows a bit about it. He comes back from holidays on the 13 of aug
@@ -424,7 +458,7 @@ Put on context when clicking on "Goals" from employee the employee id, if direct
 #+begin_src bash
 ./o -m hr_appraisal -d -t :TestHrAppraisalGoal
 #+end_src
-* CANCEL [[https://www.odoo.com/odoo/my-tasks/4980966][[l10n_in_Payroll] Fix the basic rule calculation condition in the Python code]]
+* CANCEL [[https://www.odoo.com/odoo/project/1251/tasks/4980966][[l10n_in_Payroll] Fix the basic rule calculation condition in the Python code]]
 +18.0+ *master*
 =master-l10n_in_hr_payroll-minimum_wage_check-mlef=
 PR:
@@ -459,13 +493,13 @@ If so, the hourly_wage needs to be converted to a monthly wage to be checked aga
 ***  The test will have to be changed accordingly
 ***  Migrate it all to 19.0 (19.1?)
 
-* DONE [[https://www.odoo.com/odoo/my-tasks/5042323][[Payroll] Work entries]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5042323][[Payroll] Work entries]]
 =-m hr_payroll=
 The code that check if the work entry is not validated before deletion can be found at:
 - [[project:community/addons/hr_work_entry/static/src/views/work_entry_calendar/work_entry_calendar_controller.js::151]] (for work entries view from employees)
   - [[project:enterprise/hr_work_entry_enterprise/static/src/work_entries_gantt_renderer.js::272]] (for work entries view from payroll)
 
-* CANCEL [[https://www.odoo.com/odoo/my-tasks/4774528][[Attendance] Support Tolerance-Based Extra Hours Calculation Without Active Contract]]
+* CANCEL [[https://www.odoo.com/odoo/project/1251/tasks/4774528][[Attendance] Support Tolerance-Based Extra Hours Calculation Without Active Contract]]
 =-m hr_attendance,hr_holidays,hr_contract=
 =community/addons/hr_holidays/static/src/dashboard/time_off_card.xml= pour le format mauvais du time off dashboard
 ** Review SUGA - May 12, 2025:
@@ -478,7 +512,7 @@ On a 40h / week contract, extra hours seems legit
 *The contract does not change anything.*
 It's just the *working hours* under _Employee/WorkInfo/Schedule/Working Hours_
 
-* DONE [[https://www.odoo.com/odoo/my-tasks/4901052][[Salary Config] Allow fields of salary config to be archived]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/4901052][[Salary Config] Allow fields of salary config to be archived]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
      --checkout-enterprise master-hr_contract_salary-archivable_salaries-mlef >&2

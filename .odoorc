@@ -7,5 +7,18 @@ db_password=dbpassword
 db_user=odoo
 dbfilter=odoo
 addons_path=community/addons/,enterprise/
-log_level=warn
 http_interface=127.0.0.1
+
+# Can be:
+# info
+# debug_rpc
+# warn
+# test
+# critical
+# runbot
+# debug_sql
+# error
+# debug
+# debug_rpc_answer
+# notset
+log_level=warn

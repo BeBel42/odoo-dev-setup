@@ -12,12 +12,11 @@ upgrade_dir="$project_dir/upgrade"
 
 cd "$project_dir"
 
-
 # Options that do not work in .odoorc
-default_args="--dev=all --limit-time-real=0"
+default_args="--dev=all --limit-time-real=0 --limit-time-cpu=0 --limit-time-worker-cron=0 --max-cron-threads=0"
 
 error() {
-	error_message="
+    error_message="
 $0 usage:
 	-m | --module <module_list>
 		Select the module to update / install.
@@ -83,10 +82,16 @@ $0 usage:
 		Sets up the whole project + dependencies
 	--odoo-version
 		Show the odoo version
+    --sync-community-with-enterprise
+        Will try to checkout community to the closest matching commit that
+        matches enterprise's current commit
+    --sync-enterprise-with-community
+        Will try to checkout enterprise to the closest matching commit that
+        matches community's current commit
 	-h | --help
 		Show this help prompt."
-	[[ "$1" = "" ]] || echo "$1" 1>&2
-	echo -e "$error_message" 1>&2
+    [[ "$1" = "" ]] || echo "$1" 1>&2
+    echo -e "$error_message" 1>&2
 }
 
 # default values
@@ -119,96 +124,101 @@ shell=0
 no_restart=0
 populate_models=""
 populate_factors=1000
+sync_community_with_enterprise=0
+sync_enterprise_with_community=0
 
 # parse script parameters
 while [[ "$#" -gt 0 ]]; do
-	case $1 in
-	-m | --module)
-		module="$2"
-		shift
-		;;
-	-t | --test)
-		test="$2"
-		shift
-		;;
-	--checkout-community)
-		checkout_community="$2"
-		shift
-		;;
-	--checkout-enterprise)
-		checkout_enterprise="$2"
-		shift
-		;;
-	--checkout-upgrade)
-		checkout_upgrade="$2"
-		shift
-		;;
-	-c | --checkout)
-		checkout_branch="$2"
-		shift
-		;;
-	--populate)
-		populate_models="$2"
-		shift
-		;;
-	--populate-factor)
-		populate_factors="$2"
-		shift
-		;;
-	--template)
-		template="$2"
-		shift
-		;;
-	--save-template)
-		save_template="$2"
-		shift
-		;;
-	--drop-template)
-		drop_template_regex="$2"
-		shift
-		;;
-	-r | --rebase)
-		rebase_branch="$2"
-		shift
-		;;
-	-p | --pull) pull_branch=1 ;;
-	-b | --bash) run_bash=1 ;;
-	-u | --upgrade) upgrade=1 ;;
-	-d | --drop) drop=1 && install=1 ;;
-	-i | --install) install=1 ;;
-	-s | --stop) stop=1 ;;
-	-D | --demo) demo=1 ;;
-	--no-restart) no_restart=1 ;;
-	--odoo-help) odoo_help=1 ;;
-	--shell) shell=1 ;;
-	--odoo-version) odoo_version=1 ;;
-	--init-only) init_only=1 ;;
-	--debug) enable_debug=1 ;;
-	--db-list) db_list=1 ;;
-	--setup) setup=1 ;;
-	-h | --help) help=1 ;;
-	*)
-		error "\033[1;31mError\033[0m: unknown parameter passed: \"$1\""
-		exit 1
-		;;
-	esac
-	shift
+    case $1 in
+    -m | --module)
+        module="$2"
+        shift
+        ;;
+    -t | --test)
+        test="$2"
+        shift
+        ;;
+    --checkout-community)
+        checkout_community="$2"
+        shift
+        ;;
+    --checkout-enterprise)
+        checkout_enterprise="$2"
+        shift
+        ;;
+    --checkout-upgrade)
+        checkout_upgrade="$2"
+        shift
+        ;;
+    -c | --checkout)
+        checkout_branch="$2"
+        shift
+        ;;
+    --populate)
+        populate_models="$2"
+        shift
+        ;;
+    --populate-factor)
+        populate_factors="$2"
+        shift
+        ;;
+    --template)
+        template="$2"
+        shift
+        ;;
+    --save-template)
+        save_template="$2"
+        shift
+        ;;
+    --drop-template)
+        drop_template_regex="$2"
+        shift
+        ;;
+    -r | --rebase)
+        rebase_branch="$2"
+        shift
+        ;;
+
+    -p | --pull) pull_branch=1 ;;
+    -b | --bash) run_bash=1 ;;
+    -u | --upgrade) upgrade=1 ;;
+    -d | --drop) drop=1 && install=1 ;;
+    -i | --install) install=1 ;;
+    -s | --stop) stop=1 ;;
+    -D | --demo) demo=1 ;;
+    --no-restart) no_restart=1 ;;
+    --odoo-help) odoo_help=1 ;;
+    --shell) shell=1 ;;
+    --odoo-version) odoo_version=1 ;;
+    --init-only) init_only=1 ;;
+    --debug) enable_debug=1 ;;
+    --db-list) db_list=1 ;;
+    --setup) setup=1 ;;
+    --sync-community-with-enterprise) sync_community_with_enterprise=1 ;;
+    --sync-enterprise-with-community) sync_enterprise_with_community=1 ;;
+    -h | --help) help=1 ;;
+    *)
+        error "\033[1;31mError\033[0m: unknown parameter passed: \"$1\""
+        exit 1
+        ;;
+    esac
+    shift
 done
 
 # show help prompt
 if [[ $help = 1 ]]; then
-	error ""
-	exit 0
+    error ""
+    exit 0
 fi
 
 # Will execute whenever the script finishes
 on_script_exit() {
-	odoo_icon_path="$project_dir/images/odoo_logo_small.png"
-	if type notify-send 1>/dev/null 2>&1; then
-		notify-send "Odoo" "Script execution finished" -t 2000 -u low -i "$odoo_icon_path"
-	else
-		echo -e "\033[1;33mWarning\033[0m: notify-send is not installed on your system. Notifications won't be sent." 1>&2
-	fi
+    odoo_icon_path="$project_dir/images/odoo_logo_small.png"
+    if type notify-send 1>/dev/null 2>&1; then
+        notify-send "Odoo" "Script execution finished" -t 2000 -u low -i "$odoo_icon_path"
+    else
+        echo -e "\033[1;33mWarning\033[0m: notify-send is not installed on your system. Notifications won't be sent." 1>&2
+    fi
 }
 trap "on_script_exit" EXIT
 
@@ -216,124 +226,171 @@ compose_file="$project_dir"/docker/docker-compose.yml
 
 # Setup the whole project
 if [[ $setup = 1 ]]; then
-	echo '"--setup" specified. Calling setup container...'
-	docker compose -f "$compose_file" run --build --remove-orphans setup
-	# Files created from container are chowned to root. Let's change that
-	echo "Setting owner of project to $USER..."
-	sudo chown -R "$USER:$USER" .
+    echo '"--setup" specified. Calling setup container...'
+    docker compose -f "$compose_file" run --build --remove-orphans setup
+    # Files created from container are chowned to root. Let's change that
+    echo "Setting owner of project to $USER..."
+    sudo chown -R "$USER:$USER" .
     ln -s --force ./community/ruff.toml ./ruff.toml
-	echo "Done setting up project."
-	exit 0
+    echo "Done setting up project."
+    exit 0
 fi
 
 warn_user_if_needed() {
-	cd "$project_dir/community" &&
-		community_branch=$(git rev-parse --abbrev-ref HEAD)
-	cd "$project_dir/enterprise" &&
-		enterprise_branch=$(git rev-parse --abbrev-ref HEAD)
-	cd "$project_dir"
-	if ! [[ "$community_branch" == "$enterprise_branch" ]]; then
-		echo -e "\e[33m" # start yellow text
-		echo -e "\033[1;33mWarning\033[0m: community and enterprise branches differ.
+    cd "$project_dir/community" &&
+        community_branch=$(git rev-parse --abbrev-ref HEAD)
+    cd "$project_dir/enterprise" &&
+        enterprise_branch=$(git rev-parse --abbrev-ref HEAD)
+    cd "$project_dir"
+    if ! [[ "$community_branch" == "$enterprise_branch" ]]; then
+        echo -e "\e[33m" # start yellow text
+        echo -e "\033[1;33mWarning\033[0m: community and enterprise branches differ.
 	community_branch=$community_branch
 	enterprise_branch=$enterprise_branch" 1>&2
-		echo -e "\e[0m" # end yellow text
-	fi
+        echo -e "\e[0m" # end yellow text
+    fi
 }
+
+# use it to checkout $1 to checkout the closest in time to $2's commit
+sync_repo_commit() {
+    if [ "$#" -ne 2 ]; then
+        echo "Error for $0: two arguments should be passed:
+$0 <source_repository> <target_repository>" >&2
+        exit 1
+    fi
+
+    target_repository="$1"
+    source_repository="$2"
+    commit_sha=$(git -C "$source_repository" rev-parse HEAD)
+
+    # Get commit timestamp
+    timestamp=$(git -C "$source_repository" show -s --format=%ct "$commit_sha")
+    timestamp_minute=$(((timestamp / 60 + 1) * 60))
+    echo "Commit $commit_sha has timestamp: $timestamp_minute"
+
+    # Find closest commit in before this timestamp in target_repository
+    matching_commit=$(git -C "$target_repository" rev-list master --timestamp | awk -v ts="$timestamp_minute" '$1 < ts {print $2, $1}' | sort -k2 -nr | head -n1 | cut -d' ' -f1)
+
+    if [ -z "$matching_commit" ]; then
+        echo "❎ No commit found before $timestamp_minute in $target_repository" >&2
+        exit 1
+    fi
+
+    matching_timestamp=$(git -C "$target_repository" show -s --format=%ct "$matching_commit")
+
+    echo "✔ Source repository: $source_repository"
+    echo "  ➡ Checkout on $commit_sha (ts: $timestamp_minute)"
+    echo "✔ Target repository : $target_repository"
+    echo "  ➡ Closest commit: $matching_commit (ts: $matching_timestamp)"
+
+    git -C "$target_repository" checkout "$matching_commit"
+    echo "✅ Checked out $target_repository to match $source_repository."
+}
+
+if [[ $sync_community_with_enterprise = 1 ]]; then
+    echo "'--sync-community-with-enterprise' has been specified"
+    sync_repo_commit "$community_dir" "$enterprise_dir"
+    exit 0
+fi
+if [[ $sync_enterprise_with_community = 1 ]]; then
+    echo "'--sync-enterprise-with-community' has been specified"
+    sync_repo_commit "$enterprise_dir" "$community_dir"
+    exit 0
+fi
 
 # Will take care of updating the current branch to target_branch
 # Unstaged changes will be handled using git stash
 rebase_current_branch() {
-	# Define the target branch
-	target_branch=$1
+    # Define the target branch
+    target_branch=$1
 
-	# Get the current branch name
-	current_branch=$(git rev-parse --abbrev-ref HEAD)
+    # Get the current branch name
+    current_branch=$(git rev-parse --abbrev-ref HEAD)
 
-	if ! git diff-index --quiet HEAD --; then
-		echo "Stashing uncommitted changes..."
-		git stash push --include-untracked --message "auto-stash before rebase from $current_branch onto $target_branch"
-		stashed=1
-	else
-		stashed=0
-	fi
+    if ! git diff-index --quiet HEAD --; then
+        echo "Stashing uncommitted changes..."
+        git stash push --include-untracked --message "auto-stash before rebase from $current_branch onto $target_branch"
+        stashed=1
+    else
+        stashed=0
+    fi
 
-	# Pull the latest changes into the target branch
-	if [[ $pull_branch = 1 ]]; then
-		echo "Fetching latest changes from origin/$target_branch..."
-		git fetch origin "$target_branch"
-		echo "Pulling latest changes into $target_branch..."
-		git checkout "$target_branch"
-		git pull --ff-only origin "$target_branch"
-		git checkout "$current_branch"
-	else
-		echo "\"--pull\" has not been specified. $target_branch won't be pulled"
-	fi
+    # Pull the latest changes into the target branch
+    if [[ $pull_branch = 1 ]]; then
+        echo "Fetching latest changes from origin/$target_branch..."
+        git fetch origin "$target_branch"
+        echo "Pulling latest changes into $target_branch..."
+        git checkout "$target_branch"
+        git pull --ff-only origin "$target_branch"
+        git checkout "$current_branch"
+    else
+        echo "\"--pull\" has not been specified. $target_branch won't be pulled"
+    fi
 
-	echo "Rebasing $current_branch onto $target_branch..."
-	git rebase "$target_branch"
+    echo "Rebasing $current_branch onto $target_branch..."
+    git rebase "$target_branch"
 
-	if [[ $stashed = 1 ]]; then
-		echo "Unstashing changes..."
-		git stash pop
-	fi
+    if [[ $stashed = 1 ]]; then
+        echo "Unstashing changes..."
+        git stash pop
+    fi
 
-	echo "$current_branch has been rebased on $target_branch in $(pwd)"
+    echo "$current_branch has been rebased on $target_branch in $(pwd)"
 }
 
 # everything related to git checkout and pull
 handle_branch_switch() {
-	# default to "-c" value if not specified
-	[[ "$checkout_community" = "" ]] && checkout_community="$checkout_branch"
-	[[ "$checkout_enterprise" = "" ]] && checkout_enterprise="$checkout_branch"
+    # default to "-c" value if not specified
+    [[ "$checkout_community" = "" ]] && checkout_community="$checkout_branch"
+    [[ "$checkout_enterprise" = "" ]] && checkout_enterprise="$checkout_branch"
 
-	# define arrays for mapping of branches to directories
-	dirs=("$community_dir" "$enterprise_dir" "$upgrade_dir")
-	branches=("$checkout_community" "$checkout_enterprise" "$checkout_upgrade")
+    # define arrays for mapping of branches to directories
+    dirs=("$community_dir" "$enterprise_dir" "$upgrade_dir")
+    branches=("$checkout_community" "$checkout_enterprise" "$checkout_upgrade")
 
-	# check for unstaged or staged changes in git repositories
-	for i in "${!dirs[@]}"; do
-		dir="${dirs[$i]}"
-		branch="${branches[$i]}"
+    # check for unstaged or staged changes in git repositories
+    for i in "${!dirs[@]}"; do
+        dir="${dirs[$i]}"
+        branch="${branches[$i]}"
 
-		# no need to do anything for this dir
-		if [[ $pull_branch = 0 && "$branch" = "" ]]; then
-			echo "No need to do git operations for $dir"
-			continue
-		fi
+        # no need to do anything for this dir
+        if [[ $pull_branch = 0 && "$branch" = "" ]]; then
+            echo "No need to do git operations for $dir"
+            continue
+        fi
 
-		cd "$dir" || exit 1
-		if ! git diff --cached --quiet; then
-			echo -e "\033[1;31mError\033[0m: you cannot pull/checkout when there are staged changes in $dir."
-			cd - >/dev/null
-			exit 1
-		fi
-		if ! git diff --quiet; then
-			echo -e "\033[1;31mError\033[0m: you cannot pull/checkout when there are unstaged changes in $dir."
-			cd - >/dev/null
-			exit 1
-		fi
-		cd - >/dev/null
-	done
+        cd "$dir" || exit 1
+        if ! git diff --cached --quiet; then
+            echo -e "\033[1;31mError\033[0m: you cannot pull/checkout when there are staged changes in $dir."
+            cd - >/dev/null
+            exit 1
+        fi
+        if ! git diff --quiet; then
+            echo -e "\033[1;31mError\033[0m: you cannot pull/checkout when there are unstaged changes in $dir."
+            cd - >/dev/null
+            exit 1
+        fi
+        cd - >/dev/null
+    done
 
-	# Switch branches in both repositories
-	for i in "${!dirs[@]}"; do
-		dir="${dirs[$i]}"
-		branch="${branches[$i]}"
-		cd "$dir" || exit 1
-		if [[ $branch != "" ]]; then
-			echo "Checking out $dir to $branch..."
-			git checkout "$branch"
-		fi
-		if [[ $pull_branch = 1 ]]; then
-			current_branch="$(git rev-parse --abbrev-ref HEAD)"
-			echo '"-p" has been specified.' "Pulling $dir ($current_branch) to latest changes..."
-			git pull --ff-only origin "$current_branch"
-		fi
-		cd - >/dev/null
-	done
+    # Switch branches in both repositories
+    for i in "${!dirs[@]}"; do
+        dir="${dirs[$i]}"
+        branch="${branches[$i]}"
+        cd "$dir" || exit 1
+        if [[ $branch != "" ]]; then
+            echo "Checking out $dir to $branch..."
+            git checkout "$branch"
+        fi
+        if [[ $pull_branch = 1 ]]; then
+            current_branch="$(git rev-parse --abbrev-ref HEAD)"
+            echo '"-p" has been specified.' "Pulling $dir ($current_branch) to latest changes..."
+            git pull --ff-only origin "$current_branch"
+        fi
+        cd - >/dev/null
+    done
 
-	echo "Done git branch operations."
+    echo "Done git branch operations."
 }
 
 # it's annoying me most of the time...
@@ -341,159 +398,150 @@ handle_branch_switch() {
 
 # Do git operations if needed
 if [[ $rebase_branch != "" ]]; then
-	echo "\"-r\" has been specified. Rebasing onto $rebase_branch"
-	cd "$community_dir"
-	rebase_current_branch "$rebase_branch"
-	cd "$project_dir"
-	cd "$enterprise_dir"
-	rebase_current_branch "$rebase_branch"
-	cd "$project_dir"
-	exit 0
+    echo "\"-r\" has been specified. Rebasing onto $rebase_branch"
+    cd "$community_dir"
+    rebase_current_branch "$rebase_branch"
+    cd "$project_dir"
+    cd "$enterprise_dir"
+    rebase_current_branch "$rebase_branch"
+    cd "$project_dir"
+    exit 0
 elif [[ $pull_branch = 1 ||
-	"$checkout_community" != "" ||
-	"$checkout_enterprise" != "" ||
-	"$checkout_branch" != "" ]]; then
-	handle_branch_switch
-	exit 0
+    "$checkout_community" != "" ||
+    "$checkout_enterprise" != "" ||
+    "$checkout_branch" != "" ]]; then
+    handle_branch_switch
+    exit 0
 fi
 
 # just stop everything
 if [[ $stop = 1 ]]; then
-	echo '"-s" has been specified. Stopping all running containers.'
-	docker compose -f "$compose_file" down --remove-orphans && echo "Stopped all running containers."
-	exit 0
+    echo '"-s" has been specified. Stopping all running containers.'
+    docker compose -f "$compose_file" down --remove-orphans && echo "Stopped all running containers."
+    exit 0
 fi
 
 # user did not mention module name (-m | --module <module_name>)
 if [[ "$module" = "" ]]; then
-	echo -e "\033[1;33mWarning\033[0m: missing module (-m) parameter.
+    echo -e "\033[1;33mWarning\033[0m: missing module (-m) parameter.
          No module will be updated / installed." 1>&2
 else # seeing if installing (-i) or updating (-u) module
-	if [[ $install = 1 ]]; then
-		echo "\"$( ([[ $drop = 1 ]] && echo '--drop') || echo '--install')\"" \
-			'has been specified. Adding "-i" to command'
-		action="-i"
-	else
-		echo '"--install" has not been specified. Adding "-u" to command'
-		action="-u"
-	fi
-	cmd="$cmd $action $module"
-fi
-
-if ! [[ "$test" = "" ]]; then
-	echo '"-t" has been specified. Adding test arguments to cmd'
-	cmd="$cmd --log-level=info --test-enable --test-tags=$test"
-	if [[ "$module" = "" ]]; then
-		echo -e "\033[1;33mWarning\033[0m: no module has been set to be \
-			tracked (-m) or installed (-i). Tests may not work." 1>&2
-	fi
+    if [[ $install = 1 ]]; then
+        echo "\"$( ([[ $drop = 1 ]] && echo '--drop') || echo '--install')\"" \
+            'has been specified. Adding "-i" to command'
+        action="-i"
+    else
+        echo '"--install" has not been specified. Adding "-u" to command'
+        action="-u"
+    fi
+    cmd="$cmd $action $module"
 fi
 
 if [[ $demo = 1 ]]; then
-	echo "-D has been specified. Enabling demo data"
-	cmd="$cmd --without-demo=False"
+    echo "-D has been specified. Enabling demo data"
+    cmd="$cmd --without-demo=False"
 else
-	echo "Demo data is disabled"
-	cmd="$cmd --without-demo=True"
+    echo "Demo data is disabled"
+    cmd="$cmd --without-demo=True"
 fi
 
 if [[ $upgrade = 1 ]]; then
-	echo "-u has been specified. Enabling upgrade..."
-	cmd="$cmd --upgrade-path=upgrade-util/src,upgrade/migrations --stop-after-init --log-level=info"
+    echo "-u has been specified. Enabling upgrade..."
+    cmd="$cmd --upgrade-path=upgrade-util/src,upgrade/migrations --stop-after-init --log-level=info"
 fi
 
 if [[ $no_restart = 0 ]]; then
-	echo "Shutting down everything"
-	docker compose -f "$compose_file" down --remove-orphans
+    echo "Shutting down everything"
+    docker compose -f "$compose_file" down --remove-orphans
 
-	echo "Starting db container..."
-	docker compose -f "$compose_file" up -d db
+    echo "Starting db container..."
+    docker compose -f "$compose_file" up -d db
 fi
 
 # Wait for database to be up
 tries=1
 while (! docker compose -f "$compose_file" exec db pg_isready) && [ $tries -lt 5 ]; do
-	sleep 0.5
-	tries=$(("$tries" + 1))
-	echo "Checking database availability ($tries)..."
+    sleep 0.5
+    tries=$(("$tries" + 1))
+    echo "Checking database availability ($tries)..."
 done
 if [ $tries = 5 ]; then
-	echo -e "\033[1;31mError\033[0m: could not verify database availability" 1>&2
-	exit 1
+    echo -e "\033[1;31mError\033[0m: could not verify database availability" 1>&2
+    exit 1
 fi
 
 if [[ $db_list = 1 ]]; then
-	echo '"--db-list" has been specified. List of all postgres databases:'
-	docker compose -f "$compose_file" exec db sh -c "psql --user=\$POSTGRES_USER -l"
-	exit $?
+    echo '"--db-list" has been specified. List of all postgres databases:'
+    docker compose -f "$compose_file" exec db sh -c "psql --user=\$POSTGRES_USER -l"
+    exit $?
 fi
 
 # prefix prepended to all created / deleted database templates
 database_template_prefix="odoo_template_"
 
 if ! [[ "$drop_template_regex" = "" ]]; then
-	docker compose -f "$compose_file" exec db sh -c "psql --user=\$POSTGRES_USER -lqt | cut -d \| -f 1 | \
+    docker compose -f "$compose_file" exec db sh -c "psql --user=\$POSTGRES_USER -lqt | cut -d \| -f 1 | \
 		grep -E '$database_template_prefix""$drop_template_regex' |
 		xargs -n 1 dropdb --user=\$POSTGRES_USER --if-exists 2>/dev/null" &&
-		echo "All matched templates have been deleted" ||
-		echo -e "\033[1;33mWarning\033[0m: no template matched the given regex: $drop_template_regex" 1>&2
-	exit 0
+        echo "All matched templates have been deleted" ||
+        echo -e "\033[1;33mWarning\033[0m: no template matched the given regex: $drop_template_regex" 1>&2
+    exit 0
 fi
 
 if [[ $drop = 1 ]]; then
-	echo '"--drop" has been specified. Dropping postgres database...'
-	docker compose -f "$compose_file" exec db sh -c "dropdb --user=\$POSTGRES_USER \$POSTGRES_DB" &&
-		echo "Database dropped" ||
-		echo -e "\033[1;33mWarning\033[0m: failed to drop datatbase" 1>&2
+    echo '"--drop" has been specified. Dropping postgres database...'
+    docker compose -f "$compose_file" exec db sh -c "dropdb --user=\$POSTGRES_USER \$POSTGRES_DB" &&
+        echo "Database dropped" ||
+        echo -e "\033[1;33mWarning\033[0m: failed to drop datatbase" 1>&2
 fi
 
 if ! [[ "$template" = "" ]]; then
-	echo "\"--template\" has been specified. Copying template $template to current db..."
-	(docker compose -f "$compose_file" exec db sh -c "
+    echo "\"--template\" has been specified. Copying template $template to current db..."
+    (docker compose -f "$compose_file" exec db sh -c "
         dropdb --if-exists --user=\"\$POSTGRES_USER\" \"\$POSTGRES_DB\" && \
         createdb --user=\"\$POSTGRES_USER\" -T \"$database_template_prefix""$template\" \"\$POSTGRES_DB\"
     " && echo "Successfully copied template $template") ||
-		(echo -e "\033[1;31mError\033[0m: could not use template $template" 1>&2 && exit 1)
+        (echo -e "\033[1;31mError\033[0m: could not use template $template" 1>&2 && exit 1)
 fi
 
 if ! [[ "$test" = "" ]]; then
-	echo '"-t" has been specified. Adding test arguments to cmd'
-	cmd="$cmd --stop-after-init --log-level=info --test-enable --test-tags=$test"
-	if [[ "$module" = "" ]]; then
-		echo -e "\033[1;33mWarning\033[0m: no module has been set to be \
+    echo '"-t" has been specified. Adding test arguments to cmd'
+    cmd="$cmd --stop-after-init --log-level=test --test-enable --test-tags=$test"
+    if [[ "$module" = "" ]]; then
+        echo -e "\033[1;33mWarning\033[0m: no module has been set to be \
 			tracked (-m) or installed (-i). Tests may not work." 1>&2
-	fi
+    fi
 fi
 
 if ! [[ "$save_template" = "" ]]; then
-	echo '"--save-template" has been specified. Adding arguments to cmd'
-	cmd="$cmd --stop-after-init --log-level=info"
+    echo '"--save-template" has been specified. Adding arguments to cmd'
+    cmd="$cmd --stop-after-init --log-level=info"
 fi
 
 if [[ $init_only = 1 ]]; then
-	echo '"--init-only" has been specified. Adding arguments to cmd'
-	cmd="$cmd --stop-after-init --log-level=info"
+    echo '"--init-only" has been specified. Adding arguments to cmd'
+    cmd="$cmd --stop-after-init --log-level=info"
 fi
 
 if [[ $odoo_version = 1 ]]; then
-	echo '--odoo-version has been specified. Overriding parameters to --version'
-	cmd="--version"
+    echo '--odoo-version has been specified. Overriding parameters to --version'
+    cmd="--version"
 fi
 
 if [[ $shell = 1 ]]; then
-	echo '"--shell" has ben specified. Overriding parameters to "shell"'
-	cmd="shell"
+    echo '"--shell" has ben specified. Overriding parameters to "shell"'
+    cmd="shell"
 fi
 
 if [[ $populate_models != "" ]]; then
-	echo '"--populate" has ben specified. Overriding cmd parameters...'
-	echo "Set to populate $populate_models by a factor of $populate_factors"
-	cmd="populate --models $populate_models --factors $populate_factors"
+    echo '"--populate" has ben specified. Overriding cmd parameters...'
+    echo "Set to populate $populate_models by a factor of $populate_factors"
+    cmd="populate --models $populate_models --factors $populate_factors"
 fi
 
 if [[ $odoo_help = 1 ]]; then
-	echo '--odoo-help has been specified. Overriding parameters to --help'
-	cmd="--help"
+    echo '--odoo-help has been specified. Overriding parameters to --help'
+    cmd="--help"
 fi
 
 docker_entrypoint=""
@@ -502,28 +550,28 @@ docker_run_exec="run"
 docker_service_ports="--service-ports"
 # attach to process if no restart
 if [[ $no_restart = 1 ]]; then
-	echo "\"--no-restart\" has been specified. Changing docker command.."
-	docker_run_exec="exec"
-	docker_build=""
-	docker_service_ports=""
-	cmd="bash ./entrypoint.bash $cmd"
+    echo "\"--no-restart\" has been specified. Changing docker command.."
+    docker_run_exec="exec"
+    docker_build=""
+    docker_service_ports=""
+    cmd="bash ./entrypoint.bash $cmd"
 fi
 # remove cmd if using bash
 if [[ $run_bash = 1 ]]; then
-	echo "\"-b\" has been specified. Launching bash console from odoo container..."
-	docker_entrypoint='--entrypoint="/bin/bash"'
-	cmd=""
+    echo "\"-b\" has been specified. Launching bash console from odoo container..."
+    docker_entrypoint='--entrypoint="/bin/bash"'
+    cmd=""
 fi
 
 echo "Starting odoo container with \"$cmd\" parameters..."
 docker compose -f "$compose_file" $docker_run_exec $docker_build -e "ENABLE_DEBUG=$enable_debug" $docker_service_ports $docker_entrypoint odoo $cmd
 
 if [[ ! "$save_template" = "" ]]; then
-	echo "--save-template specified. Saving db into template \"$save_template\""
-	# Need to drop the old save template to avoid errors when overriding it
-	docker compose -f "$compose_file" exec db sh -c "dropdb --if-exists --user=\"\$POSTGRES_USER\" '$database_template_prefix""$save_template' 2>/dev/null" ||
-		echo -e "\033[1;33mWarning\033[0m: failed to drop old \"$save_template\" template" 1>&2
-	docker compose -f "$compose_file" exec db sh -c "createdb --user=\"\$POSTGRES_USER\" -T \"\$POSTGRES_DB\" '$database_template_prefix""$save_template'" &&
-		echo "Template saved" ||
-		echo -e "\033[1;33mWarning\033[0m: failed to create template datatbase" 1>&2
+    echo "--save-template specified. Saving db into template \"$save_template\""
+    # Need to drop the old save template to avoid errors when overriding it
+    docker compose -f "$compose_file" exec db sh -c "dropdb --if-exists --user=\"\$POSTGRES_USER\" '$database_template_prefix""$save_template' 2>/dev/null" ||
+        echo -e "\033[1;33mWarning\033[0m: failed to drop old \"$save_template\" template" 1>&2
+    docker compose -f "$compose_file" exec db sh -c "createdb --user=\"\$POSTGRES_USER\" -T \"\$POSTGRES_DB\" '$database_template_prefix""$save_template'" &&
+        echo "Template saved" ||
+        echo -e "\033[1;33mWarning\033[0m: failed to create template datatbase" 1>&2
 fi
