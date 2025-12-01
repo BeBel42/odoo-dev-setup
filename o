@@ -13,7 +13,8 @@ upgrade_dir="$project_dir/upgrade"
 cd "$project_dir"
 
 # Options that do not work in .odoorc
-default_args="--dev=all --limit-time-real=0 --limit-time-cpu=0 --limit-time-worker-cron=0 --max-cron-threads=0"
+config_param="--config=./.odoorc"
+default_args="--dev=all --limit-time-real=0 --limit-time-cpu=0 --limit-time-worker-cron=0 --max-cron-threads=0 $config_param"
 
 error() {
     error_message="
@@ -85,6 +86,8 @@ $0 usage:
 		Sets up the whole project + dependencies
 	--odoo-version
 		Show the odoo version
+    --restore <restore-zip-path>
+        Will fill current db with specified zip dump file
     --sync-community-with-enterprise
         Will try to checkout community to the closest matching commit that
         matches enterprise's current commit
@@ -130,6 +133,7 @@ populate_models=""
 populate_factors=1000
 sync_community_with_enterprise=0
 sync_enterprise_with_community=0
+restore_path=""
 
 # parse script parameters
 while [[ "$#" -gt 0 ]]; do
@@ -182,7 +186,10 @@ while [[ "$#" -gt 0 ]]; do
         rebase_branch="$2"
         shift
         ;;
-
+    --restore)
+        restore_path="$2"
+        shift
+        ;;
     -p | --pull) pull_branch=1 ;;
     --pull-upgrade) pull_upgrade=1 ;;
     -b | --bash) run_bash=1 ;;
@@ -540,7 +547,7 @@ fi
 
 if [[ $shell = 1 ]]; then
     echo '"--shell" has ben specified. Overriding parameters to "shell"'
-    cmd="shell"
+    cmd="shell $config_param"
 fi
 
 if [[ $populate_models != "" ]]; then
@@ -558,6 +565,7 @@ docker_entrypoint=""
 docker_build="--build"
 docker_run_exec="run"
 docker_service_ports="--service-ports"
+docker_volumes=""
 # attach to process if no restart
 if [[ $no_restart = 1 ]]; then
     echo "\"--no-restart\" has been specified. Changing docker command.."
@@ -572,9 +580,15 @@ if [[ $run_bash = 1 ]]; then
     docker_entrypoint='--entrypoint="/bin/bash"'
     cmd=""
 fi
+if [[ $restore_path != '' ]]; then
+    echo '"--restore_path" has been specified. Overriding arguments to "db load"'
+    cmd="db -c .odoorc load -f odoo /tmp/restore-dump.zip"
+    echo "Adding $restore_path as a docker volume"
+    docker_volumes="-v $restore_path:/tmp/restore-dump.zip"
+fi
 
 echo "Starting odoo container with \"$cmd\" parameters..."
-docker compose -f "$compose_file" $docker_run_exec $docker_build -e "ENABLE_DEBUG=$enable_debug" $docker_service_ports $docker_entrypoint odoo $cmd
+docker compose -f "$compose_file" $docker_run_exec $docker_volumes $docker_build -e "ENABLE_DEBUG=$enable_debug" $docker_service_ports $docker_entrypoint odoo $cmd
 
 if [[ ! "$save_template" = "" ]]; then
     echo "--save-template specified. Saving db into template \"$save_template\""

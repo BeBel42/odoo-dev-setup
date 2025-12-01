@@ -1,24 +1,13 @@
 [options]
-admin_passwd=admin
-db_name=odoo
-db_port=5432
-db_host=localhost
-db_password=dbpassword
-db_user=odoo
-dbfilter=odoo
-addons_path=community/addons/,enterprise/
-http_interface=127.0.0.1
+# password is: admin
+admin_passwd = $pbkdf2-sha512$600000$E6J07l2LMeZca601JuRc6w$VKRA8V26QKhGlQ6ixegmIoKB/Yi5mAMhOjjVqXTGUw9Pd0IMZUyhG1.8jPJruFBoSqjIESQS104rEHsIfkQ6hg
+db_name = odoo
+db_port = 5432
+db_host = localhost
+db_password = dbpassword
+db_user = odoo
+dbfilter = odoo
+addons_path = community/addons/,enterprise/
+http_interface = 127.0.0.1
+log_level = warn
 
-# Can be:
-# info
-# debug_rpc
-# warn
-# test
-# critical
-# runbot
-# debug_sql
-# error
-# debug
-# debug_rpc_answer
-# notset
-log_level=warn

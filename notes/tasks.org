@@ -1,6 +1,31 @@
 #+title: Tasks
 
-* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/5350522][[l10n_be_hr_payroll] hide_in_offer used in wrong module]]
+* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/5148888][[Work entries] Optimization of gantt view]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master >&2
+#+end_src
+#+begin_src bash :results silent
+./o -m hr_work_entry
+#+end_src
+#+begin_src python
+from datetime import date
+contract_date_start = date(2024, 10, 1)
+for i in range(100):
+    e = self.env['hr.employee'].create({
+        'name': f'Beep Boop {i}',
+    })
+    e.current_version_id.contract_date_start = contract_date_start
+    print(i)
+print('committing...')
+self.env.cr.commit()
+print('Done')
+#+end_src
+- [[project:enterprise/hr_work_entry_enterprise/models/hr_work_entry.py::40][get_gantt_data is called one time too much]]
+    employees_in_contract_ids is empty so you don't see the bug (but it's still very bad)
+- [[project:enterprise/hr_work_entry_enterprise/views/hr_work_entry_views.xml::43][where you can add groups_limit="10"]]
+
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5350522][[l10n_be_hr_payroll] hide_in_offer used in wrong module]]
 #+begin_src bash :results silent
 ../o --checkout-community saas-18.4 \
      --checkout-enterprise saas-18.4-l10n_be_hr_payroll-hide_in_offer_wrong_module-mlef >&2
@@ -62,11 +87,12 @@ J'ai stop a master~2480. Meme bug que sur 19.0 la
   Maybe the backend / fronted react differently when doing a real tour test
 ** Cron that causes the issue in 19.0
 [[project:community/addons/hr_work_entry/models/hr_version.py::664][ir_cron_generate_missing_work_entries]]
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5162567][[Payroll] Work Entry Types screen]]
+* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5162567][[Payroll] Work Entry Types screen]]
 #+begin_src bash :results silent
 ../o -c master-payroll-change_work_entry_types_views-mlef \
     --checkout-upgrade master-payroll-change_work_entry_types_views-mlef >&2
 #+end_src
+
 =-m hr_work_entry,hr_payroll=
 =-m hr_work_entry,hr_payroll,l10n_be_hr_payroll=
 =-m hr_work_entry,hr_payroll,l10n_be_hr_payroll,l10n_be_hr_payroll_group_s,l10n_be_hr_payroll_partena,l10n_be_hr_payroll_ucm,l10n_be_hr_payroll_sd_worx --template work_entry_be_all=
@@ -98,6 +124,7 @@ Which is a new field with new logic. David proposed to make it in another task.
 **** [X] Meal Voucher + Representation Fees + Private Car Reimbursement : "The work entry type will make the day eligible to the related Benefit and increase the amount of days on the month."
 
 *** [X] Remove "Unforeseen Absence", check the code (gmf thinks it's never used)
+** FIXME [[https://runbot.odoo.com/odoo/runbot.build.error/234174][Runbot build error]]
 ** DONE [[project:enterprise/hr_work_entry_holidays_enterprise/views/hr_work_entry_views.xml::50][This crashes when installing with hr_payroll]]
 It's because I removed the =time_off= group in the [[project:community/addons/hr_work_entry/views/hr_work_entry_views.xml::280][type view xml]]
 ** DONE Make migrations for modified fields
@@ -166,7 +193,7 @@ Retire ton module prcq be_hr_payroll depend deja de hr_holidays donc tu peux ove
 =-m l10n_ch_hr_payroll,account -t .test_01_account_tax_groups_tour=
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5156702][[mrp_workorder] Fix permission denied on Add Operator]]
 ** DONE prevenir mec de Github
-* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
 #+begin_src bash :results silent
 ../o -c master-make_overview_page_faster-mlef >&2
 #+end_src
@@ -252,8 +279,8 @@ Everything is already fetched inf read_group_employee_id, so I can just fetch ev
 - Si user_domain est pas TRUE alors tu dois afficher que les employees avec des attendances qui matchent les domains
 ** DONE tests don't work...
 ** DONE [[project:community/addons/hr_attendance/tests/test_hr_attendance_process.py::78][This test fails]]
-** FIXME Mathias review on both branches
-* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
+** DONE Mathias review on both branches
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
 #+begin_src bash :results silent
 ../o --checkout-community master-no_recruitment_employee_refactor-mlef \
      --checkout-enterprise master >&2
@@ -380,6 +407,13 @@ Et retirer dans la condition le =or not leave_type.requires_allocation=
 
 * TODO [[https://www.odoo.com/odoo/project/1251/tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
 **master**
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-hr_contract_salary-add_diff_message_on_employee-mlef >&2
+#+end_src
+#+begin_src bash
+./o -m l10n_be_hr_payroll,hr_contract_salary
+#+end_src
 Chatter seems to be mail_message.py
 OR mail_thread.py (hr_version inherits it)
 Adding =tracking=True= in a python field makes the chatter send a message each time it is modified
@@ -392,13 +426,10 @@ The diff message is in send_diff_email:
 To get it, you have to sign a new _offer_ in the Recruitment app.
 I did it with Billy Kyle
 
-=-m l10n_be_hr_payroll,hr_contract_salary=
+==
 Xavier (xbo) connait les trucs sur les tracking values (groups specifiques + perms, etc.)
 
 WIP on branch *master-hr_contract_salary-add_diff_message_on_employee-mlef*
-
-** FIXME recent PRs made changes on code I am supposed to delete
-[[project:enterprise/hr_contract_salary/controllers/main.py::683][enterprise/hr_contract_salary/controllers/main.py::683]]
 
 ** talk with xavier (xbo)
 Try to replace [[project:enterprise/hr_contract_salary/controllers/main.py::714]]
@@ -409,7 +440,10 @@ Vals (in theory) are the same as the one passed in old code.
 After that, with the small [[https://github.com/odoo/odoo/pull/222744/files#diff-1c37517a76b393d1d30c2b03e96611643a747d12c13b086653989f4068c660b2R447-R450][pr he sent]] tracking values should take care of it. Maybe git pull to get the changes.
 
 After that, delete the old diff message you made
-* WAIT [[[https://www.odoo.com/odoo/project/1251/tasks/5013546][Employee] Migrate all "general" data to demo data]]
+** [?]
+I thought that users that could not see specific fields would be redirect to hr.employee.public (there is not chatter there).
+How can I have someone that has access to hr.employee and not be allowed to see my chatter message?
+* [?] [[[https://www.odoo.com/odoo/project/1251/tasks/5013546][Employee] Migrate all "general" data to demo data]]
 General data: =community/addons/hr/data/hr_data.xml=
 Demo data: =community/addons/hr/data/hr_demo.xml=
 Task is awaiting for some talks. Arthur knows a bit about it. He comes back from holidays on the 13 of aug
