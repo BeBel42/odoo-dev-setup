@@ -5,6 +5,9 @@
 
 set -eu
 
+# TODO make a scaffold argument to call odoo-bin scaffold
+# NOTE then the created dir will be of chown root:root so change that afterwards
+
 project_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 community_dir="$project_dir/community"
 enterprise_dir="$project_dir/enterprise"

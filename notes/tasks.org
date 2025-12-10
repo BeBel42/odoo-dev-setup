@@ -1,5 +1,11 @@
 #+title: Tasks
 
+* [?] [[https://www.odoo.com/odoo/project/1251/tasks/5379826][[hr] Generic domain translation]]
+#+begin_src bash :results silent
+../o --checkout-community master-hr-domain_operation_tools-moaln-mlef \
+     --checkout-enterprise master-hr-domain_operation_tools-moaln-mlef >&2
+** TODO prevenir reviewer qu'il y a enterprise branch aussi
+#+end_src
 * WAIT [[https://www.odoo.com/odoo/project/1251/tasks/5148888][[Work entries] Optimization of gantt view]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
@@ -87,7 +93,7 @@ J'ai stop a master~2480. Meme bug que sur 19.0 la
   Maybe the backend / fronted react differently when doing a real tour test
 ** Cron that causes the issue in 19.0
 [[project:community/addons/hr_work_entry/models/hr_version.py::664][ir_cron_generate_missing_work_entries]]
-* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5162567][[Payroll] Work Entry Types screen]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5162567][[Payroll] Work Entry Types screen]]
 #+begin_src bash :results silent
 ../o -c master-payroll-change_work_entry_types_views-mlef \
     --checkout-upgrade master-payroll-change_work_entry_types_views-mlef >&2
@@ -104,6 +110,7 @@ Upgrade test:
 [[project:community/addons/hr_work_entry/views/hr_work_entry_views.xml::244][base Work Entry Type form view]]
 [[project:enterprise/l10n_be_hr_payroll/views/hr_work_entry_views.xml::1][l10n_be work entry ptype form view main override]]
 [[project:enterprise/l10n_be_hr_payroll_sd_worx/views/hr_work_entry_type_views.xml::1][l10n_be work entry type form view SD Worx override]]
+** DONE [[https://runbot.odoo.com/odoo/runbot.build.error/234174][Runbot build error]]
 ** Spec
 *** [X] [[https://link.excalidraw.com/l/65VNwvy7c4X/4LJSOZo8W3D][Change UX]]
 **** [X] Form view
@@ -124,7 +131,6 @@ Which is a new field with new logic. David proposed to make it in another task.
 **** [X] Meal Voucher + Representation Fees + Private Car Reimbursement : "The work entry type will make the day eligible to the related Benefit and increase the amount of days on the month."
 
 *** [X] Remove "Unforeseen Absence", check the code (gmf thinks it's never used)
-** FIXME [[https://runbot.odoo.com/odoo/runbot.build.error/234174][Runbot build error]]
 ** DONE [[project:enterprise/hr_work_entry_holidays_enterprise/views/hr_work_entry_views.xml::50][This crashes when installing with hr_payroll]]
 It's because I removed the =time_off= group in the [[project:community/addons/hr_work_entry/views/hr_work_entry_views.xml::280][type view xml]]
 ** DONE Make migrations for modified fields
@@ -193,7 +199,7 @@ Retire ton module prcq be_hr_payroll depend deja de hr_holidays donc tu peux ove
 =-m l10n_ch_hr_payroll,account -t .test_01_account_tax_groups_tour=
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5156702][[mrp_workorder] Fix permission denied on Add Operator]]
 ** DONE prevenir mec de Github
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
+* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
 #+begin_src bash :results silent
 ../o -c master-make_overview_page_faster-mlef >&2
 #+end_src
@@ -285,6 +291,15 @@ Everything is already fetched inf read_group_employee_id, so I can just fetch ev
 ../o --checkout-community master-no_recruitment_employee_refactor-mlef \
      --checkout-enterprise master >&2
 #+end_src
+#+begin_src bash :results silent
+./o -m hr_recruitment
+#+end_src
+Make job_title accessible in public employee so that you can put it in group_job
+[[project:community/addons/hr/views/hr_employee_public_views.xml::28][public employee group_job]]
+[[project:community/addons/hr/views/hr_employee_views.xml::72][private employee group_job]]
+** DONE check commit code again
+** DONE check manually the stuff
+** DONE change commit message in GH
 
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
 #+begin_src bash :results silent
@@ -405,7 +420,7 @@ Et apres dans la get_allocation_data overriden, dans le if (pas le else) je rajo
 
 Et retirer dans la condition le =or not leave_type.requires_allocation=
 
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
+* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
 **master**
 #+begin_src bash :results silent
 ../o --checkout-community master \
@@ -441,8 +456,12 @@ After that, with the small [[https://github.com/odoo/odoo/pull/222744/files#diff
 
 After that, delete the old diff message you made
 ** [?]
-I thought that users that could not see specific fields would be redirect to hr.employee.public (there is not chatter there).
+I thought that users that could not see specific fields would be redirect to hr.employee.public (there is no chatter there).
 How can I have someone that has access to hr.employee and not be allowed to see my chatter message?
+=hr_payroll.group_hr_payroll_user= is the group needed to see the message
+I don't know how to conditionally show that message
+[[https://discord.com/channels/678381219515465750/687339689522364423/1445406698172055622][Discord Question]] [[https://discord.com/channels/678381219515465750/687339689522364423/1445415421909008586][Discord Answer]]
+My hint was to override =mail_message= and do some stuff with [[project:community/addons/mail/models/mail_message.py::180][tracking_values_ids]] but framework tells me it's not going to exist in the future...
 * [?] [[[https://www.odoo.com/odoo/project/1251/tasks/5013546][Employee] Migrate all "general" data to demo data]]
 General data: =community/addons/hr/data/hr_data.xml=
 Demo data: =community/addons/hr/data/hr_demo.xml=
