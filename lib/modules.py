@@ -5,9 +5,6 @@ import ast
 import os
 from collections import deque
 
-# TODO does not support autoinstall in manifest
-# (can be a list of modules or True (to default to depends list))
-
 
 # to avoid ruff warning
 class PathException(Exception):
@@ -15,7 +12,6 @@ class PathException(Exception):
 
 
 def colorize(text: str, color_code: int) -> str:
-    """Generic function to colorize text using ANSI 8-bit color codes."""
     return f"\033[38;5;{color_code}m{text}\033[0m"
 
 
@@ -29,6 +25,9 @@ def blue(s: str) -> str:
 
 def pink(s: str) -> str:
     return colorize(s, 206)
+
+def cyan(s: str) -> str:
+    return colorize(s, 51)
 
 
 def read_manifest_content(manifest_path: str) -> dict:
@@ -70,16 +69,16 @@ def get_args():
         help="Simulate the module as if it were installed (e.g., 'hr_test')",
     )
     parser.add_argument(
-        "--installs",
+        "--installed",
         action="store_true",
         default=True,
-        help="Enable installs (default: True)",
+        help="Show modules installed by \"-m\" (default: True)",
     )
     parser.add_argument(
         "--installers",
         action="store_false",
-        dest="installs",  # links to the same variable as --installs
-        help="Disable the default --installs flag",
+        dest="installed",  # links to the same variable as --installs
+        help="Disable the default --installed flag",
     )
     parser.add_argument(
         "--legend",
@@ -97,19 +96,19 @@ def get_args():
 
 
 # returns the modules installed by arg modules
-def get_installs(
+def get_installed(
     modules: list[str],
     manifest_map: dict[str, dict],
 ) -> list[dict]:
-    installs = []
-    memo = set()
+    installed = []
+    memo = dict()
     d = deque([{'name': module} for module in modules])
     while d:
         m = d.popleft()
         if m['name'] in memo:
             continue
-        memo.add(m['name'])
-        installs.append(m)
+        memo[m['name']] = m
+        installed.append(m)
         if (
             m['name'] not in manifest_map
             or 'depends' not in manifest_map[m['name']]
@@ -122,12 +121,41 @@ def get_installs(
                     'parent': m,
                 },
             )
-    return installs
+
+    # add auto-installed modules
+    n_installed = len(installed)
+    while True:  # added auto installed modules can intsall other modules again
+        for module_name, manifest in manifest_map.items():
+            if module_name in memo:
+                continue  # already in installs list
+            auto_install = manifest.get('auto_install')
+            if auto_install == True:  # noqa: E712
+                auto_install = manifest.get('depends', False)
+            if not auto_install:
+                continue
+            is_auto_installed = True
+            for auto_installer in auto_install:
+                if auto_installer not in memo:
+                    is_auto_installed = False
+                    break
+            if is_auto_installed:
+                auto_install = [memo[ai] for ai in auto_install]
+                m = {'name': module_name, 'auto_install': auto_install}
+                installed.append(m)
+                memo[m['name']] = m
+        if len(installed) == n_installed:
+            break
+        n_installed = len(installed)
+    return installed
 
 
 # to colorize output
 def color_module_level(mod) -> str:
+    if isinstance(mod, list):
+        return ', '.join(color_module_level(i) for i in mod)
     name = mod.get('name', 'You')
+    if mod.get('auto_install'):
+        return cyan(name)
     if name == 'You':
         return name
     if 'parent' not in mod:
@@ -138,23 +166,32 @@ def color_module_level(mod) -> str:
 
 
 # format and print modules installed by modules arg
-def print_installs(installs: list, show_legend: bool):
+def print_installed(installed: list, show_legend: bool):
     if show_legend:
         print(
             f"""
 {purple('■')} Base module
 {blue('■')} Modules directly installed by base modules
 {pink('■')} Modules indirectly installed by base modules
+{cyan('■')} Modules installed by auto_install
 """,
         )
 
-    for i in installs:
-        installed_by = color_module_level(i.get('parent', {}))
+    for i in installed:
         name = color_module_level(i)
-        print(
-            f"""{name}
-  Installed by: {installed_by}""",
-        )
+        auto_install = i.get('auto_install')
+        if auto_install:
+            auto_install = color_module_level(auto_install)
+            print(
+                f"""{name}
+    Installed by: auto_install[{auto_install}]""",
+            )
+        else:
+            installed_by = color_module_level(i.get('parent', {}))
+            print(
+                f"""{name}
+    Installed by: {installed_by}""",
+            )
 
 
 # get all modules that (in)directly install modules arg
@@ -223,9 +260,9 @@ def main():
     modules = args.module.split(',')
     show_legend = args.legend
 
-    if args.installs:
-        installs = get_installs(modules, manifest_map)
-        print_installs(installs, show_legend)
+    if args.installed:
+        installed = get_installed(modules, manifest_map)
+        print_installed(installed, show_legend)
     else:
         installers = get_installers(modules, manifest_map)
         print_installers(installers, modules, show_legend)

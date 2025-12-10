@@ -31,6 +31,9 @@ print('Done')
     employees_in_contract_ids is empty so you don't see the bug (but it's still very bad)
 - [[project:enterprise/hr_work_entry_enterprise/views/hr_work_entry_views.xml::43][where you can add groups_limit="10"]]
 
+** Optimize fetch of data
+
+  
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5350522][[l10n_be_hr_payroll] hide_in_offer used in wrong module]]
 #+begin_src bash :results silent
 ../o --checkout-community saas-18.4 \
