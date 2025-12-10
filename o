@@ -97,6 +97,12 @@ $0 usage:
     --sync-enterprise-with-community
         Will try to checkout enterprise to the closest matching commit that
         matches community's current commit
+    --installs
+        Will show all modules that will be installed by modules
+        specified by \"--module\"
+    --installers
+        Will show all modules that can install the modules specified
+        by \"--module\"
 	-h | --help
 		Show this help prompt."
     [[ "$1" = "" ]] || echo "$1" 1>&2
@@ -136,6 +142,8 @@ populate_models=""
 populate_factors=1000
 sync_community_with_enterprise=0
 sync_enterprise_with_community=0
+installs=0
+installers=0
 restore_path=""
 
 # parse script parameters
@@ -211,6 +219,8 @@ while [[ "$#" -gt 0 ]]; do
     --setup) setup=1 ;;
     --sync-community-with-enterprise) sync_community_with_enterprise=1 ;;
     --sync-enterprise-with-community) sync_enterprise_with_community=1 ;;
+    --installs) installs=1 ;;
+    --installers) installers=1 ;;
     -h | --help) help=1 ;;
     *)
         error "\033[1;31mError\033[0m: unknown parameter passed: \"$1\""
@@ -249,6 +259,16 @@ if [[ $setup = 1 ]]; then
     ln -s --force ./community/ruff.toml ./ruff.toml
     echo "Done setting up project."
     exit 0
+fi
+
+# handle arguments for lib/modules.py
+if [[ $installs = 1 ]]; then
+    "$project_dir"/lib/modules.py "$community_dir"/addons "$enterprise_dir" -m "$module" --installs
+    exit $?
+fi
+if [[ $installers = 1 ]]; then
+    "$project_dir"/lib/modules.py "$community_dir"/addons "$enterprise_dir" -m "$module" --installers
+    exit $?
 fi
 
 warn_user_if_needed() {

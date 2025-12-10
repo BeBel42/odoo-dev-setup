@@ -5,6 +5,9 @@ import ast
 import os
 from collections import deque
 
+# TODO does not support autoinstall in manifest
+# (can be a list of modules or True (to default to depends list))
+
 
 # to avoid ruff warning
 class PathException(Exception):
