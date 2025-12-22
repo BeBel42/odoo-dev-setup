@@ -18,7 +18,7 @@ services:
       start_period: 1s
       timeout: 5s
     volumes:
-      - ./volumes/db:/var/lib/postgresql/data
+      - ./volumes/db:/var/lib/postgresql/
       - /var/run/postgresql:/var/run/postgresql
 
   odoo:

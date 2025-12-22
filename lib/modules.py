@@ -55,6 +55,8 @@ def get_manifest_map(directories) -> dict[str, dict]:
 def get_args():
     parser = argparse.ArgumentParser(
         description="Visualize odoo modules relations",
+        epilog="Example usage:"
+                "  ./modules.py ./community/addons ./enterprise -m web,iot",
     )
     parser.add_argument(
         "directories",
@@ -66,7 +68,8 @@ def get_args():
         "--module",
         required=True,
         type=str,
-        help="Simulate the module as if it were installed (e.g., 'hr_test')",
+        help="Simulate the comma-separated modules as if they were installed"
+            "(e.g., 'web,hr_test')",
     )
     parser.add_argument(
         "--installed",
