@@ -1,13 +1,14 @@
 #+title: Tasks
 
-* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/5418875][[project] replace _search_on_comodel]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5477588][[Time Off, Planning] Gantt Domain Employee Without Records]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5418875][[project] replace _search_on_comodel]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5379826][[hr] Generic domain translation]]
 #+begin_src bash :results silent
 ../o --checkout-community master-hr-domain_operation_tools-moaln-mlef \
      --checkout-enterprise master-hr-domain_operation_tools-moaln-mlef >&2
     #+end_src 
 ** DONE prevenir reviewer qu'il y a enterprise branch aussi
-* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5148888][[Work entries] Optimization of gantt view]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5148888][[Work entries] Optimization/refactor of gantt view]]
 #+begin_src bash :results silent
 ../o --checkout-community master-work_entry_gantt_optimization-mlef \
      --checkout-enterprise master-work_entry_gantt_optimization-mlef >&2
@@ -211,7 +212,7 @@ Retire ton module prcq be_hr_payroll depend deja de hr_holidays donc tu peux ove
 =-m l10n_ch_hr_payroll,account -t .test_01_account_tax_groups_tour=
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5156702][[mrp_workorder] Fix permission denied on Add Operator]]
 ** DONE prevenir mec de Github
-* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
 #+begin_src bash :results silent
 ../o -c master-make_overview_page_faster-mlef >&2
 #+end_src
@@ -298,10 +299,10 @@ Everything is already fetched inf read_group_employee_id, so I can just fetch ev
 ** DONE tests don't work...
 ** DONE [[project:community/addons/hr_attendance/tests/test_hr_attendance_process.py::78][This test fails]]
 ** DONE Mathias review on both branches
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
+* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
 #+begin_src bash :results silent
 ../o --checkout-community master-no_recruitment_employee_refactor-mlef \
-     --checkout-enterprise master >&2
+     --checkout-enterprise master-no_recruitment_employee_refactor-mlef >&2
 #+end_src
 #+begin_src bash :results silent
 ./o -m hr_recruitment
@@ -312,7 +313,8 @@ Make job_title accessible in public employee so that you can put it in group_job
 ** DONE check commit code again
 ** DONE check manually the stuff
 ** DONE change commit message in GH
-
+** DONE juste hr installe, marc demo, peut pas filtrer par job pas propose qd on ecrit dans la prompt (normal?)
+** DONE [[project:community/addons/hr_recruitment/views/hr_employee_views.xml::14][ptet pas to replace mais genre after]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5103739][[Employee] Version method overwrite fields]]
 #+begin_src bash :results silent
 ../o --checkout-community saas-18.4-overridden_cron_work_phone-mlef \
@@ -478,9 +480,9 @@ My hint was to override =mail_message= and do some stuff with [[project:communit
 General data: =community/addons/hr/data/hr_data.xml=
 Demo data: =community/addons/hr/data/hr_demo.xml=
 Task is awaiting for some talks. Arthur knows a bit about it. He comes back from holidays on the 13 of aug
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/4784231][[Recruitment] Make the interview links expire when a candidate is refused/archived or has signed]]
+* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/4784231][[Recruitment] Make the interview links expire when a candidate is refused/archived or has signed]]
 #+begin_src bash :results silent
-../o --checkout-community master-hr-recruitment-survey-expire-ksni \
+../o --checkout-community master-hr-recruitment-survey-expire-mlef \
      --checkout-enterprise master >&2
 #+end_src
 #+begin_src bash :results silent
@@ -489,6 +491,9 @@ Task is awaiting for some talks. Arthur knows a bit about it. He comes back from
 
 [[https://github.com/odoo/odoo/pull/210980][Community PR]]
 [[https://runbot.odoo.com/runbot/bundle/master-hr-recruitment-survey-expire-ksni-371641][Runbot]]
+[[project:community/addons/hr_recruitment_survey/wizard/hr_recruitment_survey_invite.py::172][where extra repsonse id is created]]
+[[project:community/addons/hr_recruitment_survey/tests/test_recruitment_survey.py::105][test that fails]]
+** [[project:community/addons/hr_recruitment_survey/wizard/hr_recruitment_survey_invite.py::151][TODO a faire]]
 ** DONE prevenir gmf de ce que tu as fait via discord
 /Prakash/ has given some info in the discord channel
 ** DONE C'est du code d'indien, tu peux tout changer:
@@ -499,6 +504,9 @@ Task is awaiting for some talks. Arthur knows a bit about it. He comes back from
 *** [X] Change les tests aussi c'est de la m
 *** [X] Tu peux changer le commit message aussi il est nul
 *** [X] Ptet tester quand c'est deleted aussi
+** DONE send -> refuse -> restore -> send ne marche plus
+tu peux faire en sorte que ca regenerate un nouveau survey invite a chaque fois et ca ira
+[[project:community/addons/hr_recruitment_survey/wizard/hr_recruitment_survey_invite.py::185][total_answers.applicant_id]] is empty and that's probably why the _send_mail() that follows does not send the email when I force 'new'
 
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5048292][[Appraisal] Default employee_id on goal creation]]
 #+begin_src bash :results silent
