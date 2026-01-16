@@ -1,6 +1,13 @@
 #+title: Tasks
 
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5477588][[Time Off, Planning] Gantt Domain Employee Without Records]]
+* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]]
+* WAIT [[https://www.odoo.com/odoo/project.task/5500347][[Time Off] Gant overview see all employees]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477588][[Time Off, Planning] Gantt Domain Employee Without Records]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-hr_holidays-gantt_domain_employee_without_records-mlef >&2
+#+end_src 
+I won't do the planning gantt view as it is out of our scope and already tweaked.
 * TODO [[https://www.odoo.com/odoo/project/1251/tasks/5418875][[project] replace _search_on_comodel]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5379826][[hr] Generic domain translation]]
 #+begin_src bash :results silent
@@ -212,7 +219,7 @@ Retire ton module prcq be_hr_payroll depend deja de hr_holidays donc tu peux ove
 =-m l10n_ch_hr_payroll,account -t .test_01_account_tax_groups_tour=
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5156702][[mrp_workorder] Fix permission denied on Add Operator]]
 ** DONE prevenir mec de Github
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
+* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
 #+begin_src bash :results silent
 ../o -c master-make_overview_page_faster-mlef >&2
 #+end_src
@@ -299,10 +306,11 @@ Everything is already fetched inf read_group_employee_id, so I can just fetch ev
 ** DONE tests don't work...
 ** DONE [[project:community/addons/hr_attendance/tests/test_hr_attendance_process.py::78][This test fails]]
 ** DONE Mathias review on both branches
-* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
 #+begin_src bash :results silent
 ../o --checkout-community master-no_recruitment_employee_refactor-mlef \
-     --checkout-enterprise master-no_recruitment_employee_refactor-mlef >&2
+     --checkout-enterprise master-no_recruitment_employee_refactor-mlef \
+     --checkout-upgrade master-no_recruitment_employee_refactor-mlef >&2
 #+end_src
 #+begin_src bash :results silent
 ./o -m hr_recruitment
@@ -310,6 +318,11 @@ Everything is already fetched inf read_group_employee_id, so I can just fetch ev
 Make job_title accessible in public employee so that you can put it in group_job
 [[project:community/addons/hr/views/hr_employee_public_views.xml::28][public employee group_job]]
 [[project:community/addons/hr/views/hr_employee_views.xml::72][private employee group_job]]
+** [?] Is it really a good task?
+Like, =job_id= is still used in hr_appraisal, so like what do we do if we have appraisal, but no recruitment installed?
+There will now be no way to touch =job_id=? seems weird...
+*** Changes:
+You now also need to put back =job_id= (Job Position) when appraisal is installed. To maybe not repeat the same thing twice with overridings, try do make the job_id field visible only when they are installed by using groups that you assign to users. Go check =implied_by_ids= a faire sur =base.group_user=
 ** DONE check commit code again
 ** DONE check manually the stuff
 ** DONE change commit message in GH
@@ -434,7 +447,7 @@ Et apres dans la get_allocation_data overriden, dans le if (pas le else) je rajo
 
 Et retirer dans la condition le =or not leave_type.requires_allocation=
 
-* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
+* [?] [[https://www.odoo.com/odoo/project/1251/tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
 **master**
 #+begin_src bash :results silent
 ../o --checkout-community master \
@@ -480,7 +493,7 @@ My hint was to override =mail_message= and do some stuff with [[project:communit
 General data: =community/addons/hr/data/hr_data.xml=
 Demo data: =community/addons/hr/data/hr_demo.xml=
 Task is awaiting for some talks. Arthur knows a bit about it. He comes back from holidays on the 13 of aug
-* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/4784231][[Recruitment] Make the interview links expire when a candidate is refused/archived or has signed]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/4784231][[Recruitment] Make the interview links expire when a candidate is refused/archived or has signed]]
 #+begin_src bash :results silent
 ../o --checkout-community master-hr-recruitment-survey-expire-mlef \
      --checkout-enterprise master >&2

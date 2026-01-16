@@ -7,7 +7,7 @@ cd "$ODOO_DIR"
 # TODO remove mlef by a read for name + odoo gram
 
 # clone and setup each project
-for i in community enterprise tutorials upgrade upgrade-util; do
+for i in community enterprise tutorials upgrade upgrade-util documentation; do
     echo "Setting up $i project..."
     # community edition should be cloned from "odoo" git repo
     CLONE_URL="git@github.com:odoo/$([[ $i == 'community' ]] && echo "odoo.git" || echo "$i.git")"
