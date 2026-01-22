@@ -81,7 +81,7 @@ def get_args():
         "--installers",
         action="store_false",
         dest="installed",  # links to the same variable as --installs
-        help="Disable the default --installed flag",
+        help="Show modules that install the module defined by \"-m\" (default: False)",
     )
     parser.add_argument(
         "--legend",

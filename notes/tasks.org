@@ -1,5 +1,62 @@
 #+title: Tasks
 
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10N_BE]End of year Bonus - Fond Horeca]]
+[[https://www.odoo.com/odoo/action-5066/44834][Payroll Engine Documentation]]
+[[project:enterprise/l10n_be_hr_payroll/data/l10n_be_joint_committee_data.xml::538][Joint Committee 302]]
+- Tu assignes les joint committees aux salary rules via =l10n_be_joint_committee_ids= sur =hr.salary.rule=
+- Meme si tu travaillles sur cp302, tu mets tout ca dans le folder =cp200=. Ils vont bouger tout ca plus tard
+  [[project:enterprise/hr_payroll/views/report_payslip_templates.xml::106][Where a category (e.g. Earnings) is defined for payslip pdf]]
+** PFA
+*Précompte (professionnel) Forfaitaire d’Artiste*
+C’est un régime fiscal spécifique destiné aux artistes, auteurs et interprètes qui perçoivent des revenus occasionnels ou irréguliers liés à leurs activités artistiques.
+C'est pour simplifier la fiscalité pour les artistes qui ne sont pas salariés à temps plein ou qui ont des revenus variables.Aa
+Un pourcentage fixe (généralement 16,5 % en 2026) est prélevé à la source sur leurs revenus artistiques, en remplacement de l’impôt progressif classique.
+
+** Talk avec arpi
+- Tu fais dans le xml un hr.salary.rule avec le field joint_comittee_ids vers le 302 joint committee
+- Tu dois juste renommer le [[project:enterprise/l10n_be_hr_payroll/data/hr_payroll_structure_data.xml::107][payroll structure de cp200]] pour que ce soit pour la belgique en general (change pas le xmlid par contre)
+- Puis, tu dois juste creer [[project:enterprise/l10n_be_hr_payroll/data/cp200/employee_thirteen_month_data.xml::17][des rules]] specifique au cp302 en assignant leur =joint_committee_ids= a cp302. Si une rule ne doit pas se mettre au cp302, alors tu peux metter le =joint_committee_ids= a cp200 au lieu de =False= (prcq False == toutes les CP)
+
+** Test from UI
+- Employees app
+  - Creer employee dans enterprise BE, go to Payroll tab
+  - Set contract to like years ago
+  - Wage to like 4000
+  - Pay Category => CP200 BE (ne change pas ca, ca va etre removed)
+  - Joint Committee => 302
+- Payroll app
+  - Payslips > Payslips > New Off Cycle
+  - Pay Structure => /Belgium: End of year bonus/
+  - Period => from 1st to 31st of december of the year you want
+  - Compute
+  - Go on Salary Computation tab and tadaa
+** Talk avec Damien
+- Tu dois juste ajouter le /Fond Horeca/ partner au =partner_id= du salary_rule qui represente le net salary. (pour l'etape qui parle de ca)
+  (tu dois faire une nouvelle rule pour que ce soit juste cp302, et mettre la salary rule du net salary d'avant a juste pour cp200)
+** again talk avec Damien
+*** TODO La prime de fine d'annee elle apparaitra que sur la payslip du mois de decembre et sur une categorie differente genre "Extra Information".
+- Une ONSS rule c'est une payslip rule qui doit etre payee par l'employeur mais qui apparait pas sur la payslip.
+- Le truc de 12% c'est tous les mois que l'employeur dois payer mais la PFA c'est juste decembre
+*** TODO Regarder modalite d'octroi de la PFA pour voir si tu fais aussi pour ceux qui commencent apres janvier (genre ce serait 12% aussi?)
+*** TODO Aussi ajouter ce truc de extra info si il est vire / demissionne (Termination Fees structure)
+** TODOS
+*** [ ] Create 1 rule that should be applied only on December to compute the net amount of the PFA. This rule should not impact GROSS --> NET of employee.
+    Computation is defined in the documentation.
+**** [X] mockup: https://drive.google.com/file/d/1AtyUQfvHYRivadwV0UQKDdQsUKM97fir/view?usp=drivesdk 
+**** [ ] it should not appear in the payslip table but in a dedicated section
+*** [ ] Create a similar rule in the end of contract structure (in case the contracts is ended we should pay part of the EOY bonus)
+**** [X] Rename structure CP200: Employees Termination Fees --> Belgium: Termination fees
+*** [X] Create an archived Partner in data (archived so the user don't see it) for the "Fond Horeca" and...
+*** [ ] ...link that partner to the rule computing the end of year bonus in order to be able to extract the result of this rule.
+*** [ ] The rule should be linked to Joint committee 302.
+*** [ ] The amount is not paid by employer but by the fund (should not impact the net)
+*** [ ] The amount of the PFA must impact the CSS rule (cotisation speciale à la securité social)
+*** [ ] On monthly worker pay, a rule should be computed to make a provision to be paid to the horeca fund
+**** [ ] This rule has no impact on employee salary --> put it with employer ONSS rules (at the end of the payslips, should not appear to employee on pdf)
+**** [ ] Computed as 12% of the SALARY category (SALARY category = salary amount for which the employee has to pas ONSS taxes)
+*** [ ] Flexi-job and student must be excluded from the 2 rules (no monthly provision & no pfa)
+    Dimona category= STU & FLX
+  
 * WAIT [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]]
 * WAIT [[https://www.odoo.com/odoo/project.task/5500347][[Time Off] Gant overview see all employees]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477588][[Time Off, Planning] Gantt Domain Employee Without Records]]
@@ -8,7 +65,11 @@
      --checkout-enterprise master-hr_holidays-gantt_domain_employee_without_records-mlef >&2
 #+end_src 
 I won't do the planning gantt view as it is out of our scope and already tweaked.
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5418875][[project] replace _search_on_comodel]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5418875][[project] replace _search_on_comodel]]
+#+begin_src bash :results silent
+../o --checkout-community master-project-replace_comodel_function-mlef \
+     --checkout-enterprise master-project-replace_comodel_function-mlef >&2
+#+end_src 
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5379826][[hr] Generic domain translation]]
 #+begin_src bash :results silent
 ../o --checkout-community master-hr-domain_operation_tools-moaln-mlef \
@@ -219,7 +280,7 @@ Retire ton module prcq be_hr_payroll depend deja de hr_holidays donc tu peux ove
 =-m l10n_ch_hr_payroll,account -t .test_01_account_tax_groups_tour=
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5156702][[mrp_workorder] Fix permission denied on Add Operator]]
 ** DONE prevenir mec de Github
-* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/4762235][[Attendance] Load the Overview Page Faster]]
 #+begin_src bash :results silent
 ../o -c master-make_overview_page_faster-mlef >&2
 #+end_src
@@ -306,7 +367,7 @@ Everything is already fetched inf read_group_employee_id, so I can just fetch ev
 ** DONE tests don't work...
 ** DONE [[project:community/addons/hr_attendance/tests/test_hr_attendance_process.py::78][This test fails]]
 ** DONE Mathias review on both branches
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
 #+begin_src bash :results silent
 ../o --checkout-community master-no_recruitment_employee_refactor-mlef \
      --checkout-enterprise master-no_recruitment_employee_refactor-mlef \
@@ -318,7 +379,12 @@ Everything is already fetched inf read_group_employee_id, so I can just fetch ev
 Make job_title accessible in public employee so that you can put it in group_job
 [[project:community/addons/hr/views/hr_employee_public_views.xml::28][public employee group_job]]
 [[project:community/addons/hr/views/hr_employee_views.xml::72][private employee group_job]]
-** [?] Is it really a good task?
+** DONE G PAS FINI
+*** DONE pas teste du tout
+*** DONE J'ai pas fait pour appraisal (juste ajouter le groupe ?)
+*** DONE a la fin, verifier si j'ai pas fait de la merde (j'ai vite fait change les fields dans les employee views sans trop faire attentions si j'ai bien garde les attributes corrects)
+*** DONE Split en deux commits (un autre pour quand tu rename le activities_view la)
+** [X] Is it really a good task?
 Like, =job_id= is still used in hr_appraisal, so like what do we do if we have appraisal, but no recruitment installed?
 There will now be no way to touch =job_id=? seems weird...
 *** Changes:
