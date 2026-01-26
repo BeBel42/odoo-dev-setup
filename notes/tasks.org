@@ -50,13 +50,18 @@ Un pourcentage fixe (généralement 16,5 % en 2026) est prélevé à la source s
 *** [ ] ...link that partner to the rule computing the end of year bonus in order to be able to extract the result of this rule.
 *** [ ] The rule should be linked to Joint committee 302.
 *** [ ] The amount is not paid by employer but by the fund (should not impact the net)
-*** [ ] The amount of the PFA must impact the CSS rule (cotisation speciale à la securité social)
-*** [ ] On monthly worker pay, a rule should be computed to make a provision to be paid to the horeca fund
-**** [ ] This rule has no impact on employee salary --> put it with employer ONSS rules (at the end of the payslips, should not appear to employee on pdf)
-**** [ ] Computed as 12% of the SALARY category (SALARY category = salary amount for which the employee has to pas ONSS taxes)
+*** [ ] The amount of the monthly contribution must impact the CSS rule (cotisation speciale à la securité sociale)
+*** [X] On monthly worker pay, a rule should be computed to make a provision to be paid to the horeca fund
+**** [X] This rule has no impact on employee salary --> put it with employer ONSS rules (at the end of the payslips, should not appear to employee on pdf)
+**** [X] Computed as 12% of the SALARY category (SALARY category = salary amount for which the employee has to pas ONSS taxes)
+*** [X] That rule should be between =Accounting: Remuneration= and =Accounting: ONSS Basic (Empployer)=
 *** [ ] Flexi-job and student must be excluded from the 2 rules (no monthly provision & no pfa)
     Dimona category= STU & FLX
-  
+** Talk
+*** [X] Rajouter "Accounting:" devant le nom de tes rules
+*** La rule des PFA doit se faire une peu comme les meal vouchers prcq les meal vouchers c'est aussi un thirt party qui fait ca.
+*** /Termination fees/ c'est la payslip de quand t'es vire
+*** Les PFA il prennent le Gross yearly salary
 * WAIT [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]]
 * WAIT [[https://www.odoo.com/odoo/project.task/5500347][[Time Off] Gant overview see all employees]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477588][[Time Off, Planning] Gantt Domain Employee Without Records]]

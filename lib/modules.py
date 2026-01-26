@@ -3,6 +3,7 @@
 import argparse
 import ast
 import os
+import sys
 from collections import deque
 
 
@@ -25,6 +26,7 @@ def blue(s: str) -> str:
 
 def pink(s: str) -> str:
     return colorize(s, 206)
+
 
 def cyan(s: str) -> str:
     return colorize(s, 51)
@@ -56,7 +58,7 @@ def get_args():
     parser = argparse.ArgumentParser(
         description="Visualize odoo modules relations",
         epilog="Example usage:"
-                "  ./modules.py ./community/addons ./enterprise -m web,iot",
+        "  ./modules.py ./community/addons ./enterprise -m web,iot",
     )
     parser.add_argument(
         "directories",
@@ -69,7 +71,7 @@ def get_args():
         required=True,
         type=str,
         help="Simulate the comma-separated modules as if they were installed"
-            "(e.g., 'web,hr_test')",
+        "(e.g., 'web,hr_test')",
     )
     parser.add_argument(
         "--installed",
@@ -257,11 +259,23 @@ def print_installers(installers: list[dict], module: str, show_legend: bool):
         )
 
 
+def check_whether_modules_are_valid(modules, manifest_map) -> None:
+    modules_not_found = [m for m in modules if m not in manifest_map]
+    if modules_not_found:
+        print(
+            f"Error: the following modules were not found: {modules_not_found}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+
 def main():
     args = get_args()
     manifest_map = get_manifest_map(args.directories)
     modules = args.module.split(',')
     show_legend = args.legend
+
+    check_whether_modules_are_valid(modules, manifest_map)
 
     if args.installed:
         installed = get_installed(modules, manifest_map)
