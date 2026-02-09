@@ -1,17 +1,18 @@
 #+title: Tasks
 
 * TODO [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10N_BE]End of year Bonus - Fond Horeca]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef >&2
+#+end_src 
+[[https://drive.google.com/file/d/1i8bj425ccEW0ZGvNSaQvEV6VIedmLYCS/view][Sectorial Documentation]]
+[[https://docs.google.com/document/d/1gCgYoND-0OURJrXdt25oMKDhdTONHw1V/edit][Partena Engine technical documentation]]
 [[https://www.odoo.com/odoo/action-5066/44834][Payroll Engine Documentation]]
 [[project:enterprise/l10n_be_hr_payroll/data/l10n_be_joint_committee_data.xml::538][Joint Committee 302]]
+[[project:enterprise/l10n_be_hr_payroll/models/hr_payslip.py::621][Where 13th month is computed for cp200]]
 - Tu assignes les joint committees aux salary rules via =l10n_be_joint_committee_ids= sur =hr.salary.rule=
 - Meme si tu travaillles sur cp302, tu mets tout ca dans le folder =cp200=. Ils vont bouger tout ca plus tard
   [[project:enterprise/hr_payroll/views/report_payslip_templates.xml::106][Where a category (e.g. Earnings) is defined for payslip pdf]]
-** PFA
-*Précompte (professionnel) Forfaitaire d’Artiste*
-C’est un régime fiscal spécifique destiné aux artistes, auteurs et interprètes qui perçoivent des revenus occasionnels ou irréguliers liés à leurs activités artistiques.
-C'est pour simplifier la fiscalité pour les artistes qui ne sont pas salariés à temps plein ou qui ont des revenus variables.Aa
-Un pourcentage fixe (généralement 16,5 % en 2026) est prélevé à la source sur leurs revenus artistiques, en remplacement de l’impôt progressif classique.
-
 ** Talk avec arpi
 - Tu fais dans le xml un hr.salary.rule avec le field joint_comittee_ids vers le 302 joint committee
 - Tu dois juste renommer le [[project:enterprise/l10n_be_hr_payroll/data/hr_payroll_structure_data.xml::107][payroll structure de cp200]] pour que ce soit pour la belgique en general (change pas le xmlid par contre)
@@ -34,34 +35,125 @@ Un pourcentage fixe (généralement 16,5 % en 2026) est prélevé à la source s
 - Tu dois juste ajouter le /Fond Horeca/ partner au =partner_id= du salary_rule qui represente le net salary. (pour l'etape qui parle de ca)
   (tu dois faire une nouvelle rule pour que ce soit juste cp302, et mettre la salary rule du net salary d'avant a juste pour cp200)
 ** again talk avec Damien
-*** TODO La prime de fine d'annee elle apparaitra que sur la payslip du mois de decembre et sur une categorie differente genre "Extra Information".
+*** DONE La prime de fin d'annee elle apparaitra que sur la payslip du mois de decembre et sur une categorie differente genre "Extra Information".
 - Une ONSS rule c'est une payslip rule qui doit etre payee par l'employeur mais qui apparait pas sur la payslip.
-- Le truc de 12% c'est tous les mois que l'employeur dois payer mais la PFA c'est juste decembre
+- Le truc de 12% c'est tous les mois que l'employeur doit payer mais la PFA c'est juste decembre
 *** TODO Regarder modalite d'octroi de la PFA pour voir si tu fais aussi pour ceux qui commencent apres janvier (genre ce serait 12% aussi?)
 *** TODO Aussi ajouter ce truc de extra info si il est vire / demissionne (Termination Fees structure)
 ** TODOS
-*** [ ] Create 1 rule that should be applied only on December to compute the net amount of the PFA. This rule should not impact GROSS --> NET of employee.
+*** [X] Create 1 rule that should be applied only on December to compute the net amount of the PFA. This rule should not impact GROSS --> NET of employee.
     Computation is defined in the documentation.
 **** [X] mockup: https://drive.google.com/file/d/1AtyUQfvHYRivadwV0UQKDdQsUKM97fir/view?usp=drivesdk 
-**** [ ] it should not appear in the payslip table but in a dedicated section
+**** [X] it should not appear in the payslip table but in a dedicated section
 *** [ ] Create a similar rule in the end of contract structure (in case the contracts is ended we should pay part of the EOY bonus)
 **** [X] Rename structure CP200: Employees Termination Fees --> Belgium: Termination fees
 *** [X] Create an archived Partner in data (archived so the user don't see it) for the "Fond Horeca" and...
-*** [ ] ...link that partner to the rule computing the end of year bonus in order to be able to extract the result of this rule.
-*** [ ] The rule should be linked to Joint committee 302.
-*** [ ] The amount is not paid by employer but by the fund (should not impact the net)
+*** [X] ...link that partner to the rule computing the end of year bonus in order to be able to extract the result of this rule.
+*** [X] The rule should be linked to Joint committee 302.
+*** [X] The amount is not paid by employer but by the fund (should not impact the net)
 *** [ ] The amount of the monthly contribution must impact the CSS rule (cotisation speciale à la securité sociale)
+**** message discord de GMF
+Oui, ok
+j'ai l'explication
+La Cotisation Spéciale de Sécurité Sociale (CSSS)
+La "cotisation spéciale de sécurité sociale" est un prélèvement progressif instauré en 1994 qui s'applique sur l'ensemble des revenus annuels du foyer fiscal.
+
+Retenue mensuelle : Elle est prélevée chaque mois sur le salaire.
+
+Impact sur le 13ème mois : Puisque le 13ème mois augmente le revenu brut total du mois où il est versé, il peut entraîner un passage dans une tranche supérieure de calcul pour la cotisation spéciale de ce mois-là.
+DONC
+on est en décembre, tu es payé 4000€ brut
++ 3500€ de 13eme mois
+normalement ta cotisation CSSS est calculée sur 4000
+mais dans ce cas, tu dois la calculer sur 7500€
+l'employé va pas toucher 7500€ mais sa cotisation sera calculé sur cette base là
+
 *** [X] On monthly worker pay, a rule should be computed to make a provision to be paid to the horeca fund
 **** [X] This rule has no impact on employee salary --> put it with employer ONSS rules (at the end of the payslips, should not appear to employee on pdf)
 **** [X] Computed as 12% of the SALARY category (SALARY category = salary amount for which the employee has to pas ONSS taxes)
-*** [X] That rule should be between =Accounting: Remuneration= and =Accounting: ONSS Basic (Empployer)=
-*** [ ] Flexi-job and student must be excluded from the 2 rules (no monthly provision & no pfa)
+*** [X] That rule (maybe the PFA and not the monthly contribution) should be between =Accounting: Remuneration= and =Accounting: ONSS Basic (Empployer)=
+*** [X] Flexi-job and student must be excluded from the 2 rules (no monthly provision & no pfa)
     Dimona category= STU & FLX
 ** Talk
 *** [X] Rajouter "Accounting:" devant le nom de tes rules
-*** La rule des PFA doit se faire une peu comme les meal vouchers prcq les meal vouchers c'est aussi un thirt party qui fait ca.
+*** La rule des PFA doit se faire une peu comme les meal vouchers prcq les meal vouchers c'est aussi un third party qui fait ca.
 *** /Termination fees/ c'est la payslip de quand t'es vire
 *** Les PFA il prennent le Gross yearly salary
+** Reading [[https://drive.google.com/file/d/1i8bj425ccEW0ZGvNSaQvEV6VIedmLYCS/view][Sectorial Documentation]]
+** Reading [[https://www.lacsc.be/la-csc/secteurs/alimentation-et-horeca/secteurs/302-00-horeca/campagnes/primes-horeca#qui-a-droit---une-prime-de-fin-d-ann-e-dans-l-horeca][CSC Documentation]]
+#+begin_quote
+Avez-vous droit à une prime de fin d'année en cas de licenciement ?
+Licenciement par l’employeur
+Le travailleur est licencié par l’employeur ; il conserve le droit à la prime de fin d’année (sauf en cas de licenciement pour motif grave) s’il a travaillé au moins 2 mois ininterrompus chez l’employeur.
+
+Démission du travailleur
+Les travailleurs qui quittent volontairement l’entreprise n’ont pas droit à la prime de fin d’année, quelle que soit leur ancienneté, sauf :
+
+    lorsque la démission est donnée le 31 décembre (après avoir terminé le service, selon son horaire) ;
+    lorsque le préavis effectivement presté prend fin au plus tôt le 31 décembre ;
+    lorsque, à la demande de l’employeur, le préavis ne doit pas être presté et qui prend fin au plus tôt le 31 décembre.
+#+end_quote
+
+** Talk avec BEDO
+- Pour savoir si employee est part time ou full time, tu peux regarder son calendar (genre y aura un truc par eg 80% pour 4/5ieme)
+- Pour virer un employee tu vas sur Employees / End Collaboration et paf plein de trucs
+- version.date_version_end c'est pour la version juste 
+- version.date_contract_end c'est fin de contract vraiment
+Pour savoir le preavis c'est employee.start/end_notice_period
+
+** Talk avec gmf
+Faut pas refaire ta logique pour le treizieme mois. Faut repartir sur le code de la cp200
+On supporte le salaires horaires et les salaires mensuels fixes. C'est le "Wage Type"
+Tous les trucs du genre tu es away pour ton service militaire, petit chomage et tout c'est des *work entry types*
+** Assimilated and prested months
+Assimilated:
+- Congés payés (vacances annuelles).
+- Congé de maladie (souvent limité à 60 jours/an).
+- Congé de maternité/paternité. (PAS PARENTAL TIME OFF, c'est pas la meme)
+- Jours fériés légaux (ex : 1er novembre, Noël).
+- Absences justifiées (ex : mariage, décès d’un proche, selon les conventions).
+- Unpredictable days (often limited to 10 days)
+  [[project:enterprise/l10n_be_hr_payroll/models/hr_payslip.py::480][go see this to see how it's handled]]
+  
+Prested:
+- Normal work presence
+** Questions pour Partena
+- mes criteres pour assimilated sont corrects?
+- "Le résultat du calcul par mois ne peut en aucun cas être inférieur au nombre de mois calendrier complets qui ont été effectivement prestés ou assimilés" > Je comprends pas. Donc le montant du 13ieme mois peux pas etre inferieur au nombre de mois? Genre pas en dessous de 12 pour une annee???
+- Pour la formulde de proratisation des travailleurs temporaires, c'est incomprehensible:
+  /Nombre total d'heures prestées durant l'année = Nombre de jours = X de la P.F.A.maximum/ ==> c'est que des equal operators et un x qui est les 12iemes... J'ai ecrit ce que j'ai estime dans mes notes.
+- Par "travailleur temporaire", j'imagine que c'est CDD?
+- Vu que le mois de decembre de l'annee d'avant est compte pour les annes d'experience et les tranches de 1/12 de PFA, on pourrait atteindre 13/12 de PFA... J'imagine que c'est max 12/12 mais donc si je fais decembre 2025 -> novembre 2026 j'ai droit a 12 mois ??? Bizarre.
+- Il est marque que les personnes virees qui vont en prepension on droit a leur PFA, sans mension des deux mois d'anciennete. Donc ils ont toujours droit a leur PFA?
+- C quoi la difference entre etre licencie pour motif grave dans le chef de l'employeur vs just etre licencie pour motif grave? (ptet ask AI jsp)
+  
+ #+begin_quote
+Les travailleurs liés par un contrat de travail à durée déterminée ou pour un travail nettement défini,
+conservent le droit à une prime de fin d’année quand le contrat prend fin au terme prévu et pour autant que les
+conditions prévues par la CCT sont remplies.
+ #+end_quote 
+ - Donc les gens en CDD n'ont jamais droit a de PFA si il arretent de travailler plus tot? J'ai pas ecrit ca dans mes notes.
+   
+#+begin_quote
+à une seule période de maladie ininterrompue d'au moins 6 mois. Cette période ininterrompue de 6 mois
+peut être réalisée à cheval sur deux années calendrier sauf si l’incapacité de travail dans une des deux années
+calendrier dépasse les six mois. En aucun cas, l’assimilation ne peut dépasser 6 mois. L 'assimilation est limitée à
+une période de 6 mois maximum et la prime de fin d'année due pour cette période correspond à 50 % du montant
+qui aurait dû être payé si le travailleur avait travaillé. Pour toute période de plus d’un an d’incapacité de travail
+ininterrompue, l’assimilation de 6 mois ne peut être appliquée qu’une seule fois.
+#+end_quote 
+- Faut demander des clarifications par rapport a mes notes prcq c'est bizarre.
+** talk avec arhur
+fiche de sortie vire ou pas = termination payslip (termination fees?)
+*** Les fields de date de contrats / version sont:
+- contract_date_start
+- date_version
+- date_start = min(contract_date_start, date_version)
+- date_end = truc bizarre c'est contract_date_end date_version de version suivante
+[[project:community/addons/hr/models/hr_version.py::565][compute de tous ces trucs]]
+
+
+
 * WAIT [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]]
 * WAIT [[https://www.odoo.com/odoo/project.task/5500347][[Time Off] Gant overview see all employees]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477588][[Time Off, Planning] Gantt Domain Employee Without Records]]
@@ -560,7 +652,7 @@ How can I have someone that has access to hr.employee and not be allowed to see 
 I don't know how to conditionally show that message
 [[https://discord.com/channels/678381219515465750/687339689522364423/1445406698172055622][Discord Question]] [[https://discord.com/channels/678381219515465750/687339689522364423/1445415421909008586][Discord Answer]]
 My hint was to override =mail_message= and do some stuff with [[project:community/addons/mail/models/mail_message.py::180][tracking_values_ids]] but framework tells me it's not going to exist in the future...
-* [?] [[[https://www.odoo.com/odoo/project/1251/tasks/5013546][Employee] Migrate all "general" data to demo data]]
+* CANCEL [[[https://www.odoo.com/odoo/project/1251/tasks/5013546][Employee] Migrate all "general" data to demo data]]
 General data: =community/addons/hr/data/hr_data.xml=
 Demo data: =community/addons/hr/data/hr_demo.xml=
 Task is awaiting for some talks. Arthur knows a bit about it. He comes back from holidays on the 13 of aug
