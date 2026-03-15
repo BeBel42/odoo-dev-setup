@@ -1,8 +1,9 @@
 #+title: Tasks
-
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10N_BE]End of year Bonus - Fond Horeca]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6037156][[hr_work_entry] prevent duplicate work entry codes in same country]]
+* TODO [[https://runbot.odoo.com/odoo/runbot.build.error/241204][replace comodel function runbot error]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10]End of year Bonus - Fond Horeca]]
 #+begin_src bash :results silent
-../o --checkout-community master \
+../o --checkout-community master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef \
      --checkout-enterprise master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef >&2
 #+end_src 
 [[https://drive.google.com/file/d/1i8bj425ccEW0ZGvNSaQvEV6VIedmLYCS/view][Sectorial Documentation]]
@@ -38,14 +39,14 @@
 *** DONE La prime de fin d'annee elle apparaitra que sur la payslip du mois de decembre et sur une categorie differente genre "Extra Information".
 - Une ONSS rule c'est une payslip rule qui doit etre payee par l'employeur mais qui apparait pas sur la payslip.
 - Le truc de 12% c'est tous les mois que l'employeur doit payer mais la PFA c'est juste decembre
-*** TODO Regarder modalite d'octroi de la PFA pour voir si tu fais aussi pour ceux qui commencent apres janvier (genre ce serait 12% aussi?)
-*** TODO Aussi ajouter ce truc de extra info si il est vire / demissionne (Termination Fees structure)
+*** DONE Regarder modalite d'octroi de la PFA pour voir si tu fais aussi pour ceux qui commencent apres janvier (genre ce serait 12% aussi?)
+*** DONE Aussi ajouter ce truc de extra info si il est vire / demissionne (Termination Fees structure)
 ** TODOS
 *** [X] Create 1 rule that should be applied only on December to compute the net amount of the PFA. This rule should not impact GROSS --> NET of employee.
     Computation is defined in the documentation.
 **** [X] mockup: https://drive.google.com/file/d/1AtyUQfvHYRivadwV0UQKDdQsUKM97fir/view?usp=drivesdk 
 **** [X] it should not appear in the payslip table but in a dedicated section
-*** [ ] Create a similar rule in the end of contract structure (in case the contracts is ended we should pay part of the EOY bonus)
+*** [X] Create a similar rule in the end of contract structure (in case the contracts is ended we should pay part of the EOY bonus)
 **** [X] Rename structure CP200: Employees Termination Fees --> Belgium: Termination fees
 *** [X] Create an archived Partner in data (archived so the user don't see it) for the "Fond Horeca" and...
 *** [X] ...link that partner to the rule computing the end of year bonus in order to be able to extract the result of this rule.
@@ -152,8 +153,12 @@ fiche de sortie vire ou pas = termination payslip (termination fees?)
 - date_end = truc bizarre c'est contract_date_end date_version de version suivante
 [[project:community/addons/hr/models/hr_version.py::565][compute de tous ces trucs]]
 
-
-
+** Talk avec david
+*** DONE Mettre 12% en rule parameter
+*** DONE A cet effet, le Fonds social est alimenté mensuellement par une cotisation patronale équivalant à 12 % du total de la masse salariale brute soumise à l'ONSS du mois précédent (à 108 % pour les ouvriers).
+*** CANCEL Les dispositions suivants s’appliquent aux employeurs et aux travailleurs des entreprises ressortissant à la CP de l’industrie hôtelière, à l’exception des étudiants qui sont uniquement soumis à la cotisation de solidarité.
+*** TODO Cottisation speciale a la securite sociale machin en gros le calcul de cette cottisation se fait sur un montant, ben ce montant doit se faire plus gros (avec la valeur de la PFA rajoutee)
+*** DONE read beginning of sectorial documentation to see more details
 * WAIT [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]]
 * WAIT [[https://www.odoo.com/odoo/project.task/5500347][[Time Off] Gant overview see all employees]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477588][[Time Off, Planning] Gantt Domain Employee Without Records]]
@@ -167,13 +172,14 @@ I won't do the planning gantt view as it is out of our scope and already tweaked
 ../o --checkout-community master-project-replace_comodel_function-mlef \
      --checkout-enterprise master-project-replace_comodel_function-mlef >&2
 #+end_src 
+** DONE rebase this DO THAT FIRST
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5379826][[hr] Generic domain translation]]
 #+begin_src bash :results silent
 ../o --checkout-community master-hr-domain_operation_tools-moaln-mlef \
      --checkout-enterprise master-hr-domain_operation_tools-moaln-mlef >&2
     #+end_src 
 ** DONE prevenir reviewer qu'il y a enterprise branch aussi
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5148888][[Work entries] Optimization/refactor of gantt view]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5148888][[Work entries] Optimization/refactor of gantt view]]
 #+begin_src bash :results silent
 ../o --checkout-community master-work_entry_gantt_optimization-mlef \
      --checkout-enterprise master-work_entry_gantt_optimization-mlef >&2
