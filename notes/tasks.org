@@ -1,7 +1,32 @@
 #+title: Tasks
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6037156][[hr_work_entry] prevent duplicate work entry codes in same country]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6068542][[l10n_be_hr_payroll] Quarterly special social cotisation payment]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-l10n_be_hr_payroll-quarterly_csss-mlef >&2
+#+end_src 
+[[project:enterprise/l10n_be_hr_payroll/models/hr_payslip.py::1049][special social cot function]]
+** TODO prendre nouveau doc + up to date et le mettre dans la tache (page 7 est celle qui est interessante)
+** TODO revenir sur old rule param pour le faire sur les anciennes versions
+** Talk with damien
+Au lieu de faire CSS mensuelle puis trimestrielle, tu peux faire:
+- Tu prends tous les salaires bruts du trimestre (meme dans le futur)
+- Tu appliques la CSS trimestrille sur la valeur (meme si premier mois, osef)
+- Tu auras un meilleur montant qui fonctionne aussi pour les corrections.
+- [[https://www.odoo.com/odoo/project/1251/tasks/5976407][Romain fait la meme]], donc stv tu peux lui demander pour voir si y a des trucs bizarres a faire
+** TODO quand faire quadrimestre
+- Tu le fais juste sur la dmfa ou sur les termination fees, sinon, mensuel
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6041052][[l10n_be_hr_payroll] Traceback when generating payslip for cp302]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-l10n_be_hr_payroll-fix_cp302_compute_payslip_traceback-mlef >&2
+#+end_src 
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6037156][[hr_work_entry] prevent duplicate work entry codes in same country]]
+#+begin_src bash :results silent
+../o --checkout-community saas-19.2-prevent_duplicate_work_entry_codes-mlef \
+     --checkout-enterprise saas-19.2 >&2
+#+end_src 
 * TODO [[https://runbot.odoo.com/odoo/runbot.build.error/241204][replace comodel function runbot error]]
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10]End of year Bonus - Fond Horeca]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10]End of year Bonus - Fond Horeca]]
 #+begin_src bash :results silent
 ../o --checkout-community master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef \
      --checkout-enterprise master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef >&2
@@ -52,7 +77,7 @@
 *** [X] ...link that partner to the rule computing the end of year bonus in order to be able to extract the result of this rule.
 *** [X] The rule should be linked to Joint committee 302.
 *** [X] The amount is not paid by employer but by the fund (should not impact the net)
-*** [ ] The amount of the monthly contribution must impact the CSS rule (cotisation speciale à la securité sociale)
+*** [X] The amount of the monthly contribution must impact the CSS rule (cotisation speciale à la securité sociale)
 **** message discord de GMF
 Oui, ok
 j'ai l'explication
@@ -157,8 +182,22 @@ fiche de sortie vire ou pas = termination payslip (termination fees?)
 *** DONE Mettre 12% en rule parameter
 *** DONE A cet effet, le Fonds social est alimenté mensuellement par une cotisation patronale équivalant à 12 % du total de la masse salariale brute soumise à l'ONSS du mois précédent (à 108 % pour les ouvriers).
 *** CANCEL Les dispositions suivants s’appliquent aux employeurs et aux travailleurs des entreprises ressortissant à la CP de l’industrie hôtelière, à l’exception des étudiants qui sont uniquement soumis à la cotisation de solidarité.
-*** TODO Cottisation speciale a la securite sociale machin en gros le calcul de cette cottisation se fait sur un montant, ben ce montant doit se faire plus gros (avec la valeur de la PFA rajoutee)
+*** DONE Cottisation speciale a la securite sociale machin en gros le calcul de cette cottisation se fait sur un montant, ben ce montant doit se faire plus gros (avec la valeur de la PFA rajoutee)
 *** DONE read beginning of sectorial documentation to see more details
+** DONE voir email pour calcul des sick leaves
++ see with _get_expected_attendances() pour tes sick leave de six mois et ptet calendar limited leaves
++ _attendance_intervals_batch() donne aussi hors contrat donc la tu peux utiliser pour calculer les heures apres retirement
+** TODO BIG REVIEW
+*** [ ] rebase ton truc attention a la pr de romain
+*** [ ] Afficher 0 et pas rien pour la rule des 12% pour le tout premier mois
+*** [ ] pour les 12% on se base sur le mois actuel et pas le mois precedent
+*** [ ] renommer la regle des 12% prcq la c'est special social cotisation (dans l'id) et c'est fauuuuxxxxxx
+*** [ ] osef de mettre les 12% dans la note de bas de page ("is informative")
+*** [ ] Pour la spec rajoutee avec "accounting tab", c'est le "credit/debit account" 
+*** [ ] C'est deux comptes credit/debit differents pour les employes/ouvriers
+*** [ ] Ecrire tous les trucs que j'ai pas faits/que j'ai pas pu faire dans une tache pour que les POs puissent en faire une et garder trace de ce qu'il faut faire
+*** [ ] Changer la fonction de seniority genre pour les version dates qui font un gap hardcode de 4 jours prcq C de la merde et C pas bon pour les flexi jobs qui ont un jour d'interruption de contrat (le < 4 va penser que c'est consecutif)
+*** [ ] Trucs en plus dans la spec
 * WAIT [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]]
 * WAIT [[https://www.odoo.com/odoo/project.task/5500347][[Time Off] Gant overview see all employees]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477588][[Time Off, Planning] Gantt Domain Employee Without Records]]
@@ -690,6 +729,9 @@ Task is awaiting for some talks. Arthur knows a bit about it. He comes back from
 tu peux faire en sorte que ca regenerate un nouveau survey invite a chaque fois et ca ira
 [[project:community/addons/hr_recruitment_survey/wizard/hr_recruitment_survey_invite.py::185][total_answers.applicant_id]] is empty and that's probably why the _send_mail() that follows does not send the email when I force 'new'
 
+** DONE voir message discord et ptet bouger des trucs en parent module
+** DONE pas faire avec state "cancelled" mais plus avec une `deadline` ou juste unlink la survey input pour avoir une 404
+[[https://discord.com/channels/678381219515465750/775727120193814528/1484131051478454283][discord msg]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5048292][[Appraisal] Default employee_id on goal creation]]
 #+begin_src bash :results silent
 ../o --checkout-community saas-18.2 \

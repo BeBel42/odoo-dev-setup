@@ -449,6 +449,7 @@ elif [[ $pull_branch = 1 ||
     $pull_upgrade = 1 ||
     "$checkout_community" != "" ||
     "$checkout_enterprise" != "" ||
+    "$checkout_upgrade" != "" ||
     "$checkout_branch" != "" ]]; then
     handle_branch_switch
     exit 0
