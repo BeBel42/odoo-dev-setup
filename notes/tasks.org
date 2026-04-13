@@ -1,19 +1,34 @@
 #+title: Tasks
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6068542][[l10n_be_hr_payroll] Quarterly special social cotisation payment]]
+* DONE Calculs de fiches pour david et partena
+template: =partena_payslips=
+#+begin_src bash :results silent
+../o -m l10n_be_hr_payroll,fleet
+#+end_src 
+- premier cas il est a 5km a 24 cents (old param value?). Il faut rajouter une entree salariale sur la payslip en plus
+- Tu peux installer le module Test Belgian Payroll
+- Les categories c'est pour les ouvriers, mais ptet que ca change pas les payslips (fingers crossed on sait pas), prcq on a pas les memes, une tache arrive bientot
+- Voiture:
+  - type de carburant 5 = Hybride/Essence
+  - Type d'usage = Prive + domicile/travail (mixte)
+
+- 
+  
+* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/6068542][[l10n_be_hr_payroll] Quarterly special social cotisation payment]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
-     --checkout-enterprise master-l10n_be_hr_payroll-quarterly_csss-mlef >&2
+     --checkout-enterprise master-l10n_be_hr_payroll-quarterly_csss-mlef \
+     --checkout-upgrade master-l10n_be_hr_payroll-quarterly_csss-mlef >&2
 #+end_src 
 [[project:enterprise/l10n_be_hr_payroll/models/hr_payslip.py::1049][special social cot function]]
-** TODO prendre nouveau doc + up to date et le mettre dans la tache (page 7 est celle qui est interessante)
-** TODO revenir sur old rule param pour le faire sur les anciennes versions
+** DONE prendre nouveau doc + up to date et le mettre dans la tache (page 7 est celle qui est interessante)
+** DONE revenir sur old rule param pour le faire sur les anciennes versions
 ** Talk with damien
 Au lieu de faire CSS mensuelle puis trimestrielle, tu peux faire:
 - Tu prends tous les salaires bruts du trimestre (meme dans le futur)
 - Tu appliques la CSS trimestrille sur la valeur (meme si premier mois, osef)
 - Tu auras un meilleur montant qui fonctionne aussi pour les corrections.
 - [[https://www.odoo.com/odoo/project/1251/tasks/5976407][Romain fait la meme]], donc stv tu peux lui demander pour voir si y a des trucs bizarres a faire
-** TODO quand faire quadrimestre
+** DONE quand faire quadrimestre
 - Tu le fais juste sur la dmfa ou sur les termination fees, sinon, mensuel
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6041052][[l10n_be_hr_payroll] Traceback when generating payslip for cp302]]
 #+begin_src bash :results silent
@@ -26,7 +41,7 @@ Au lieu de faire CSS mensuelle puis trimestrielle, tu peux faire:
      --checkout-enterprise saas-19.2 >&2
 #+end_src 
 * TODO [[https://runbot.odoo.com/odoo/runbot.build.error/241204][replace comodel function runbot error]]
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10]End of year Bonus - Fond Horeca]]
+* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10]End of year Bonus - Fond Horeca]]
 #+begin_src bash :results silent
 ../o --checkout-community master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef \
      --checkout-enterprise master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef >&2
