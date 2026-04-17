@@ -30,6 +30,8 @@ Au lieu de faire CSS mensuelle puis trimestrielle, tu peux faire:
 - [[https://www.odoo.com/odoo/project/1251/tasks/5976407][Romain fait la meme]], donc stv tu peux lui demander pour voir si y a des trucs bizarres a faire
 ** DONE quand faire quadrimestre
 - Tu le fais juste sur la dmfa ou sur les termination fees, sinon, mensuel
+** FIXME payslip tests
+- Done error 6129
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6041052][[l10n_be_hr_payroll] Traceback when generating payslip for cp302]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
@@ -203,11 +205,11 @@ fiche de sortie vire ou pas = termination payslip (termination fees?)
 + see with _get_expected_attendances() pour tes sick leave de six mois et ptet calendar limited leaves
 + _attendance_intervals_batch() donne aussi hors contrat donc la tu peux utiliser pour calculer les heures apres retirement
 ** TODO BIG REVIEW
-*** [ ] rebase ton truc attention a la pr de romain
-*** [ ] Afficher 0 et pas rien pour la rule des 12% pour le tout premier mois
-*** [ ] pour les 12% on se base sur le mois actuel et pas le mois precedent
-*** [ ] renommer la regle des 12% prcq la c'est special social cotisation (dans l'id) et c'est fauuuuxxxxxx
-*** [ ] osef de mettre les 12% dans la note de bas de page ("is informative")
+*** [X] rebase ton truc attention a la pr de romain
+*** [X] Afficher 0 et pas rien pour la rule des 12% pour le tout premier mois
+*** [X] pour les 12% on se base sur le mois actuel et pas le mois precedent
+*** [X] renommer la regle des 12% prcq la c'est special social cotisation (dans l'id) et c'est fauuuuxxxxxx
+*** [X] osef de mettre les 12% dans la note de bas de page ("is informative")
 *** [ ] Pour la spec rajoutee avec "accounting tab", c'est le "credit/debit account" 
 *** [ ] C'est deux comptes credit/debit differents pour les employes/ouvriers
 *** [ ] Ecrire tous les trucs que j'ai pas faits/que j'ai pas pu faire dans une tache pour que les POs puissent en faire une et garder trace de ce qu'il faut faire
