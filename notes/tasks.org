@@ -1,4 +1,10 @@
 #+title: Tasks
+* WAIT [[https://github.com/odoo/enterprise/pull/113973][review gantt tasks employee public]]
+#+begin_src bash :results silent
+../o --checkout-community saas-19.2 \
+     --checkout-enterprise saas-19.2-hr-holidays-gnatt-domain-maji >&2
+#+end_src 
+
 * DONE Calculs de fiches pour david et partena
 template: =partena_payslips=
 #+begin_src bash :results silent
@@ -10,8 +16,6 @@ template: =partena_payslips=
 - Voiture:
   - type de carburant 5 = Hybride/Essence
   - Type d'usage = Prive + domicile/travail (mixte)
-
-- 
   
 * RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/6068542][[l10n_be_hr_payroll] Quarterly special social cotisation payment]]
 #+begin_src bash :results silent
