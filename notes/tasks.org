@@ -1,11 +1,11 @@
 #+title: Tasks
-* WAIT [[https://github.com/odoo/enterprise/pull/113973][review gantt tasks employee public]]
+* DONE [[https://github.com/odoo/enterprise/pull/113973][review gantt tasks employee public]] :review:not_in_pipe:
 #+begin_src bash :results silent
 ../o --checkout-community saas-19.2 \
      --checkout-enterprise saas-19.2-hr-holidays-gnatt-domain-maji >&2
 #+end_src 
 
-* DONE Calculs de fiches pour david et partena
+* DONE Calculs de fiches pour david et partena :not_in_pipe:
 template: =partena_payslips=
 #+begin_src bash :results silent
 ../o -m l10n_be_hr_payroll,fleet
@@ -46,8 +46,8 @@ Au lieu de faire CSS mensuelle puis trimestrielle, tu peux faire:
 ../o --checkout-community saas-19.2-prevent_duplicate_work_entry_codes-mlef \
      --checkout-enterprise saas-19.2 >&2
 #+end_src 
-* TODO [[https://runbot.odoo.com/odoo/runbot.build.error/241204][replace comodel function runbot error]]
-* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10]End of year Bonus - Fond Horeca]]
+* TODO [[https://runbot.odoo.com/odoo/runbot.build.error/241204][replace comodel function runbot error]] :not_in_pipe:
+* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10]End of year Bonus - Fond Horeca]] :difficult:
 #+begin_src bash :results silent
 ../o --checkout-community master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef \
      --checkout-enterprise master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef >&2
@@ -216,9 +216,9 @@ fiche de sortie vire ou pas = termination payslip (termination fees?)
 *** [X] osef de mettre les 12% dans la note de bas de page ("is informative")
 *** [ ] Pour la spec rajoutee avec "accounting tab", c'est le "credit/debit account" 
 *** [ ] C'est deux comptes credit/debit differents pour les employes/ouvriers
-*** [ ] Ecrire tous les trucs que j'ai pas faits/que j'ai pas pu faire dans une tache pour que les POs puissent en faire une et garder trace de ce qu'il faut faire
-*** [ ] Changer la fonction de seniority genre pour les version dates qui font un gap hardcode de 4 jours prcq C de la merde et C pas bon pour les flexi jobs qui ont un jour d'interruption de contrat (le < 4 va penser que c'est consecutif)
-*** [ ] Trucs en plus dans la spec
+*** [ ] [[https://www.odoo.com/odoo/project/1251/tasks/5477296/1251/project.task/project.task/6159782][Ecrire tous les trucs que j'ai pas faits/que j'ai pas pu faire dans une tache pour que les POs puissent en faire une et garder trace de ce qu'il faut faire]]
+*** [X] Changer la fonction de seniority genre pour les version dates qui font un gap hardcode de 4 jours prcq C de la merde et C pas bon pour les flexi jobs qui ont un jour d'interruption de contrat (le < 4 va penser que c'est consecutif)
+*** [ ] Trucs en plus dans la [[https://www.odoo.com/odoo/project/1251/tasks/5477296][spec]]
 * WAIT [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]]
 * WAIT [[https://www.odoo.com/odoo/project.task/5500347][[Time Off] Gant overview see all employees]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477588][[Time Off, Planning] Gantt Domain Employee Without Records]]
@@ -239,7 +239,7 @@ I won't do the planning gantt view as it is out of our scope and already tweaked
      --checkout-enterprise master-hr-domain_operation_tools-moaln-mlef >&2
     #+end_src 
 ** DONE prevenir reviewer qu'il y a enterprise branch aussi
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5148888][[Work entries] Optimization/refactor of gantt view]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5148888][[Work entries] Optimization/refactor of gantt view]] :difficult:
 #+begin_src bash :results silent
 ../o --checkout-community master-work_entry_gantt_optimization-mlef \
      --checkout-enterprise master-work_entry_gantt_optimization-mlef >&2
@@ -845,23 +845,49 @@ File where ribbon component is:
 #+name: Count number of tasks
 #+begin_src elisp :results none
 (save-excursion
-  (goto-char (point-min))
-  (let ((counts (make-hash-table :test 'equal)))
+  (let ((state-counts (make-hash-table :test 'equal))
+        (tag-counts (make-hash-table :test 'equal)))
+
+    ;; Count headers by state
+    (goto-char (point-min))
     (while (re-search-forward "^\\* \\([^[:space:]]+\\)" nil t)
       (let ((word (match-string 1)))
         (unless (string= word "Configuration")
-          (puthash "Total" (1+ (or (gethash "Total" counts 0) 0)) counts)
-          (puthash word (1+ (or (gethash word counts 0) 0)) counts)
-		  )))
-    (message (mapconcat
-              (lambda (pair)
-                (format "%s: %d" (car pair) (cdr pair)))
-              (loop for k being the hash-keys of counts
-                    using (hash-value v)
-                    collect (cons k v))
-              "\n")
-             )))
-#+END_src
+          (puthash "Total" (1+ (or (gethash "Total" state-counts 0) 0)) state-counts)
+          (puthash word (1+ (or (gethash word state-counts 0) 0)) state-counts))))
+
+    ;; Count tags from top-level headings only
+    (goto-char (point-min))
+    (while (re-search-forward "^\\* .*?\\(:[[:alnum:]_@#%:]+:\\)[[:space:]]*$" nil t)
+      (let ((tag-string (match-string 1)))
+        (dolist (tag (split-string tag-string ":" t))
+          (puthash tag (1+ (or (gethash tag tag-counts 0) 0)) tag-counts))))
+
+    ;; Display both sections in a scrollable buffer
+    (with-current-buffer (get-buffer-create "*Org Stats*")
+      (read-only-mode -1)
+      (erase-buffer)
+      (insert (concat "=== Tasks ===\n"
+                      (mapconcat
+                       (lambda (pair) (format "%s: %d" (car pair) (cdr pair)))
+                       (cl-loop for k being the hash-keys of state-counts
+                                using (hash-value v)
+                                collect (cons k v))
+                       "\n")))
+      (insert "\n\n")
+      (insert (concat "=== Tags ===\n"
+                      (mapconcat
+                       (lambda (pair) (format "%s: %d" (car pair) (cdr pair)))
+                       (cl-sort
+                        (cl-loop for k being the hash-keys of tag-counts
+                                 using (hash-value v)
+                                 collect (cons k v))
+                        #'> :key #'cdr)
+                       "\n")))
+      (goto-char (point-min))
+      (read-only-mode 1)
+      (display-buffer (current-buffer)))))
+#+end_src
 
 # Local Variables:
 # eval: (org-overview)
