@@ -29,7 +29,7 @@ def pink(s: str) -> str:
 
 
 def cyan(s: str) -> str:
-    return colorize(s, 51)
+    return colorize(s, 30)
 
 
 def read_manifest_content(manifest_path: str) -> dict:
@@ -51,6 +51,7 @@ def get_manifest_map(directories) -> dict[str, dict]:
                     manifest_map[item] = read_manifest_content(manifest_path)
                 else:
                     manifest_map[item] = {}
+    manifest_map['base'] = {}  # always there
     return manifest_map
 
 
@@ -67,7 +68,7 @@ def get_args():
     )
     parser.add_argument(
         "-m",
-        "--module",
+        "--modules",
         required=True,
         type=str,
         help="Simulate the comma-separated modules as if they were installed"
@@ -97,14 +98,18 @@ def get_args():
         dest="legend",  # links to the same variable as --legend
         help="Disable the default --legend flag",
     )
+    parser.add_argument(
+        "-c",
+        "--countries",
+        type=str,
+        help="Comma-serparated list of countries, defaults to countries in --modules"
+        "(e.g., 'be,us')",
+    )
     return parser.parse_args()
 
 
 # returns the modules installed by arg modules
-def get_installed(
-    modules: list[str],
-    manifest_map: dict[str, dict],
-) -> list[dict]:
+def get_installed(modules: list[str], manifest_map: dict[str, dict]) -> list[dict]:
     installed = []
     memo = dict()
     d = deque([{'name': module} for module in modules])
@@ -151,6 +156,7 @@ def get_installed(
         if len(installed) == n_installed:
             break
         n_installed = len(installed)
+
     return installed
 
 
@@ -171,7 +177,7 @@ def color_module_level(mod) -> str:
 
 
 # format and print modules installed by modules arg
-def print_installed(installed: list, show_legend: bool):
+def print_installed(installed: list, show_legend: bool, countries: set[str]):
     if show_legend:
         print(
             f"""
@@ -179,6 +185,8 @@ def print_installed(installed: list, show_legend: bool):
 {blue('■')} Modules directly installed by base modules
 {pink('■')} Modules indirectly installed by base modules
 {cyan('■')} Modules installed by auto_install
+
+Countries: {', '.join(countries)}
 """,
         )
 
@@ -199,11 +207,8 @@ def print_installed(installed: list, show_legend: bool):
             )
 
 
-# get all modules that (in)directly install modules arg
-def get_installers(
-    modules: list[str],
-    manifest_map: dict[str, dict],
-) -> list[dict]:
+# # get all modules that (in)directly install modules arg
+def get_installers(modules: list[str], manifest_map: dict[str, dict]) -> list[dict]:
     # None if does not install, else {name, module_that_name_installs}
     memo: dict[str, dict | None] = {}
 
@@ -233,7 +238,12 @@ def get_installers(
 
 
 # format and print modules that install modules arg
-def print_installers(installers: list[dict], module: str, show_legend: bool):
+def print_installers(
+    installers: list[dict],
+    module: str,
+    show_legend: bool,
+    countries: set[str]
+):
     def sort_by_n_parents(x):
         if not 'parent' in x:
             return 0, x['name']
@@ -247,6 +257,8 @@ def print_installers(installers: list[dict], module: str, show_legend: bool):
 {purple('■')} Base module
 {blue('■')} Modules that directly install base modules
 {pink('■')} Modules that indirectly install base modules
+
+Countries: {', '.join(countries)}
 """,
         )
 
@@ -269,20 +281,37 @@ def check_whether_modules_are_valid(modules, manifest_map) -> None:
         sys.exit(1)
 
 
+def get_countries(args, modules, manifest_map) -> set[str]:
+    if args.countries:
+        return set(args.countries.split(','))
+    countries = set()
+    for module in modules:
+        countries |= set(manifest_map[module].get('countries', []))
+    return countries
+
+def filter_modules_not_in_countries(countries, manifest_map) -> dict[str, dict]:
+    return {
+        module_name: manifest
+        for module_name, manifest in manifest_map.items()
+        if not (set(manifest.get('countries', [])) - countries)
+    }
+
 def main():
     args = get_args()
-    manifest_map = get_manifest_map(args.directories)
-    modules = args.module.split(',')
     show_legend = args.legend
+    manifest_map = get_manifest_map(args.directories)
+    modules = args.modules.split(',')
+    countries = get_countries(args, modules, manifest_map)
+    manifest_map = filter_modules_not_in_countries(countries, manifest_map)
 
     check_whether_modules_are_valid(modules, manifest_map)
 
     if args.installed:
         installed = get_installed(modules, manifest_map)
-        print_installed(installed, show_legend)
+        print_installed(installed, show_legend, countries)
     else:
         installers = get_installers(modules, manifest_map)
-        print_installers(installers, modules, show_legend)
+        print_installers(installers, modules, show_legend, countries)
 
 
 if __name__ == "__main__":

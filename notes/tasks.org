@@ -3,7 +3,8 @@
 #+begin_src bash :results silent
 ../o --checkout-community saas-19.2 \
      --checkout-enterprise saas-19.2-hr-holidays-gnatt-domain-maji >&2
-#+end_src 
+#+end_src
+** It led to [[https://github.com/odoo/odoo/pull/261937][this PR]] being made with bedo
 
 * DONE Calculs de fiches pour david et partena :not_in_pipe:
 template: =partena_payslips=
@@ -17,7 +18,7 @@ template: =partena_payslips=
   - type de carburant 5 = Hybride/Essence
   - Type d'usage = Prive + domicile/travail (mixte)
   
-* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/6068542][[l10n_be_hr_payroll] Quarterly special social cotisation payment]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6068542][[l10n_be_hr_payroll] Quarterly special social cotisation payment]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
      --checkout-enterprise master-l10n_be_hr_payroll-quarterly_csss-mlef \
@@ -34,8 +35,10 @@ Au lieu de faire CSS mensuelle puis trimestrielle, tu peux faire:
 - [[https://www.odoo.com/odoo/project/1251/tasks/5976407][Romain fait la meme]], donc stv tu peux lui demander pour voir si y a des trucs bizarres a faire
 ** DONE quand faire quadrimestre
 - Tu le fais juste sur la dmfa ou sur les termination fees, sinon, mensuel
-** FIXME payslip tests
-- Done error 6129
+** DONE damien a demande de extraire function pour trucs de trimestre jsp
+** DONE relire code
+** DONE rename all occurences of "special social cotisation" to "special social contribution"
+** DONE y a rien sur la PFA lol faut aussi mettre + tester
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6041052][[l10n_be_hr_payroll] Traceback when generating payslip for cp302]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
@@ -47,7 +50,7 @@ Au lieu de faire CSS mensuelle puis trimestrielle, tu peux faire:
      --checkout-enterprise saas-19.2 >&2
 #+end_src 
 * TODO [[https://runbot.odoo.com/odoo/runbot.build.error/241204][replace comodel function runbot error]] :not_in_pipe:
-* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10]End of year Bonus - Fond Horeca]] :difficult:
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10]End of year Bonus - Fond Horeca]] :difficult:
 #+begin_src bash :results silent
 ../o --checkout-community master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef \
      --checkout-enterprise master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef >&2
@@ -208,17 +211,61 @@ fiche de sortie vire ou pas = termination payslip (termination fees?)
 ** DONE voir email pour calcul des sick leaves
 + see with _get_expected_attendances() pour tes sick leave de six mois et ptet calendar limited leaves
 + _attendance_intervals_batch() donne aussi hors contrat donc la tu peux utiliser pour calculer les heures apres retirement
-** TODO BIG REVIEW
+** DONE BIG REVIEW
 *** [X] rebase ton truc attention a la pr de romain
 *** [X] Afficher 0 et pas rien pour la rule des 12% pour le tout premier mois
 *** [X] pour les 12% on se base sur le mois actuel et pas le mois precedent
 *** [X] renommer la regle des 12% prcq la c'est special social cotisation (dans l'id) et c'est fauuuuxxxxxx
 *** [X] osef de mettre les 12% dans la note de bas de page ("is informative")
-*** [ ] Pour la spec rajoutee avec "accounting tab", c'est le "credit/debit account" 
-*** [ ] C'est deux comptes credit/debit differents pour les employes/ouvriers
-*** [ ] [[https://www.odoo.com/odoo/project/1251/tasks/5477296/1251/project.task/project.task/6159782][Ecrire tous les trucs que j'ai pas faits/que j'ai pas pu faire dans une tache pour que les POs puissent en faire une et garder trace de ce qu'il faut faire]]
+*** [X] Pour la spec rajoutee avec "accounting tab", c'est le "credit/debit account"
+*** [X] C'est deux comptes credit/debit differents pour les employes/ouvriers
+Provision Prime de fin d'année HORECA pour nom et basta
+*** [X] [[https://www.odoo.com/odoo/project/1251/tasks/5477296/1251/project.task/project.task/6159782][Ecrire tous les trucs que j'ai pas faits/que j'ai pas pu faire dans une tache pour que les POs puissent en faire une et garder trace de ce qu'il faut faire]]
 *** [X] Changer la fonction de seniority genre pour les version dates qui font un gap hardcode de 4 jours prcq C de la merde et C pas bon pour les flexi jobs qui ont un jour d'interruption de contrat (le < 4 va penser que c'est consecutif)
-*** [ ] Trucs en plus dans la [[https://www.odoo.com/odoo/project/1251/tasks/5477296][spec]]
+*** [X] Trucs en plus dans la [[https://www.odoo.com/odoo/project/1251/tasks/5477296][spec]]
+** DONE Github Review 1
+*** DONE [[https://github.com/odoo/enterprise/pull/110863#discussion_r3148184570][ask partena about this six months thingy]]
+** DONE mail conversation with partena
+Sabrina:
+#+begin_quote
+Hello Fabien,
+
+
+
+Voici les infos que je trouve dans la note :
+
+
+
+    Pour les travailleurs sortis en cours d’année, les fichiers sont également envoyés. Le job tourne chaque jeudi soir à partir du mois de février ;
+    Le Fonds garde un historique par travailleur des déclarations qu’ils ont déjà reçues de notre part et qu’ils ont déjà traitées.
+
+
+
+Donc si on a déjà calculé une PFA suite à un 1er contrat et que le travailleur revient, on doit calculer la PFA de décembre uniquement sur le 2ème contrat.
+
+Au niveau de l’envoi, dès qu’il y a eu un calcul en paie, il est envoyé au Fonds.
+
+Donc dans le cas du travailleur qui a eu 2 occupations avec calcul de la PFA, il y aura 2 envois, le 1er au moment de la sortie du travailleur et le 2ème en décembre.
+
+
+
+Bien à toi,
+#+end_quote
+Ma question:
+#+begin_quote
+Salut Cédric,
+
+Oui, je comprends bien, mais si la personne prend des jours de maladie lors du premier contrat (e.g. : 7 jours), est-ce que je dois les prendre en compte lors du calcul du deuxième mois (donc il n'aura plus de jours de maladie assimilables), ou pas (le compteur se remet à zéro, et il peut assimiler à nouveau 7 jours de maladie) ?
+
+La même question s'applique pour les congés maternités, force majeure, etc.
+
+Bien à toi
+#+end_quote
+Réponse de Fabien : Non le compeur ne se remet pas à zéro
+** DONE Mail with partena 2
+- En gros pour la partie des six mois assimilables, c'est pas une seule période d'incapacité par an, genre si la période a commencé l'année d'avant, elle peut être assimilée l'année d'après + une autre période ! Genre en fait c'est période de + de six mois qui est à cheval + max une période qui commence pendant l'année actuelle.
+- Pour ce qu'ils considèrent comme période de six mois, c'est six mois calendriers (six mois naturels quoi, 1 janvier -> 30 juin). A voir si il faut changer ça pour d'autres endroits
+** DONE still fixing [[project:enterprise/l10n_be_hr_payroll/tests/test_cp302_thirteen_month.py::1391][test_mixed_leaves_part_time()]]
 * WAIT [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]]
 * WAIT [[https://www.odoo.com/odoo/project.task/5500347][[Time Off] Gant overview see all employees]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477588][[Time Off, Planning] Gantt Domain Employee Without Records]]

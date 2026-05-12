@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-# TODO adapt this script then test it on your case
-
 """
 Run payslip validation tests and automatically update expected values in test files
 based on actual computed values from test failures.
@@ -25,11 +23,10 @@ DIM = "\033[2m"
 
 TEST_TAGS = ":TestPayslipValidation,:TestCreditTime,:TestDMFA"
 
-
 def run_tests(tags):
     print(f"\n{CYAN}🔄 Running tests:{RESET} {DIM}{tags}{RESET}", flush=True)
     result = subprocess.run(
-        ('./o', "-t", tags),
+        ('./o', "-m", "test_l10n_be_hr_payroll_account", "-t", tags),
         capture_output=True,
         text=True,
         check=False,
