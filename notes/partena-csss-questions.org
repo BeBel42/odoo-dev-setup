@@ -1,0 +1,144 @@
+Deux questions par rapport à la CSS:
+
+- Tenez vous bien compte que lorsqu’on paie une indemnité de rupture de contrat , on calcule la CSS par trimestre ?
+
+    Donc si j’ai une indemnité de rupture de 1 an, je vais ajouter le morceau d’indemnité de rupture propre au trimestre de sortie à la rémunération classique de ce trimestre de sortie en 1er lieu
+    Et ensuite , on découpe l’indemnité de rupture en x trimestres et on calcule la CSS par trimestre.
+
+    Est-ce que c’est fait comme ça dans Odoo ?
+    Je ne sais pas encore comment tester une termination fee dans Odoo, sinon je ferais le test.
+
+/Pour la periode de cloture fiscale, c'est Fiscal Year dans accounting (configuration > settings)/
+- Autre point d’attention , on ne recalcule plus la CSS en cas de rectification de paie lorsque la clôture fiscale annuelle est établie.
+    C’est-à-dire quand le fisc nous dit « à partir de cette date les rectifications de fiches fiscales sont interdites ».
+    C’est une date que le fisc nous transmet et qu’on stocke dans le système chaque année.
+
+Je te donne un vieil exemple de cheminement du calcul de la CSS en cas d’indemnité de rupture de contrat, ça date de 2011 mais c’est toujours valable , au cas ou vous ne l’auriez pas implémenté comme ça dans Odoo
+
+bàt
+
+
+
+Travailleur sorti le 18/10/2011 avec IRC à partir du 19/10/2011 jusqu’au 18/11/2012.
+
+Brut mensuel trimestre 4 :
+
+*Salaire* : 3058.50 => trop bas pour une CSS trimestrielle (déclenchée par la date de sortie)
+
+*Prime barème forfaitaire* : 3923.74.On y rajoute les 3058.50 du trimestre = 6982.24
+css = ~1.1% de (6982.24 - 6570.55) (voir tableau) =  4.5286~
+~+ 55.80 (voir tableau) = 60.33~
+
+
+/Ca c'est la valeur des conges qui te restent (non utilises) de l'annee/
+*Pécule de sortie année en cours* : base de calcul de la CSS = pécule simple = 3980.74 >> CSS trimestrielle sur la base
+~3058.50 + 3980.74 + 3923.74 = 10962.98~
+~-6570.55 x 1.1% = 48.32~
+~+55.80 = 104.12~
+~-60.33~ déjà calculé = ~43.79~
+
+
+/Ca c'est la valeur des conges qui tu as gagne pour l'annee dapres (on te les paie aussi direct)/
+*Pécule de sortie anticipé* : base de calcul de la CSS = pécule simple = 4390.71 >> CSS trimestrielle sur la base
+~4952.46 + 3058.50 + 3980.74 + 3923.74 = 15915.44~
+~-6570.55 x 1.1% = 102.79~
+~+55.80 = 158.59~
+à plafonner à ~154.92 – 60.33-43.79=50.80~
+
+
+*Volet IRC :*
+
+1. On ajoute le brut de l’irc (en proportion) pour complèter le t4/2011.Base 103689.23 pour 283 jours prestables (déterminé sur base de l’horaire théorique du travailleur)
+    T4/2011 période irc= 53 jours (9 jours en 10/2011 +22 jours en 11/2011 +22 jours en 12/2011)
+
+    Brut période t4/2011 = ~103689.23 / 283 x 53 = 19418.83~
+
+   - /CSS pour t4/2011 est déjà au maximum à savoir 154.92 donc pas de CSS sur cette partie./
+
+2. On calcule une CSS trimestrielle (en proportion) pour chaque trimestre de l’année 2012
+   - T1/2012 = 65 jours par trimestre du t1 au t3 de 2012 (régime 5 x13 semaines)
+   - Brut = ~103689.23 / 283 x 65 = 23815.54~ pour le trimestre (>18116.47) donc *CSS trimestrielle maximale de 154.92*
+       ~154.92 x 3 trimestres = 464.76~
+   - T4 /2012 est incomplet car l’irc se termine le 18/11/2012 soit 35 jours prestables théoriquement.
+   - CSS pour t4/2012 = ~103689.23 / 283 x 35 = 12823.76~ pour le trimestre soit une cotisation css égale à
+        ~(12823.76 - 6570.55) x 1.1% = 68.79~
+        ~+55.80 = 124.59~
+
+   Le calcul de la CSS est terminé !
+
+
+
+
+Questions + Reponses:
+
+Salut Fabien,
+
+Non, je n'ai rien fait avec l'indemnité de rupture. Je faisais juste mes calculs basés sur les revenus bruts... Donc aucun découpage non plus. Je vais travailler dessus.
+Mais je ne comprends pas tout de ton mail / exemple, donc j'ai besoin de quelques clarifications :
+
+  -----
+
+- Si, après la clôture fiscale (e.g. : 31 décembre 2025), je corrige une fiche de paie de novembre. Ok, on ne recalcule pas la CSS. On garde la valeur originale. Mais imagine, on devait payer 30 euros en plus. Est-ce que je rajoute ces 30 euros à la CSSS du premier trimestre de 2026, ou est-ce que je ne fais rien de spécial et l'employeur règlera ça lui-même ?
+
+  - tu ne recalcules plus rien , la CSS est figée , pas de report à faire sur une année postérieure non plus, elle reste calée sur le montant calculé initialement => ceci parce que la CSS est déclarée distinctement sur ta fiche fiscale, le fisc (SPF) bloque tout à un moment donné.
+
+    Et la date de blocage est fournie par le SPF, ça n’est pas le 31/12 de chaque année, ce sera plus tard l’année suivante.
+
+-----
+
+- Je n'arrive pas à trouver + à comprendre ce qu'est la Prime barème forfaitaire... Est-ce que c'est en rapport avec la PFA du travailleur ?
+
+- oui tout ce que le travailleur reçoit comme prime dont la taxation (le précompte profesionnel) est établie sur base de tranche salariale qui débouche sur un % (forfait) de précompte à appliquer. La prime de fin d’année est en effet un élément salarial de ce type.
+
+-----
+
+- Pour le "pécule de sortie année en cours", est-ce bien la valeur des congés qui restent au travailleur (pas utilisés) pour l'année ?
+ 
+- quand tu sors tu reçois en argent ce qu’il te reste à prendre comme congé cette semaine et également le montant des congés de l’année suivante , tu reçois deux parties chaque fois , le simple pécule (les jours de congé à prendre ) et le double pécule ( une sorte de prime équivalent à 92% de ta rémunération grosso modo) , c’est sur la partie simple pécule qu’on calcule également la CSS.
+
+-----
+
+- Et pour le "Pécule de sortie anticipé", est-ce bien la valeur des congés que le travailleur a gagnés pour l'année d'après ? (par e.g. : si je démissionne en fin juin, j'aurais eu droit à 10 jours de congés l'année d'après, donc je les reçois en argent à la date de ma sortie).
+  
+- En effet
+
+-----
+
+- Est-ce normal que ces deux pécules ont un montant plus élevé que le salaire du travailleur ?
+    Si les pécules sont basés sur les jours de congés légaux (max. 20 jours), alors la valeur devrait être plus basse que le salaire brut mensuel (qui représente 22 jours de travail).
+    Peut-être que le salaire indiqué (3058 euros) n'est pas le salaire mensuel, mais le salaire proratisé (vu que l'employé arrête de travailler au milieu du mois).
+  
+- oui les montants ne doivent pas t’inquiéter ici , tu peux sortir très tôt dans le trimestre et recevoir un pécule qui est l’équivalent de 15.34% de toute l’année -1 et de l’année en cours donc forcément ça peut donner plus que le salaire si le travailleur sort en cours de mois.
+
+-----
+
+- Dans l'exemple, ils disent que le salaire est trop bas pour une CSSS trimestrielle, mais la CSSS trimestrielle est calculée sur le salaire brut ONSS trimestriel.
+  Donc, je ne comprends pas pourquoi la CSS sur le salaire n'est pas calculée sur 3 x 3058.50.
+  Sinon ça voudrait dire que le travailleur touche un tiers de 3058.50, ce qui m'a l'air peu probable...
+  Est-ce une erreur de l'exemple ?
+
+- c’est son unique salaire sur le trimestre car il sort en cours du mois 1 du trimestre , n’oublie pas que la règle trimestrielle s’applique sur le dernier mois du trimestre OU EN CAS DE SORTIE sur le mois de sortie déjà.
+
+-----
+
+- Dans l'exemple donné, il fait le calcul à chaque fois en rajoutant le barème, puis un pécule, puis un autre, en les déduisant tous un par un. C’est le principe du fonctionnement du mainframe de Partena, les éléments salariaux sont découpés en plusieurs blocs, donc il fonctionne par cumul à chaque élément de rémunération qu’il rencontre car la chaine de calcul les présente séparément dans le système.
+  Mais au final, la vraie CSSS à payer est celle du dernier calcul. Celle calculée sur :
+    4952.6 + 3058.50 + 3980.74 + 3923.74 = 15915.44
+    -6570.55 x 1.1% = 102.79
+    +55.80 = 158.59 (à plafonner à 154.92)
+
+    (donc sur (pécule sortie anticipée ?) + salaire + pécule de sortie en cours + prime barème forfaitaire)
+
+    Donc je ne comprends pas pourquoi je devrais faire tout, étape par étape, si au final seul le dernier calcul a la valeur réelle de la CSSS à payer. Ai-je raison ou est-ce que je dois faire le calcul par étape (peut-être dois-je faire les calculs sur des documents différents et pas juste tout mettre sur la dernière fiche de paie ou termination fees ?)  comme on distingue bien les nets du salaire, de la prime de fin d’année, des pécules de sortie, des indemnités de rupture de contrat , on trouve aussi plus logique que la CSS soit découpée selon les différents éléments salariaux.
+
+- C’est plus propre mais la css est bien le calcul globalisé de tous les éléments salariaux du trimestre.
+
+-----
+
+- Je ne sais pas pourquoi le pécule de sortie anticipée dans l'exemple est à 4952.6 et non à 4390.71 euros comme dit dans l'exemple.
+- Surement une erreur de note  de ma part à l’époque , bien vu.
+
+-----
+
+Bien à toi,
+Martin Lefèvre
