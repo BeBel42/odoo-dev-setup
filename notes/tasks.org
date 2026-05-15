@@ -27,6 +27,8 @@ template: =partena_payslips=
 [[project:enterprise/l10n_be_hr_payroll/models/hr_payslip.py::1049][special social cot function]]
 ** TODO [[project:notes/partena-csss-questions.org::70][mail questions partena]]
 *** TODO Mettre CSSS sur termination fees a calculer sur l'IRC (Indemnite de rupture de contract)
+- Genre le montant du preavis qu'on donne si le travailleur le preste pas ou partiellement
+- [[project:notes/partena-csss-questions.org::51][Mais elle elle doit genre etre repartie par trimestre]]
 *** TODO CSSS doit aussi etre calculee sur les deux holiday attests (N et N-1) sur le =PAY_SIMPLE=. C'est le simple pecule de vacance.
 - N = Jours qu'on accumule pour l'an prochain ([[project:notes/partena-csss-questions.org::101][Pecule de sortie anticipee]])
 - N-1 = Jour qu'on a accumule l'annee d'avant qu'on peut utiliser mtn ([[project:notes/partena-csss-questions.org::95][Pecule de sortie annee en cours]])
