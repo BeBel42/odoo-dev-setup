@@ -34,6 +34,7 @@ services:
       - ../upgrade-util:/app/upgrade-util
       - ../venv:/app/venv
       - ../.odoorc:/app/.odoorc
+      - ../lib/custom-odoo-bin:/app/custom-odoo-bin
       # where odoo stores its session data
       - ./volumes/.odoo-share:/root/.local/share/Odoo/
       - ./volumes/screenshots/:/tmp/odoo_tests/

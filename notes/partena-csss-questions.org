@@ -38,7 +38,7 @@ css = ~1.1% de (6982.24 - 6570.55) (voir tableau) =  4.5286~
 ~-60.33~ déjà calculé = ~43.79~
 
 
-/Ca c'est la valeur des conges qui tu as gagne pour l'annee dapres (on te les paie aussi direct)/
+/Ca c'est la valeur des conges que tu as gagne pour l'annee dapres (on te les paie aussi direct)/
 *Pécule de sortie anticipé* : base de calcul de la CSS = pécule simple = 4390.71 >> CSS trimestrielle sur la base
 ~4952.46 + 3058.50 + 3980.74 + 3923.74 = 15915.44~
 ~-6570.55 x 1.1% = 102.79~
@@ -101,11 +101,10 @@ Mais je ne comprends pas tout de ton mail / exemple, donc j'ai besoin de quelque
 - Et pour le "Pécule de sortie anticipé", est-ce bien la valeur des congés que le travailleur a gagnés pour l'année d'après ? (par e.g. : si je démissionne en fin juin, j'aurais eu droit à 10 jours de congés l'année d'après, donc je les reçois en argent à la date de ma sortie).
   
 - En effet
-
 -----
 
 - Est-ce normal que ces deux pécules ont un montant plus élevé que le salaire du travailleur ?
-    Si les pécules sont basés sur les jours de congés légaux (max. 20 jours), alors la valeur devrait être plus basse que le salaire brut mensuel (qui représente 22 jours de travail).
+    Si les pécules sont basés sur les jours de congés légaux (max. 20 jours), alors la valeur devrait être plus basse que le salaire brut mensuel (qui représente 22 jours de travail)
     Peut-être que le salaire indiqué (3058 euros) n'est pas le salaire mensuel, mais le salaire proratisé (vu que l'employé arrête de travailler au milieu du mois).
   
 - oui les montants ne doivent pas t’inquiéter ici , tu peux sortir très tôt dans le trimestre et recevoir un pécule qui est l’équivalent de 15.34% de toute l’année -1 et de l’année en cours donc forcément ça peut donner plus que le salaire si le travailleur sort en cours de mois.

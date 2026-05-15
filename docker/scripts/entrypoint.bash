@@ -5,8 +5,9 @@
 
 set -eu
 
-cd "$ODOO_DIR"
-odoo_command="$ODOO_DIR/community/odoo-bin $*"
+odoo_command="$ODOO_DIR/custom-odoo-bin $*"
+# where odoo-bin dependencies are located (custom-odoo-bin is not in that dir)
+export PYTHONPATH=$ODOO_DIR/community
 
 echo -e "\033[0;35m$odoo_command\033[0m"
 
@@ -14,6 +15,8 @@ debug_params=""
 if [[ $ENABLE_DEBUG = 1 ]]; then
 	debug_params="-Xfrozen_modules=off -m debugpy --listen localhost:5678"
 fi
+
+cd "$ODOO_DIR"
 
 set -x
 

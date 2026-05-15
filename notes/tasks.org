@@ -26,6 +26,11 @@ template: =partena_payslips=
 #+end_src 
 [[project:enterprise/l10n_be_hr_payroll/models/hr_payslip.py::1049][special social cot function]]
 ** TODO [[project:notes/partena-csss-questions.org::70][mail questions partena]]
+*** TODO Mettre CSSS sur termination fees a calculer sur l'IRC (Indemnite de rupture de contract)
+*** TODO CSSS doit aussi etre calculee sur les deux holiday attests (N et N-1) sur le =PAY_SIMPLE=. C'est le simple pecule de vacance.
+- N = Jours qu'on accumule pour l'an prochain ([[project:notes/partena-csss-questions.org::101][Pecule de sortie anticipee]])
+- N-1 = Jour qu'on a accumule l'annee d'avant qu'on peut utiliser mtn ([[project:notes/partena-csss-questions.org::95][Pecule de sortie annee en cours]])
+  Pour faire tout ca, tu faire une end of collaboration -> generate holiday attests -> set /Right to time off/ (jours de conges legaux auxquels tu as droit) and set /Time off already taken/ en salary inputs manuellement. Ouais bizarre.
 ** DONE prendre nouveau doc + up to date et le mettre dans la tache (page 7 est celle qui est interessante)
 ** DONE revenir sur old rule param pour le faire sur les anciennes versions
 ** Talk with damien
@@ -51,7 +56,7 @@ Au lieu de faire CSS mensuelle puis trimestrielle, tu peux faire:
      --checkout-enterprise saas-19.2 >&2
 #+end_src 
 * TODO [[https://runbot.odoo.com/odoo/runbot.build.error/241204][replace comodel function runbot error]] :not_in_pipe:
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10]End of year Bonus - Fond Horeca]] :difficult:
+* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10]End of year Bonus - Fond Horeca]] :difficult:
 #+begin_src bash :results silent
 ../o --checkout-community master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef \
      --checkout-enterprise master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef >&2
