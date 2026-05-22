@@ -20,19 +20,23 @@ template: =partena_payslips=
   
 * FIXME [[https://www.odoo.com/odoo/project/1251/tasks/6068542][[l10n_be_hr_payroll] Quarterly special social cotisation payment]]
 #+begin_src bash :results silent
-../o --checkout-community master \
+../o --checkout-community master-l10n_be_hr_payroll-quarterly_csss-mlef \
      --checkout-enterprise master-l10n_be_hr_payroll-quarterly_csss-mlef \
      --checkout-upgrade master-l10n_be_hr_payroll-quarterly_csss-mlef >&2
 #+end_src 
 [[project:enterprise/l10n_be_hr_payroll/models/hr_payslip.py::1049][special social cot function]]
 ** TODO [[project:notes/partena-csss-questions.org::70][mail questions partena]]
-*** TODO Mettre CSSS sur termination fees a calculer sur l'IRC (Indemnite de rupture de contract)
+*** DONE Mettre CSSS sur termination fees a calculer sur l'IRC (Indemnite de rupture de contract)
 - Genre le montant du preavis qu'on donne si le travailleur le preste pas ou partiellement
 - [[project:notes/partena-csss-questions.org::51][Mais elle elle doit genre etre repartie par trimestre]]
-*** TODO CSSS doit aussi etre calculee sur les deux holiday attests (N et N-1) sur le =PAY_SIMPLE=. C'est le simple pecule de vacance.
+*** TODO J'ai fait l'IRC repartie par trimestre et tout, j'ai teste pour la notice period with full respect, and without respect, but I commented out the attempt to test with the partial notice respect (not done) (it does not work, [[https://discord.com/channels/@me/1401918106942574764/1507306438417059920][ND_WEEK is zero in my tests]]), you'll have to figure out something lol
+*** DONE CSSS doit aussi etre calculee sur les deux holiday attests (N et N-1) sur le =PAY_SIMPLE=. C'est le simple pecule de vacance.
 - N = Jours qu'on accumule pour l'an prochain ([[project:notes/partena-csss-questions.org::101][Pecule de sortie anticipee]])
 - N-1 = Jour qu'on a accumule l'annee d'avant qu'on peut utiliser mtn ([[project:notes/partena-csss-questions.org::95][Pecule de sortie annee en cours]])
   Pour faire tout ca, tu faire une end of collaboration -> generate holiday attests -> set /Right to time off/ (jours de conges legaux auxquels tu as droit) and set /Time off already taken/ en salary inputs manuellement. Ouais bizarre.
+**** DONE C'est fait mais il manque des tests
+*** TODO [[project:notes/partena-csss-questions.org::12][Ne pas recorriger la CSSS si fait après cloture fiscale]]
+**** TODO Y a pas moyen donc faudra mettre ca dans la spec et voir pour que les POs creent une tache
 ** DONE prendre nouveau doc + up to date et le mettre dans la tache (page 7 est celle qui est interessante)
 ** DONE revenir sur old rule param pour le faire sur les anciennes versions
 ** Talk with damien
@@ -47,6 +51,10 @@ Au lieu de faire CSS mensuelle puis trimestrielle, tu peux faire:
 ** DONE relire code
 ** DONE rename all occurences of "special social cotisation" to "special social contribution"
 ** DONE y a rien sur la PFA lol faut aussi mettre + tester
+** TODO Quand on génère plusieurs payslips à la fois (e.g.: les deux holiday attests), ils sont compupted en même temps et c'est pas bon.
+Il faut prévenir l'user que il faut les faire une par une. Genre avec un warning.
+regarde pour [[https://github.com/odoo/enterprise/pull/115811][_issue_l10n_be_draft_payslips_by_departure]] et améliore la fonction pour que toutes les payslips du genre qui ont en draft et qui ont pas le =self.create_date= le plus petit aient le warning. Change ptet le message pour le rendre + explicite.
+** TODO Faire rapport à David pour qu'il l'envoie aux RH de ce qu'on a mal fait [[https://discord.com/channels/@me/1420677058845212764/1506661389639487610][voir discord message]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6041052][[l10n_be_hr_payroll] Traceback when generating payslip for cp302]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
@@ -58,7 +66,7 @@ Au lieu de faire CSS mensuelle puis trimestrielle, tu peux faire:
      --checkout-enterprise saas-19.2 >&2
 #+end_src 
 * TODO [[https://runbot.odoo.com/odoo/runbot.build.error/241204][replace comodel function runbot error]] :not_in_pipe:
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10]End of year Bonus - Fond Horeca]] :difficult:
+* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10]End of year Bonus - Fond Horeca]] :difficult:
 #+begin_src bash :results silent
 ../o --checkout-community master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef \
      --checkout-enterprise master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef >&2
@@ -274,6 +282,7 @@ Réponse de Fabien : Non le compeur ne se remet pas à zéro
 - En gros pour la partie des six mois assimilables, c'est pas une seule période d'incapacité par an, genre si la période a commencé l'année d'avant, elle peut être assimilée l'année d'après + une autre période ! Genre en fait c'est période de + de six mois qui est à cheval + max une période qui commence pendant l'année actuelle.
 - Pour ce qu'ils considèrent comme période de six mois, c'est six mois calendriers (six mois naturels quoi, 1 janvier -> 30 juin). A voir si il faut changer ça pour d'autres endroits
 ** DONE still fixing [[project:enterprise/l10n_be_hr_payroll/tests/test_cp302_thirteen_month.py::1391][test_mixed_leaves_part_time()]]
+** TODO Make all the assimilation limits (and other things) as rule parameters so that it can be modified by parterna if they want it to
 * WAIT [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]]
 * WAIT [[https://www.odoo.com/odoo/project.task/5500347][[Time Off] Gant overview see all employees]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477588][[Time Off, Planning] Gantt Domain Employee Without Records]]
