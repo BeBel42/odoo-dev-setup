@@ -51,10 +51,11 @@ Au lieu de faire CSS mensuelle puis trimestrielle, tu peux faire:
 ** DONE relire code
 ** DONE rename all occurences of "special social cotisation" to "special social contribution"
 ** DONE y a rien sur la PFA lol faut aussi mettre + tester
-** TODO Quand on génère plusieurs payslips à la fois (e.g.: les deux holiday attests), ils sont compupted en même temps et c'est pas bon.
+** TODO Quand on génère plusieurs payslips à la fois (e.g.: les deux holiday attests), ils sont computed en même temps et c'est pas bon.
 Il faut prévenir l'user que il faut les faire une par une. Genre avec un warning.
-regarde pour [[https://github.com/odoo/enterprise/pull/115811][_issue_l10n_be_draft_payslips_by_departure]] et améliore la fonction pour que toutes les payslips du genre qui ont en draft et qui ont pas le =self.create_date= le plus petit aient le warning. Change ptet le message pour le rendre + explicite.
+regarde pour [[project:enterprise/l10n_be_hr_payroll/data/hr_payroll_warning_data.xml::713][_issue_l10n_be_draft_payslips_by_departure]] et améliore la fonction pour que toutes les payslips du genre qui sont en draft et qui ont pas le =self.create_date= le plus petit aient le warning. Change ptet le message pour le rendre + explicite.
 ** TODO Faire rapport à David pour qu'il l'envoie aux RH de ce qu'on a mal fait [[https://discord.com/channels/@me/1420677058845212764/1506661389639487610][voir discord message]]
+** TODO See [[https://github.com/odoo/odoo/pull/254218/changes#r3317499615][pfa github review]] to apply it as well on your copy of the =_get_max_workable_hours= function
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6041052][[l10n_be_hr_payroll] Traceback when generating payslip for cp302]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
@@ -282,7 +283,16 @@ Réponse de Fabien : Non le compeur ne se remet pas à zéro
 - En gros pour la partie des six mois assimilables, c'est pas une seule période d'incapacité par an, genre si la période a commencé l'année d'avant, elle peut être assimilée l'année d'après + une autre période ! Genre en fait c'est période de + de six mois qui est à cheval + max une période qui commence pendant l'année actuelle.
 - Pour ce qu'ils considèrent comme période de six mois, c'est six mois calendriers (six mois naturels quoi, 1 janvier -> 30 juin). A voir si il faut changer ça pour d'autres endroits
 ** DONE still fixing [[project:enterprise/l10n_be_hr_payroll/tests/test_cp302_thirteen_month.py::1391][test_mixed_leaves_part_time()]]
-** TODO Make all the assimilation limits (and other things) as rule parameters so that it can be modified by parterna if they want it to
+** DONE Make all the assimilation limits (and other things) as rule parameters so that it can be modified by parterna if they want it to
+*** DONE You forgot to do it for the stuff inside =_cp302_get_assimilable_hours_after_contract=
+** TODO Partial 66% incapacity
+Tu peux le faire en fait. Genre sur le calendar du mec, tu peux expend ses work lines pour y mettre un type. (e.g.: Medical assistance - MEDIC01)
+Genre ce work entry type c'est quand le mec travaille pas a cause de son partial incapacity. Si il a plus de 66% de ca dans la semaine ou tu trouves une partial incapacity, alors il fit la condition.
+[[https://discord.com/channels/@me/1509872578787938324/1509899617133924503][Voir message discord avec jeher]]
+*** NOTE
+C'est seulement bon si l'incapacite a ete accordee par le medecin conseil. Si c'est le medecin traitant ca va pas.
+*** TODO Efface le truc des taches de choses pas faites once you're done with it
+
 * WAIT [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]]
 * WAIT [[https://www.odoo.com/odoo/project.task/5500347][[Time Off] Gant overview see all employees]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477588][[Time Off, Planning] Gantt Domain Employee Without Records]]

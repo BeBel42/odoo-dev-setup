@@ -488,7 +488,7 @@ fi
 
 if [[ $upgrade = 1 ]]; then
     echo "-u has been specified. Enabling upgrade..."
-    cmd="$cmd --upgrade-path=upgrade-util/src,upgrade/migrations --stop-after-init --log-level=info"
+    cmd="$cmd --upgrade-path=upgrade-util/src,upgrade/migrations --stop-after-init"
 fi
 
 if [[ $no_restart = 0 ]]; then
@@ -547,7 +547,7 @@ fi
 
 if ! [[ "$test" = "" ]]; then
     echo '"-t" has been specified. Adding test arguments to cmd'
-    cmd="$cmd --stop-after-init --log-level=test --test-enable --test-tags=$test"
+    cmd="$cmd --stop-after-init --test-enable --test-tags=$test"
     if [[ "$module" = "" ]]; then
         echo -e "\033[1;33mWarning\033[0m: no module has been set to be \
 			tracked (-m) or installed (-i). Tests may not work." 1>&2
@@ -556,12 +556,12 @@ fi
 
 if ! [[ "$save_template" = "" ]]; then
     echo '"--save-template" has been specified. Adding arguments to cmd'
-    cmd="$cmd --stop-after-init --log-level=info"
+    cmd="$cmd --stop-after-init"
 fi
 
 if [[ $init_only = 1 ]]; then
     echo '"--init-only" has been specified. Adding arguments to cmd'
-    cmd="$cmd --stop-after-init --log-level=info"
+    cmd="$cmd --stop-after-init"
 fi
 
 if [[ $odoo_version = 1 ]]; then
