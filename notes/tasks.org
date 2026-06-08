@@ -25,18 +25,19 @@ template: =partena_payslips=
      --checkout-upgrade master-l10n_be_hr_payroll-quarterly_csss-mlef >&2
 #+end_src 
 [[project:enterprise/l10n_be_hr_payroll/models/hr_payslip.py::1049][special social cot function]]
-** TODO [[project:notes/partena-csss-questions.org::70][mail questions partena]]
+** [?] [[project:notes/partena-csss-questions.org::70][mail questions partena]]
 *** DONE Mettre CSSS sur termination fees a calculer sur l'IRC (Indemnite de rupture de contract)
 - Genre le montant du preavis qu'on donne si le travailleur le preste pas ou partiellement
 - [[project:notes/partena-csss-questions.org::51][Mais elle elle doit genre etre repartie par trimestre]]
-*** TODO J'ai fait l'IRC repartie par trimestre et tout, j'ai teste pour la notice period with full respect, and without respect, but I commented out the attempt to test with the partial notice respect (not done) (it does not work, [[https://discord.com/channels/@me/1401918106942574764/1507306438417059920][ND_WEEK is zero in my tests]]), you'll have to figure out something lol
+*** DONE J'ai fait l'IRC repartie par trimestre et tout, j'ai teste pour la notice period with full respect, and without respect, but I commented out the attempt to test with the partial notice respect (not done) (it does not work, [[https://discord.com/channels/@me/1401918106942574764/1507306438417059920][ND_WEEK is zero in my tests]]), you'll have to figure out something lol
 *** DONE CSSS doit aussi etre calculee sur les deux holiday attests (N et N-1) sur le =PAY_SIMPLE=. C'est le simple pecule de vacance.
 - N = Jours qu'on accumule pour l'an prochain ([[project:notes/partena-csss-questions.org::101][Pecule de sortie anticipee]])
 - N-1 = Jour qu'on a accumule l'annee d'avant qu'on peut utiliser mtn ([[project:notes/partena-csss-questions.org::95][Pecule de sortie annee en cours]])
   Pour faire tout ca, tu faire une end of collaboration -> generate holiday attests -> set /Right to time off/ (jours de conges legaux auxquels tu as droit) and set /Time off already taken/ en salary inputs manuellement. Ouais bizarre.
 **** DONE C'est fait mais il manque des tests
-*** TODO [[project:notes/partena-csss-questions.org::12][Ne pas recorriger la CSSS si fait après cloture fiscale]]
+*** [?] [[project:notes/partena-csss-questions.org::12][Ne pas recorriger la CSSS si fait après cloture fiscale]]
 **** TODO Y a pas moyen donc faudra mettre ca dans la spec et voir pour que les POs creent une tache
+** TODO tester dans l'ui
 ** DONE prendre nouveau doc + up to date et le mettre dans la tache (page 7 est celle qui est interessante)
 ** DONE revenir sur old rule param pour le faire sur les anciennes versions
 ** Talk with damien
@@ -51,11 +52,13 @@ Au lieu de faire CSS mensuelle puis trimestrielle, tu peux faire:
 ** DONE relire code
 ** DONE rename all occurences of "special social cotisation" to "special social contribution"
 ** DONE y a rien sur la PFA lol faut aussi mettre + tester
-** TODO Quand on génère plusieurs payslips à la fois (e.g.: les deux holiday attests), ils sont computed en même temps et c'est pas bon.
+** CANCEL Quand on génère plusieurs payslips à la fois (e.g.: les deux holiday attests), ils sont computed en même temps et c'est pas bon.
 Il faut prévenir l'user que il faut les faire une par une. Genre avec un warning.
 regarde pour [[project:enterprise/l10n_be_hr_payroll/data/hr_payroll_warning_data.xml::713][_issue_l10n_be_draft_payslips_by_departure]] et améliore la fonction pour que toutes les payslips du genre qui sont en draft et qui ont pas le =self.create_date= le plus petit aient le warning. Change ptet le message pour le rendre + explicite.
-** TODO Faire rapport à David pour qu'il l'envoie aux RH de ce qu'on a mal fait [[https://discord.com/channels/@me/1420677058845212764/1506661389639487610][voir discord message]]
-** TODO See [[https://github.com/odoo/odoo/pull/254218/changes#r3317499615][pfa github review]] to apply it as well on your copy of the =_get_max_workable_hours= function
+*** CANCEL avec =self.create_date=, le problème c'est que si le mec il validate la pasylip + vielle, alors le warning disparait (alors qu'il devrait rester tant que le mec a pas recompte). Tu peux fix ça en utilisant =compute_date= mais c'est un field.Date et pas datetime. Faudrait voir pour changer ça
+Tu peux le faire gogo gadgeto upgrade script
+** DONE Faire rapport à David pour qu'il l'envoie aux RH de ce qu'on a mal fait [[https://discord.com/channels/@me/1420677058845212764/1506661389639487610][voir discord message]]
+** DONE See [[https://github.com/odoo/odoo/pull/254218/changes#r3317499615][pfa github review]] to apply it as well on your copy of the =_get_work_hours_count= function
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6041052][[l10n_be_hr_payroll] Traceback when generating payslip for cp302]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
@@ -67,7 +70,7 @@ regarde pour [[project:enterprise/l10n_be_hr_payroll/data/hr_payroll_warning_dat
      --checkout-enterprise saas-19.2 >&2
 #+end_src 
 * TODO [[https://runbot.odoo.com/odoo/runbot.build.error/241204][replace comodel function runbot error]] :not_in_pipe:
-* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10]End of year Bonus - Fond Horeca]] :difficult:
+* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10]End of year Bonus - Fond Horeca]] :difficult:
 #+begin_src bash :results silent
 ../o --checkout-community master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef \
      --checkout-enterprise master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef >&2
@@ -285,14 +288,17 @@ Réponse de Fabien : Non le compeur ne se remet pas à zéro
 ** DONE still fixing [[project:enterprise/l10n_be_hr_payroll/tests/test_cp302_thirteen_month.py::1391][test_mixed_leaves_part_time()]]
 ** DONE Make all the assimilation limits (and other things) as rule parameters so that it can be modified by parterna if they want it to
 *** DONE You forgot to do it for the stuff inside =_cp302_get_assimilable_hours_after_contract=
-** TODO Partial 66% incapacity
+** OKAY Partial 66% incapacity
+[[https://www.odoo.com/odoo/project/1251/tasks/6159782][Has been put in this task]]
+[[https://github.com/odoo/enterprise/pull/110863#discussion_r3356285756][See this gh comment]]
 Tu peux le faire en fait. Genre sur le calendar du mec, tu peux expend ses work lines pour y mettre un type. (e.g.: Medical assistance - MEDIC01)
 Genre ce work entry type c'est quand le mec travaille pas a cause de son partial incapacity. Si il a plus de 66% de ca dans la semaine ou tu trouves une partial incapacity, alors il fit la condition.
 [[https://discord.com/channels/@me/1509872578787938324/1509899617133924503][Voir message discord avec jeher]]
 *** NOTE
 C'est seulement bon si l'incapacite a ete accordee par le medecin conseil. Si c'est le medecin traitant ca va pas.
-*** TODO Efface le truc des taches de choses pas faites once you're done with it
-
+*** CANCEL Efface le truc des taches de choses pas faites once you're done with it
+**
+** DONE finish fixing review
 * WAIT [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]]
 * WAIT [[https://www.odoo.com/odoo/project.task/5500347][[Time Off] Gant overview see all employees]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477588][[Time Off, Planning] Gantt Domain Employee Without Records]]
