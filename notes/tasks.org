@@ -18,14 +18,14 @@ template: =partena_payslips=
   - type de carburant 5 = Hybride/Essence
   - Type d'usage = Prive + domicile/travail (mixte)
   
-* FIXME [[https://www.odoo.com/odoo/project/1251/tasks/6068542][[l10n_be_hr_payroll] Quarterly special social cotisation payment]]
+* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/6068542][[l10n_be_hr_payroll] Quarterly special social cotisation payment]] :difficult:
 #+begin_src bash :results silent
 ../o --checkout-community master-l10n_be_hr_payroll-quarterly_csss-mlef \
      --checkout-enterprise master-l10n_be_hr_payroll-quarterly_csss-mlef \
      --checkout-upgrade master-l10n_be_hr_payroll-quarterly_csss-mlef >&2
 #+end_src 
 [[project:enterprise/l10n_be_hr_payroll/models/hr_payslip.py::1049][special social cot function]]
-** [?] [[project:notes/partena-csss-questions.org::70][mail questions partena]]
+** [X] [[project:notes/partena-csss-questions.org::70][mail questions partena]]
 *** DONE Mettre CSSS sur termination fees a calculer sur l'IRC (Indemnite de rupture de contract)
 - Genre le montant du preavis qu'on donne si le travailleur le preste pas ou partiellement
 - [[project:notes/partena-csss-questions.org::51][Mais elle elle doit genre etre repartie par trimestre]]
@@ -35,9 +35,10 @@ template: =partena_payslips=
 - N-1 = Jour qu'on a accumule l'annee d'avant qu'on peut utiliser mtn ([[project:notes/partena-csss-questions.org::95][Pecule de sortie annee en cours]])
   Pour faire tout ca, tu faire une end of collaboration -> generate holiday attests -> set /Right to time off/ (jours de conges legaux auxquels tu as droit) and set /Time off already taken/ en salary inputs manuellement. Ouais bizarre.
 **** DONE C'est fait mais il manque des tests
-*** [?] [[project:notes/partena-csss-questions.org::12][Ne pas recorriger la CSSS si fait après cloture fiscale]]
-**** TODO Y a pas moyen donc faudra mettre ca dans la spec et voir pour que les POs creent une tache
-** TODO tester dans l'ui
+*** [X] [[project:notes/partena-csss-questions.org::12][Ne pas recorriger la CSSS si fait après cloture fiscale]]
+**** DONE Y a pas moyen donc faudra mettre ca dans la spec et voir pour que les POs creent une tache
+** DONE tester dans l'ui
+** DONE voir msg avec bedo, + stash sur enterprise
 ** DONE prendre nouveau doc + up to date et le mettre dans la tache (page 7 est celle qui est interessante)
 ** DONE revenir sur old rule param pour le faire sur les anciennes versions
 ** Talk with damien
