@@ -377,6 +377,7 @@ domains et les autres trucs pour get_gantt_data et de faire en sorte que les deu
 models heritent de ce model pour ne pas avoir a faire du code duplication
 ** DONE j'ai remove le active_domain dans le =_fetchData()= des deux models enfants, donc faut tester pour voir si ca change vraiment rien
 ** DONE Oups j'ai fait deux commits faut squash
+** TODO changer git commit msg
 ** TODO revoir [[project:enterprise/hr_gantt/static/tests/hr_gantt.test.js::144][hoot test]] (j'ai mis un TODO),
 *** [ ] Faire que ca teste aussi pour le args.domain (ou kwargs.domain je sais plus)
 *** [ ] et ptet changer la test string
