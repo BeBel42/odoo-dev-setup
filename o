@@ -240,7 +240,7 @@ fi
 on_script_exit() {
     odoo_icon_path="$project_dir/images/odoo_logo_small.png"
     if type notify-send 1>/dev/null 2>&1; then
-        notify-send "Odoo" "Script execution finished" -t 2000 -u low -i "$odoo_icon_path"
+        notify-send "Odoo" "Script execution finished" -t 2000 -u critical -i "$odoo_icon_path"
     else
         echo -e "\033[1;33mWarning\033[0m: notify-send is not installed on your system. Notifications won't be sent." 1>&2
     fi

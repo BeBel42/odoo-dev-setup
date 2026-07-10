@@ -1,4 +1,59 @@
 #+title: Tasks
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6376147][[hr_payroll] Change behavior of extra info field]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6159782][[l10n_be_hr_payroll] missing features in the 13th month for the CP302]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6329380][[hr_paryoll] rule parameter cache issues]]
+#+begin_src bash :results silent
+../o --checkout-community 17.0 \
+     --checkout-enterprise 17.0-rule_parameter_cache-mlef >&2
+#+end_src
+This one is because the error string changed:
+#+begin_src bash :results silent
+../o --checkout-community 18.0 \
+     --checkout-enterprise 18.0-rule_parameter_cache-mlef >&2
+#+end_src
+This one is because the @ormcache params changed + function got split:
+#+begin_src bash :results silent
+../o --checkout-community saas-19.3 \
+     --checkout-enterprise saas-19.3-rule_parameter_cache-mlef >&2
+#+end_src
+** NOTE bedo etait pas chaud que je fixe sur 16.0. Donc euuh ben on va faire le patch a partir de 17.0 I guess
+** DONE tests
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6317856][[l10n_be_hr_payroll] cp302 13th month partial incapacities]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-l10n_be_hr_payroll-cp302_13th_month_partial_incapacities-mlef >&2
+#+end_src
+En fait c'est pas MEDIC01 et les total incapacity codes qu'on peut mettre dans le calendar.
+C'est juste Partial Incapacity et un point c'est tout. Ca simplifie de fou la tache
+** DONE investigate WTF does MEDIC01 get converted to LEAVE110 when we change the resource_calendar_id?
+#+begin_src python
+# should not affect 2024's computation as no partial incapacities are
+# consecutive to this total incapacity
+self._create_leave_from_we_type_code(
+    employee, 'MEDIC01',  # total incapacity
+    date_from=date(2023, 3, 3),  # friday
+    date_to=date(2023, 3, 3),
+)
+
+payslip_december_2024.compute_sheet()
+thirteen_month = payslip_december_2024.line_ids.filtered_domain([['code', '=', 'CP302THIRTEEN']]).total
+self.assertAlmostEqual(expected_13th_month, thirteen_month, msg="""
+A total incapcity in the previous year, that is not consecutive to any partial
+incapacity, should not influence the partial incapacity assimilation.
+""")
+#+end_src
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6314432][[l10n_be_hr_payroll] no seniority restriction on ext personnel]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-l10n_be_hr_payroll-cp302_13th_month_ext_limit-mlef >&2
+#+end_src
+
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6311159][[sale_project] invalid field runbot error]]
+#+begin_src bash :results silent
+../o --checkout-community saas-19.3-sale_project-comodel_test_error-mlef \
+     --checkout-enterprise saas-19.3 >&2
+#+end_src
+Third world 4g. You just need to push + create PR
 * DONE [[https://github.com/odoo/enterprise/pull/113973][review gantt tasks employee public]] :review:not_in_pipe:
 #+begin_src bash :results silent
 ../o --checkout-community saas-19.2 \
@@ -20,11 +75,12 @@ template: =partena_payslips=
   
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6068542][[l10n_be_hr_payroll] Quarterly special social contribution payment]] :difficult:
 #+begin_src bash :results silent
-../o --checkout-community master-l10n_be_hr_payroll-quarterly_csss-mlef \
+../o --checkout-community master \
      --checkout-enterprise master-l10n_be_hr_payroll-quarterly_csss-mlef \
      --checkout-upgrade master-l10n_be_hr_payroll-quarterly_csss-mlef >&2
-#+end_src 
+#+end_src
 [[project:enterprise/l10n_be_hr_payroll/models/hr_payslip.py::1049][special social cot function]]
+** DONE rajouter CP302THIRTEEN dans le calcul + tests
 ** [X] [[project:notes/partena-csss-questions.org::70][mail questions partena]]
 *** DONE Mettre CSSS sur termination fees a calculer sur l'IRC (Indemnite de rupture de contract)
 - Genre le montant du preavis qu'on donne si le travailleur le preste pas ou partiellement
@@ -70,7 +126,6 @@ Tu peux le faire gogo gadgeto upgrade script
 ../o --checkout-community saas-19.2-prevent_duplicate_work_entry_codes-mlef \
      --checkout-enterprise saas-19.2 >&2
 #+end_src 
-* TODO [[https://runbot.odoo.com/odoo/runbot.build.error/241204][replace comodel function runbot error]] :not_in_pipe:
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477296][[Payroll][L10]End of year Bonus - Fond Horeca]] :difficult:
 #+begin_src bash :results silent
 ../o --checkout-community master-l10n_be_hr_payroll-add_cp302_thirteen_month-mlef \
@@ -300,7 +355,32 @@ C'est seulement bon si l'incapacite a ete accordee par le medecin conseil. Si c'
 *** CANCEL Efface le truc des taches de choses pas faites once you're done with it
 **
 ** DONE finish fixing review
-* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-hr_gantt-remove_group_by_employee_repetitions-mlef >&2
+#+end_src
+[[project:enterprise/hr_holidays_gantt/report/hr_leave_report_calendar.py::50][Where moaln did the better version]]
+
+** Fix le souci de domaines rajoutes
+=this.searchParams.domain= domain defini par l'user
+=this.searchParams.globalDomain= c'est domain de base (qui est cache et defini dans l'xml)
+(e.g.: [[project:community/addons/hr_holidays/report/hr_leave_report_calendar.xml::120][celui qui nous posait des soucis]])
+
+Donc en gros tu peux trouver un moyen de retirer le global domain du domain et
+ptet faire comme l'autre get_gantt_data avec la condition sur le user domain seulement.
+
+Les deux time off gantt views utilisent le meme [[project:enterprise/hr_holidays_gantt/static/src/views/gantt/hr_holidays_gantt_model.js::95][HrHolidaysGanttModel]], mais tu dois faire ca pour [[project:enterprise/hr_attendance_gantt/static/src/attendance_gantt/attendance_gantt_model.js::6][AttendanceGanttModel]] aussi.
+
+Donc matthias propose de faire un [[project:enterprise/hr_gantt/static/src/hr_gantt_model.js::1][HrGanttModel]] qui fait juste cette partie de split les
+domains et les autres trucs pour get_gantt_data et de faire en sorte que les deux gantt
+models heritent de ce model pour ne pas avoir a faire du code duplication
+** DONE j'ai remove le active_domain dans le =_fetchData()= des deux models enfants, donc faut tester pour voir si ca change vraiment rien
+** DONE Oups j'ai fait deux commits faut squash
+** TODO revoir [[project:enterprise/hr_gantt/static/tests/hr_gantt.test.js::144][hoot test]] (j'ai mis un TODO),
+*** [ ] Faire que ca teste aussi pour le args.domain (ou kwargs.domain je sais plus)
+*** [ ] et ptet changer la test string
+** TODO il faudra appliquer un max sur les base branches
 * WAIT [[https://www.odoo.com/odoo/project.task/5500347][[Time Off] Gant overview see all employees]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477588][[Time Off, Planning] Gantt Domain Employee Without Records]]
 #+begin_src bash :results silent
@@ -320,7 +400,7 @@ I won't do the planning gantt view as it is out of our scope and already tweaked
      --checkout-enterprise master-hr-domain_operation_tools-moaln-mlef >&2
     #+end_src 
 ** DONE prevenir reviewer qu'il y a enterprise branch aussi
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5148888][[Work entries] Optimization/refactor of gantt view]] :difficult:
+* CANCEL [[https://www.odoo.com/odoo/project/1251/tasks/5148888][[Work entries] Optimization/refactor of gantt view]] :difficult:
 #+begin_src bash :results silent
 ../o --checkout-community master-work_entry_gantt_optimization-mlef \
      --checkout-enterprise master-work_entry_gantt_optimization-mlef >&2
@@ -353,9 +433,6 @@ faut optimiser [[project:community/addons/hr_work_entry/wizard/hr_work_entry_reg
 [[project:community/addons/hr_work_entry/models/hr_version.py::659][Ou wizard est cree pour regenerate work entries]]
 - Faut pas qu'il aie a faire ca. Just passer des params devrait etre bon.
 - regenerate_work_entries devrait etre dans hr_work_entry.py et pas dans le wizard. Prcq la il fait genre deux fonctions differentes aves un if/else et c'est horrible.
-
-
-  
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5350522][[l10n_be_hr_payroll] hide_in_offer used in wrong module]]
 #+begin_src bash :results silent
 ../o --checkout-community saas-18.4 \
@@ -611,7 +688,7 @@ Everything is already fetched inf read_group_employee_id, so I can just fetch ev
 ** DONE tests don't work...
 ** DONE [[project:community/addons/hr_attendance/tests/test_hr_attendance_process.py::78][This test fails]]
 ** DONE Mathias review on both branches
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
+* [?] [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
 #+begin_src bash :results silent
 ../o --checkout-community master-no_recruitment_employee_refactor-mlef \
      --checkout-enterprise master-no_recruitment_employee_refactor-mlef \
