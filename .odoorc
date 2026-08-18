@@ -1,6 +1,6 @@
 [options]
-# password is: admin
-admin_passwd = $pbkdf2-sha512$600000$E6J07l2LMeZca601JuRc6w$VKRA8V26QKhGlQ6ixegmIoKB/Yi5mAMhOjjVqXTGUw9Pd0IMZUyhG1.8jPJruFBoSqjIESQS104rEHsIfkQ6hg
+# password is: qfg8-nrea-rwcr
+admin_passwd = $pbkdf2-sha512$600000$RijlfO/dO4fwXivFWGttbQ$hYRdTX7ms215Nfsr0MZrgFlsNepOePw5zBzJUZMBSFgNftXpm/3YL9L0YyW3znb8VKXCV6fuWU/tcn1OMZ89CA
 db_name = odoo
 db_port = 5432
 db_host = localhost
@@ -10,3 +10,14 @@ dbfilter = odoo
 addons_path = community/addons/,enterprise/
 http_interface = 127.0.0.1
 log_level = warn
+
+[colors]
+pid = never
+loglevel = auto
+session_id = never
+http_request_line = auto
+http_response_body = auto
+perf = auto
+cursor_mode = auto
+sql = auto
+

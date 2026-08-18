@@ -6,6 +6,8 @@
 # to always show some info values (e.g.: installed modules, test results, etc.)
 # so that we can set a higher log_level (e.g.: warn) without losing crucial info
 
+#!/usr/bin/env python3
+
 import logging
 
 
@@ -34,25 +36,55 @@ LEVEL_BY_NAME = {name: getattr(logging, name, logging.INFO) for name in LEVELS}
     WARNING: this patch may break depending on the logging library version (standard python library only tested in 3.12)
 """
 
-IMPORTANT_RECORD_NAME = ('odoo.service.server', 'odoo.tests.stats', 'odoo.tests.result', 'odoo', 'odoo.service.server.ThreadedServer')
+IMPORTANT_RECORD_NAME = ('odoo.service.server', 'odoo.tests.stats', 'odoo.tests.result', 'odoo.service.server.ThreadedServer')
+IMPORTANT_RECORD_NAME_COND = {
+    'odoo': lambda record: record.msg.startswith('Odoo version %s'),
+    'odoo.modules.loading': lambda record: record.msg.startswith('%s modules loaded in ') and record.args[2] > 1,
+}
+MODULE_LOADING_BLOAT = True
+PROGRESS_BAR_LENGTH = 50
 
 
 class PleaseShowImportantLogsDearGodooFilter(logging.Filter):
+    was_last_message_module_loading = False
+    previous_msg_len = 0
+
     def __init__(self, min_log_level, logger):
         super().__init__()
         self.min_log_level = min_log_level
         self.logger = logger
+        self.first_loaded_module_nbr = None
+        self.to_load_module_nbr = None
 
     def filter(self, record):
         filter = self
         while not filter.min_log_level and filter.logger.parent:
             filter = filter.logger.parent.please_filter
         min_log_level = filter.min_log_level
-        return (
-            record.levelname not in LEVEL_BY_NAME
-            or LEVEL_BY_NAME[record.levelname] >= min_log_level
+        filter = ((record.levelname not in LEVEL_BY_NAME or LEVEL_BY_NAME[record.levelname] >= min_log_level)
             or record.name in IMPORTANT_RECORD_NAME
+            or (record.name in IMPORTANT_RECORD_NAME_COND and (IMPORTANT_RECORD_NAME_COND[record.name])(record))
         )
+        if not MODULE_LOADING_BLOAT:
+            return filter
+        if record.name == 'odoo.modules.loading' and record.msg.startswith('Loading module %s') and record.args[2] > 1:
+            loaded_modules = record.args[1]
+            total_modules = record.args[2]
+            # 'loaded_modules' starts at 1 and ends at 'total_modules'
+            if self.first_loaded_module_nbr is None:
+                self.first_loaded_module_nbr = loaded_modules
+                self.to_load_module_nbr = total_modules - loaded_modules + 1
+            real_loaded_modules = loaded_modules - self.first_loaded_module_nbr
+            progress_value = int(real_loaded_modules / self.to_load_module_nbr * PROGRESS_BAR_LENGTH)
+            msg = (f'[{'=' * progress_value}{'-' * (PROGRESS_BAR_LENGTH - progress_value)}]  '
+                f'{loaded_modules}/{total_modules}  Loading {record.args[0]}...')
+            print(f'\r{msg}'.ljust(self.previous_msg_len, " "), end="")
+            PleaseShowImportantLogsDearGodooFilter.previous_msg_len = len(msg) + 1
+            PleaseShowImportantLogsDearGodooFilter.was_last_message_module_loading = True
+        if PleaseShowImportantLogsDearGodooFilter.was_last_message_module_loading and filter:
+            print('\r', end="")
+            PleaseShowImportantLogsDearGodooFilter.was_last_message_module_loading = False
+        return filter
 
 # This root logger is created by default when loading the logging library, we have to give him the custom filter like the other future loggers !
 root_logger = logging.getLogger('root')

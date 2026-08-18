@@ -4,4 +4,7 @@
 ((nil .
   ((eval .
     (setq projectile-project-root
-          (locate-dominating-file (or (buffer-file-name) default-directory) ".projectile"))))))
+          (locate-dominating-file (or (buffer-file-name) default-directory) ".projectile")))))
+ ;; rng-validate would freeze odoo's xml buffers
+ (nxml-mode .
+  ((eval . (rng-validate-mode -1)))))

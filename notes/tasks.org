@@ -1,6 +1,21 @@
 #+title: Tasks
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6376147][[hr_payroll] Change behavior of extra info field]]
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6159782][[l10n_be_hr_payroll] missing features in the 13th month for the CP302]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6456252][[hr_attendance] Gantt crash marc demo as officer]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6453757][[hr_attendance] Fix attendance gantt progress bar UI]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-hr_attendance_gantt-empty_employees_progress_bar-mlef >&2
+#+end_src
+- Si il est attendance_based (version) et qu'il a 0 heures on l'afficher en jaune/orange
+[[project:enterprise/hr_attendance_gantt/static/src/attendance_gantt/attendance_gantt_model.js::82][ptet la ligne qui fait le souci]]
+* TODO [[https://runbot.odoo.com/odoo/runbot.build.error/944167][uninstall tests failed (runbot error)]]
+[[project:enterprise/l10n_be_hr_payroll_fleet/__manifest__.py::8][hr_fleet gets renamed to fleet in 19.0 here]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6376147][[hr_payroll] Change behavior of extra info field]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-hr_payroll-display_in_pdf_extra_info_behavior-mlef >&2
+#+end_src
+
+* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/6159782][[l10n_be_hr_payroll] missing features in the 13th month for the CP302]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6329380][[hr_paryoll] rule parameter cache issues]]
 #+begin_src bash :results silent
 ../o --checkout-community 17.0 \
@@ -80,6 +95,8 @@ template: =partena_payslips=
      --checkout-upgrade master-l10n_be_hr_payroll-quarterly_csss-mlef >&2
 #+end_src
 [[project:enterprise/l10n_be_hr_payroll/models/hr_payslip.py::1049][special social cot function]]
+** DONE migration still targeting 19.4
+** DONE dmfa tests failing
 ** DONE rajouter CP302THIRTEEN dans le calcul + tests
 ** [X] [[project:notes/partena-csss-questions.org::70][mail questions partena]]
 *** DONE Mettre CSSS sur termination fees a calculer sur l'IRC (Indemnite de rupture de contract)
@@ -355,13 +372,47 @@ C'est seulement bon si l'incapacite a ete accordee par le medecin conseil. Si c'
 *** CANCEL Efface le truc des taches de choses pas faites once you're done with it
 **
 ** DONE finish fixing review
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]]
+* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]] :urgent:difficult:
 #+begin_src bash :results silent
-../o --checkout-community master \
+../o --checkout-community master-hr_gantt-remove_group_by_employee_repetitions-mlef \
      --checkout-enterprise master-hr_gantt-remove_group_by_employee_repetitions-mlef >&2
 #+end_src
-[[project:enterprise/hr_holidays_gantt/report/hr_leave_report_calendar.py::50][Where moaln did the better version]]
+#+begin_src bash :results silent
+../o --checkout-community saas-19.3-hr_gantt-user_domain_inconsistencies-mlef \
+     --checkout-enterprise saas-19.3-hr_gantt-user_domain_inconsistencies-mlef >&2
+#+end_src
+#+begin_src bash :results silent
+../o --checkout-community saas-19.2-hr_gantt-user_domain_inconsistencies-mlef \
+     --checkout-enterprise saas-19.2-hr_gantt-user_domain_inconsistencies-mlef >&2
+#+end_src
 
+This only only applies the "My Team" filter fix, to be combined with 19.3's forward port
+#+begin_src bash :results silent
+../o --checkout-community saas-19.4-hr_attendance_gantt-my_team_filter_everywhere-mlef \
+     --checkout-enterprise saas-19.4-hr_attendance_gantt-my_team_filter_everywhere-mlef >&2
+#+end_src
+
+This *upgrade PR* is to force the update of the security rules
+#+begin_src bash :results silent
+../o --checkout-upgrade master-hr-remove_parent_id_ir_access_on_employee-mlef >&2
+#+end_src
+
+[[project:enterprise/hr_holidays_gantt/report/hr_leave_report_calendar.py::50][Where moaln did the better version]]
+** DONE voir avec xavier (c'est lui qui a fait le test qui crashe) si on retirerait pas son test et donc continuer avec ma solution des domains
+** DONE Voir runbot de [[https://github.com/odoo/odoo/pull/280050?email_source=notifications&email_token=APLFGYQWAE5LZHLAPYQBOTL5JSBARA5CNFSNUABFM5UWIORPF5TWS5BNNB2WEL2JONZXKZKDN5WW2ZLOOQXTKMRWHA2TKNBYGY4KM4TFMFZW63VHNVSW45DJN5XKKZLWMVXHJLDGN5XXIZLSL5RWY2LDNM#issuecomment-5268554868][PR de 19.2]]
+** DONE [[project:enterprise/hr_gantt/static/tests/hr_gantt.test.js::95][tests fail]] after adding the [[project:enterprise/hr_gantt/static/src/hr_gantt_model.js::21][forced company_id domain]] in _getDomain()
+** DONE recheck les runbots si y a pas d'erreur surtout pour la pr de 19.4 only la, j'ai juste rebase et j'ai surement fait des trucs very haram, recheck le code aussi lol
+** Info for base versions
+- [[project:enterprise/hr_attendance_gantt/models/hr_attendance.py::93][_get_gantt_data_group_by_employee]] added in attendances in *19.2*
+- [[project:enterprise/hr_holidays_gantt/report/hr_leave_report_calendar.py::50][_get_gantt_data_groupby_employee]] added in report_calendar in *19.2*
+- [[project:enterprise/hr_holidays_gantt/models/hr_leave.py::419][_get_gantt_data_group_by_employee]] added in hr_leave in *19.3*
+- [[project:enterprise/hr_payroll/models/hr_leave.py::103][overridden _get_gantt_data_group_by_employee]] added in hr_leave in *19.3*
+** DONE apres que runbot passe faut retester dans l'UI sur chaque version
+** DONE J'ai rajouté des sudo() en 19.2 et je pense qu'on peut les retirer
+** DONE utiliser l'access domain la aussi dans stable (normalement fait mais a revoir)
+** DONE fix typo of test_get_gantt_data_unavalabilities also in stable + changements dans les tests (normalement fait mais a revoir)
+** DONE update les git commits
+** DONE [[https://discord.com/channels/@me/1438919574644064366/1529863926576189460][Retirer exception bizarre hardcodee]]
 ** Fix le souci de domaines rajoutes
 =this.searchParams.domain= domain defini par l'user
 =this.searchParams.globalDomain= c'est domain de base (qui est cache et defini dans l'xml)
@@ -377,11 +428,18 @@ domains et les autres trucs pour get_gantt_data et de faire en sorte que les deu
 models heritent de ce model pour ne pas avoir a faire du code duplication
 ** DONE j'ai remove le active_domain dans le =_fetchData()= des deux models enfants, donc faut tester pour voir si ca change vraiment rien
 ** DONE Oups j'ai fait deux commits faut squash
-** TODO changer git commit msg
-** TODO revoir [[project:enterprise/hr_gantt/static/tests/hr_gantt.test.js::144][hoot test]] (j'ai mis un TODO),
-*** [ ] Faire que ca teste aussi pour le args.domain (ou kwargs.domain je sais plus)
-*** [ ] et ptet changer la test string
-** TODO il faudra appliquer un max sur les base branches
+** DONE changer git commit msg dans les pr (G changé dans git)
+- j'ai ajouté des trucs pour pas avoir les filtres de contexte pour les gantt views, genre avec =_getGroupedBy()= et =searchMenuTypes=
+- Mtn c'est juste que avec les employees
+** DONE revoir [[project:enterprise/hr_gantt/static/tests/hr_gantt.test.js::144][hoot test]] (j'ai mis un TODO),
+*** [X] Faire que ca teste aussi pour le args.domain (ou kwargs.domain je sais plus)
+*** [X] et ptet changer la test string
+** DONE il faudra appliquer un max sur les base branches
+** DONE recheck le code + tests sur runbot une fois que c'est passé
+** DONE "My team" filter being applied on all time off views
+- le probleme est la quand [[project:community/addons/hr_holidays/static/src/views/calendar/time_off_search_model.js::13][quand cette condition est false]] (moved to [[project:enterprise/hr_holidays_gantt/static/src/views/gantt/hr_holidays_report_search_model.js::12][this file]])
+- Faut changer ca et le faire que pour les [[project:enterprise/hr_holidays_gantt/views/hr_holidays_gantt_view.xml::136][time off overview gantt views]]
+** DONE Upgrade fails when trying to update csv fields
 * WAIT [[https://www.odoo.com/odoo/project.task/5500347][[Time Off] Gant overview see all employees]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477588][[Time Off, Planning] Gantt Domain Employee Without Records]]
 #+begin_src bash :results silent
@@ -835,7 +893,7 @@ Et apres dans la get_allocation_data overriden, dans le if (pas le else) je rajo
 
 Et retirer dans la condition le =or not leave_type.requires_allocation=
 
-* [?] [[https://www.odoo.com/odoo/project/1251/tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
+* [X] [[https://www.odoo.com/odoo/project/1251/tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
 **master**
 #+begin_src bash :results silent
 ../o --checkout-community master \
@@ -870,7 +928,7 @@ Vals (in theory) are the same as the one passed in old code.
 After that, with the small [[https://github.com/odoo/odoo/pull/222744/files#diff-1c37517a76b393d1d30c2b03e96611643a747d12c13b086653989f4068c660b2R447-R450][pr he sent]] tracking values should take care of it. Maybe git pull to get the changes.
 
 After that, delete the old diff message you made
-** [?]
+** [X]
 I thought that users that could not see specific fields would be redirect to hr.employee.public (there is no chatter there).
 How can I have someone that has access to hr.employee and not be allowed to see my chatter message?
 =hr_payroll.group_hr_payroll_user= is the group needed to see the message
