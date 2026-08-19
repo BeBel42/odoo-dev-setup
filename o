@@ -105,8 +105,8 @@ $0 usage:
         by \"--module\"
 	-h | --help
 		Show this help prompt."
-    [[ "$1" = "" ]] || echo "$1" 1>&2
-    echo -e "$error_message" 1>&2
+    [[ "$1" = "" ]] || echo "$1"
+    echo -e "$error_message"
 }
 
 # default values
@@ -223,7 +223,7 @@ while [[ "$#" -gt 0 ]]; do
     --installers) installers=1 ;;
     -h | --help) help=1 ;;
     *)
-        error "\033[1;31mError\033[0m: unknown parameter passed: \"$1\""
+        error "\033[1;31mError\033[0m: unknown parameter passed: \"$1\"" 1>&2
         exit 1
         ;;
     esac

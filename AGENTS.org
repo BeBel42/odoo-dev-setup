@@ -1,0 +1,190 @@
+#+title: Odoo-specific LLM agent configuration
+
+* Workspace layout
+
+This directory is a workspace holding several sibling Odoo repositories that are developed together, not a single project. The four that matter:
+
+- ~community/~ — Odoo Community: the framework (~community/odoo/~) plus community addons (~community/addons/~, ~675 modules).
+- ~enterprise/~ — Odoo Enterprise addons. Each top-level dir is one module; these depend on modules in ~community/addons/~. Requires ~community/~ to run.
+- ~upgrade/~ — Database migration scripts, one directory per module under ~upgrade/migrations/<module>/<version>/~. Private; runs on top of ~community/~.
+- ~upgrade-util/~ (~odoo.upgrade.util~) — Helper library used /by/ the scripts in ~upgrade/~. Importable as ~from odoo.upgrade import util~.
+
+All four are typically on ~master~ and kept in sync. ~community~ and ~enterprise~ are checked out together at the same version.
+
+* Running/Testing odoo
+
+All odoo operations go through the =./o= script, located at the root of the current project/workspace. It wraps docker: odoo runs inside containers, never on the host.
+
+** Key facts
+
+- Every run *stops and recreates* the containers (use =--no-restart= to =docker exec= into running ones instead).
+- *Blocking*: a plain run attaches to the container and blocks until it exits. Non-blocking cases: =-t/--test=, =--init-only=, and operations that don't launch odoo at all (checkout, pull, =--db-list=, etc.). Never launch a blocking run in the foreground of an unattended shell.
+- Modules are selected with =-m <module_list>= (comma-separated); =-d= drops the database first, =-i= installs, =-u= upgrades.
+- Full reference: =./o --help= (also reproduced at the end of this section).
+
+** Common recipes
+
+#+begin_src bash
+# run all tests of a module
+./o -m hr_attendance -t /hr_attendance
+
+# run a single test method
+./o -m hr_attendance -t :TestHrAttendanceManager.test_employee_attendance_smart_button
+
+# fresh db + install a module, then stop (non-blocking)
+./o -m hr_attendance -d -i --init-only
+
+# drop db and refill it from a saved template (fast reset)
+./o --template my_template
+
+# open a python shell / bash inside the odoo container
+./o --shell
+./o -b
+#+end_src
+
+** Full =./o --help= output
+
+#+begin_src bash :results verbatim
+./o --help
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+./o usage:
+	-m | --module <module_list>
+		Select the module to update / install.
+		It can also be a comma-separated module_name list.
+	-d | --drop
+		Drop the database to start on an empty session.
+		This will automatically reinstall the module.
+	-i | --install
+		Installs the module in the database.
+	-s | --stop
+		Stop all containers
+	-u | --upgrade
+		Run upgrade scripts for module (specified with -m)
+	-t | --test [-][tag][/module][:class][.method][[params]]
+		Enables testing for filtered tests.
+		The '-' specifies whether to include or to exclude matched tests.
+		Example: -t :TestClass.test_func,/test_module,external
+		It is also possible to provide parameters to a test method that supports
+		them. Example: -t /web.test_js[mail]
+	--checkout-community <branch>
+		Checkout community repository to <branch>
+	--checkout-enterprise <branch>
+		Checkout enterprise repository to <branch>
+	--checkout-upgrade <branch>
+		Checkout upgrade repository to <branch>
+	--populate <models_list>
+		Allows to duplicate existing data in a given database.
+		Can be used for testing and benchmarking when large tables are needed.
+	--populate-factor <factors_list>
+		List of populate factors. In case a factor is missing for a model, the
+		last factor in the list will be used. Defaults to 1000.
+	-c | --checkout <branch>
+		Checkout enterprise and community odoo repositories to <branch>
+	-p | --pull
+		Pull community/enterprise odoo repositories to the latest changes.
+		This will be executed after "--checkout" flags if both are specified.
+	--pull-upgrade
+		Pull the upgrade odoo repository to the latest changes.
+		This will be executed after "--checkout" flags if both are specified.
+	-b | --bash
+	   Launches bash in the odoo container (e.g.: to use odoo-bin manually)
+	-r | --rebase <branch>
+	   Rebases current branches in enterprise/community onto <branch>
+	   if "--pull" is specified, pulls <branch> before rebasing onto it
+	--shell
+	   Launches the odoo python shell
+	--template <template_name>
+		Will drop the current db and refill it with <template_name>'s content
+	--save-template <template_name>
+		Will launch odoo, immediatly quit when odoo is done setting up the
+		modules, then save the current db as <template_name>
+	--drop-template <regex>
+		Drops all db templates matching <regex>
+	--db-list
+		List all postgres databases
+	--no-restart
+		Runs command as 'docker exec' instead of stopping old containers and
+		replacing them with a new 'docker run' instance.
+	--odoo-help
+		Show the help prompt from odoo-bin
+	--debug
+		Enables debugpy. May crash on live code change.
+	--init-only
+		Stops odoo after init (e.g.: to only set database)
+	--setup
+		Sets up the whole project + dependencies
+	--odoo-version
+		Show the odoo version
+    --restore <restore-zip-path>
+        Will fill current db with specified zip dump file
+    --sync-community-with-enterprise
+        Will try to checkout community to the closest matching commit that
+        matches enterprise's current commit
+    --sync-enterprise-with-community
+        Will try to checkout enterprise to the closest matching commit that
+        matches community's current commit
+    --installed
+        Will show all modules that will be installed by modules
+        specified by "--module"
+    --installers
+        Will show all modules that can install the modules specified
+        by "--module"
+	-h | --help
+		Show this help prompt.
+#+end_example
+
+* Linting
+
+Ruff config lives in ~community/ruff.toml~ (targets py312, ~preview = true~); ~ruff.toml~ at the workspace root is a symlink to it. ~upgrade/~ and ~upgrade-util/~ carry their own ~ruff.toml~. The ~community/ruff.toml~ header notes it is generated by runbot's nightly checks — do not hand-edit it.
+
+* Addon module structure
+
+A module is a directory with ~__manifest__.py~ (metadata: ~name~, ~version~, ~depends~, ~data~ list of XML/CSV to load, ~category~). Common subdirs: ~models/~ (Python ORM models), ~views/~ (XML), ~data/~, ~security/~ (access rules, ~ir.model.access.csv~), ~wizard/~ (transient models), ~controllers/~ (HTTP routes), ~static/~ (JS/CSS/OWL frontend), ~report/~, ~tests/~, ~i18n/~. ~data~ files in the manifest load in listed order — ordering matters when records reference each other.
+
+* Upgrade scripts
+
+Layout: ~upgrade/migrations/<module>/<version>/<phase>-<name>.py~, where version is the module's target version string (e.g. ~16.0.1.0~, ~saas\sim18.1.1.4~) and phase is one of:
+
+- ~pre-migrate.py~ — runs before the module's new data/schema is loaded.
+- ~post-migrate.py~ — runs after.
+- ~end-migrate.py~ — runs at the very end of the whole upgrade.
+
+Each script exposes ~def migrate(cr, version):~ and uses the util library:
+
+#+begin_src python
+from odoo.upgrade import util
+
+def migrate(cr, version):
+    util.remove_view(cr, "website_customer.contact_edit_options")
+#+end_src
+
+~upgrade-util/src/util/~ groups helpers by concern — ~fields.py~, ~models.py~, ~modules.py~, ~records.py~, ~pg.py~ (raw SQL/PG), ~orm.py~, ~inherit.py~, ~domains.py~, ~spreadsheet/~, etc. Reach for a ~util~ helper before writing raw SQL; these functions are written to work across Odoo versions 7.0 → master.
+
+* Conventions
+
+- *Commit messages*: ~[TAG] module: short description~ where TAG is ~FIX~, ~IMP~, ~ADD~, ~REF~, ~REM~, ~MOV~, etc. (see ~git log~ in ~community/~).
+- *Feature branch naming*: ~<base>-<description>-<trigram>~, e.g. ~master-fix_private_sign_requests-mohmo~. Common but not strictly enforced — don't block on it.
+- Stable series (released versions) only accept restricted changes — bug fixes, no schema/behavior breaks. New features target ~master~.
+
+* Coding guidelines
+
+Full text: ~documentation/content/contributing/development/coding_guidelines.rst~. Follow standard Odoo conventions (naming, file layout, ORM style); the points below are the ones most commonly violated — enforce them strictly.
+
+** Python
+- *Never* call ~cr.commit()~ or ~cr.rollback()~ on a cursor you didn't create.
+- Catch *specific* exceptions in the narrowest try block; never bare ~except Exception~. Use ~self.env.cr.savepoint()~ for framework exceptions (but batch — >64 savepoints/transaction degrades PostgreSQL).
+- Translations: ~self.env._('literal string', arg)~ — static literal only, ~_~ does the formatting. Never format/concatenate before ~_()~, never pass dynamic strings or field values. Prefer ~%(name)s~.
+- Model attribute order: private attrs (~_name~, ~_description~, ~_inherit~) → defaults → fields → SQL constraints → compute/inverse/search → selection methods → ~@api.constrains~/~@api.onchange~ → CRUD overrides → ~action_*~ methods → other business methods.
+- Context is frozen — use ~with_context(...)~; namespace custom context keys with the module name.
+
+** XML
+- IDs: views ~<model>_view_<type>~, actions ~<model>_action[_<detail>]~, menus ~<model>_menu[_<x>]~, groups ~<module>_group_<name>~, rules ~<model>_rule_<group>~; the record ~name~ mirrors the id with dots.
+- Inheriting views reuse the *same* id as the original; new primary views (~mode="primary"~) don't.
+- ~<data noupdate="1">~ only for non-updatable data.
+
+** JS / SCSS
+- Prefix SCSS classes ~o_<module_name>~ (webclient uses bare ~o_~); no ~id~ selectors, no hyper-nesting. Never add minified libs or hotlink external assets — copy them into ~static/~.

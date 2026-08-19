@@ -1,5 +1,5 @@
 #+title: Tasks
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6456252][[hr_attendance] Gantt crash marc demo as officer]]
+* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/6456252][[hr_attendance] Gantt crash marc demo as officer]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6453757][[hr_attendance] Fix attendance gantt progress bar UI]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
