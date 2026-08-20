@@ -480,10 +480,10 @@ fi
 
 if [[ $demo = 1 ]]; then
     echo "-D has been specified. Enabling demo data"
-    cmd="$cmd --without-demo=False"
+    # default is already --without-demo=False, no need to pass it
 else
     echo "Demo data is disabled"
-    cmd="$cmd --without-demo=True"
+    cmd="$cmd --without-demo=all"
 fi
 
 if [[ $upgrade = 1 ]]; then

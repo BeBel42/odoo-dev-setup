@@ -1,4 +1,19 @@
 #+title: Tasks
+* TODO Voir pour fix les groups dans les autres versions
+- [[https://github.com/odoo/odoo/pull/281713/changes#diff-4b6f4473332f5e30b7d83acb51946ffa4731af0093c75954f619906010c3f8a8R28][T'as fait ca en 19.4]] pdt le forward port du truc avec les gantt views
+ #+begin_src diff
+modified   addons/hr_attendance/security/hr_attendance_security.xml
+@@ -25,7 +25,7 @@
+     <record id="group_hr_attendance_officer" model="res.groups">
+         <field name="name">Officer: Manage attendances</field>
+         <field name="sequence">10</field>
+-        <field name="implied_ids" eval="[(4, ref('hr_attendance.group_hr_attendance_own_reader'))]"/>
++        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+         <field name="comment">The user will have access to the attendance records and reporting of employees where he's set as an attendance manager</field>
+     </record>
+ #+end_src
+ Regarde si tu peux le faire dans les autres versions.
+ Le probleme c'etait que =hr_attendance.group_hr_attendance_own_reader= ne imply pas =base.group_user= (needed for all users), mais =base.group_user= imply =hr_attendance.group_hr_attendance_own_reader= donc c'est un bon fix
 * WAIT [[https://www.odoo.com/odoo/project/1251/tasks/6456252][[hr_attendance] Gantt crash marc demo as officer]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6453757][[hr_attendance] Fix attendance gantt progress bar UI]]
 #+begin_src bash :results silent
@@ -8,6 +23,10 @@
 - Si il est attendance_based (version) et qu'il a 0 heures on l'afficher en jaune/orange
 [[project:enterprise/hr_attendance_gantt/static/src/attendance_gantt/attendance_gantt_model.js::82][ptet la ligne qui fait le souci]]
 * TODO [[https://runbot.odoo.com/odoo/runbot.build.error/944167][uninstall tests failed (runbot error)]]
+#+begin_src bash :results silent
+../o --checkout-community 18.0 \
+     --checkout-enterprise 18.0 >&2
+#+end_src
 [[project:enterprise/l10n_be_hr_payroll_fleet/__manifest__.py::8][hr_fleet gets renamed to fleet in 19.0 here]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6376147][[hr_payroll] Change behavior of extra info field]]
 #+begin_src bash :results silent
@@ -372,7 +391,7 @@ C'est seulement bon si l'incapacite a ete accordee par le medecin conseil. Si c'
 *** CANCEL Efface le truc des taches de choses pas faites once you're done with it
 **
 ** DONE finish fixing review
-* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]] :urgent:difficult:
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5502544][[hr_gantt] Remove repetitions for gantt group by employees]] :urgent:difficult:
 #+begin_src bash :results silent
 ../o --checkout-community master-hr_gantt-remove_group_by_employee_repetitions-mlef \
      --checkout-enterprise master-hr_gantt-remove_group_by_employee_repetitions-mlef >&2
@@ -398,6 +417,7 @@ This *upgrade PR* is to force the update of the security rules
 #+end_src
 
 [[project:enterprise/hr_holidays_gantt/report/hr_leave_report_calendar.py::50][Where moaln did the better version]]
+** DONE [[https://runbot.odoo.com/runbot/bundle/saas-194-saas-193-hr-gantt-user-domain-inconsistencies-mlef-547475-fw-500225][forward port to 19.4]]
 ** DONE voir avec xavier (c'est lui qui a fait le test qui crashe) si on retirerait pas son test et donc continuer avec ma solution des domains
 ** DONE Voir runbot de [[https://github.com/odoo/odoo/pull/280050?email_source=notifications&email_token=APLFGYQWAE5LZHLAPYQBOTL5JSBARA5CNFSNUABFM5UWIORPF5TWS5BNNB2WEL2JONZXKZKDN5WW2ZLOOQXTKMRWHA2TKNBYGY4KM4TFMFZW63VHNVSW45DJN5XKKZLWMVXHJLDGN5XXIZLSL5RWY2LDNM#issuecomment-5268554868][PR de 19.2]]
 ** DONE [[project:enterprise/hr_gantt/static/tests/hr_gantt.test.js::95][tests fail]] after adding the [[project:enterprise/hr_gantt/static/src/hr_gantt_model.js::21][forced company_id domain]] in _getDomain()
