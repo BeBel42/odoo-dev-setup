@@ -5,9 +5,6 @@
 
 set -eu
 
-# TODO make a scaffold argument to call odoo-bin scaffold
-# NOTE then the created dir will be of chown root:root so change that afterwards
-
 project_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 community_dir="$project_dir/community"
 enterprise_dir="$project_dir/enterprise"
@@ -29,11 +26,15 @@ $0 usage:
 		Drop the database to start on an empty session.
 		This will automatically reinstall the module.
 	-i | --install
-		Installs the module in the database.
+		Installs the module in the database at init.
 	-s | --stop
 		Stop all containers
 	-u | --upgrade
 		Run upgrade scripts for module (specified with -m)
+	-I | --module-install <modules_to_uninstall>
+        Installs the specified modules for the already existing database.
+	-U | --module-uninstall <modules_to_uninstall>
+        Uninstalls the specified modules for the already existing database.
 	-t | --test [-][tag][/module][:class][.method][[params]]
 		Enables testing for filtered tests.
 		The '-' specifies whether to include or to exclude matched tests.
@@ -103,6 +104,8 @@ $0 usage:
     --installers
         Will show all modules that can install the modules specified
         by \"--module\"
+    --disable-notifications
+        Disable the notifications the script can emit (e.g.: when it exits)
 	-h | --help
 		Show this help prompt."
     [[ "$1" = "" ]] || echo "$1"
@@ -112,6 +115,8 @@ $0 usage:
 # default values
 drop=0
 install=0
+module_uninstall=""
+module_install=""
 help=0
 stop=0
 module=""
@@ -145,6 +150,7 @@ sync_enterprise_with_community=0
 installed=0
 installers=0
 restore_path=""
+disable_notifications=0
 
 # parse script parameters
 while [[ "$#" -gt 0 ]]; do
@@ -197,6 +203,14 @@ while [[ "$#" -gt 0 ]]; do
         rebase_branch="$2"
         shift
         ;;
+    -U | --module-uninstall)
+        module_uninstall="$2"
+        shift
+        ;;
+    -I | --module-install)
+        module_install="$2"
+        shift
+        ;;
     --restore)
         restore_path="$2"
         shift
@@ -221,6 +235,7 @@ while [[ "$#" -gt 0 ]]; do
     --sync-enterprise-with-community) sync_enterprise_with_community=1 ;;
     --installed) installed=1 ;;
     --installers) installers=1 ;;
+    --disable-notifications) disable_notifications=1 ;;
     -h | --help) help=1 ;;
     *)
         error "\033[1;31mError\033[0m: unknown parameter passed: \"$1\"" 1>&2
@@ -238,6 +253,9 @@ fi
 
 # Will execute whenever the script finishes
 on_script_exit() {
+    if [[ $disable_notifications = 1 ]]; then
+        return
+    fi
     odoo_icon_path="$project_dir/images/odoo_logo_small.png"
     if type notify-send 1>/dev/null 2>&1; then
         notify-send "Odoo" "Script execution finished" -t 2000 -u critical -i "$odoo_icon_path"
@@ -462,6 +480,15 @@ if [[ $stop = 1 ]]; then
     exit 0
 fi
 
+if ! [[ $module_uninstall = "" ]]; then
+    echo '-U has been specified, adding "module uninstall <modules>" to command'
+    cmd="$cmd module uninstall $module_uninstall"
+fi
+if ! [[ $module_install = "" ]]; then
+    echo '-I has been specified, adding "module install <modules>" to command'
+    cmd="$cmd module install $modle_install"
+fi
+
 # user did not mention module name (-m | --module <module_name>)
 if [[ "$module" = "" ]]; then
     echo -e "\033[1;33mWarning\033[0m: missing module (-m) parameter.
@@ -477,6 +504,8 @@ else # seeing if installing (-i) or updating (-u) module
     fi
     cmd="$cmd $action $module"
 fi
+
+
 
 if [[ $demo = 1 ]]; then
     echo "-D has been specified. Enabling demo data"
