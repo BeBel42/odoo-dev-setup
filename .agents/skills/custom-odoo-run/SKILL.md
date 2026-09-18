@@ -1,5 +1,5 @@
 ---
-name: odoo-run
+name: custom-odoo-run
 description: >-
   Use this skill when you need to run Odoo, execute tests, manage the database,
   or perform any container operation. Covers the ./o wrapper script for Docker.
@@ -16,8 +16,6 @@ All Odoo operations go through the `./o` script, located at the root of the work
 ```bash
 ./o --help
 ```
-
-Or use `scripts/get-help.sh` in this skill directory to get the complete output.
 
 **Do not guess flags or options.** The help text is extensive and covers edge cases not listed in this summary.
 

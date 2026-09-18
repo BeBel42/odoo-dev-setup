@@ -4,7 +4,8 @@ set -eu
 
 cd "$ODOO_DIR"
 
-# TODO remove mlef by a read for name + odoo gram
+read -rp 'Full name (used for `git config`): ' FULL_NAME
+read -rp 'Odoo n-gram (used for `git config`): ' NGRAM
 
 # clone and setup each project
 for i in community enterprise tutorials upgrade upgrade-util documentation; do
@@ -18,8 +19,8 @@ for i in community enterprise tutorials upgrade upgrade-util documentation; do
 
     # To pass CLA runbot tests
     echo "Setting git user + email"
-    git config user.name "Martin Lefèvre (mlef)"
-    git config user.email mlef@odoo.com
+    git config user.name "$FULL_NAME ($NGRAM)"
+    git config user.email "$NGRAM@odoo.com"
 
     # Check if the directory is already in the safe list
     if ! git config --global --get-all safe.directory | grep -q "$ODOO_DIR/$i"; then
@@ -41,6 +42,15 @@ for i in community enterprise tutorials upgrade upgrade-util documentation; do
     cd "$ODOO_DIR"
 
     echo "Done setting up $i project..."
+done
+
+# symlink every odoo-provided skill into .agents/skills
+mkdir -p "$ODOO_DIR/.agents/skills"
+for dir in "$ODOO_DIR/community/skills"/*/; do
+    [ -d "$dir" ] || continue # guard against empty skills directory
+    name="$(basename "$dir")"
+    # use relative links so they also resolve outside the container
+    ln -sfn --relative "$dir" "$ODOO_DIR/.agents/skills/${name}-symlink"
 done
 
 # See https://github.com/odoo/odoo/wiki/Javascript-coding-guidelines#use-a-linter

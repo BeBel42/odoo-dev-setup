@@ -1,5 +1,47 @@
 #+title: Tasks
-* TODO Voir pour fix les groups dans les autres versions
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6565916][[hr_payroll] Payrun steps removal follow up]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-hr_payroll-payrun_no_stepbar_follow_up-mlef \
+     --checkout-upgrade master-hr_payroll-payrun_no_stepbar_follow_up-mlef >&2
+#+end_src
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6486910][[Payroll][L10N_BE] POC payrun no stepbar]] :difficult:
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-hr_payroll-payrun_no_stepbar-mlef \
+     --checkout-upgrade master-hr_payroll-payrun_no_stepbar-mlef >&2
+#+end_src
+[[https://app.excalidraw.com/l/65VNwvy7c4X/8KJW73zZGan][Excalidraw]]
+[[project:enterprise/hr_payroll/static/src/components/status_bubble/status_bubble.js::58][Component qui a les step bubbles]]
+[[project:enterprise/hr_payroll/models/hr_payslip_run.py::90][Where 100_version is defined]]
+[[project:enterprise/hr_payroll/models/hr_payslip_run.py::265][Where employee bubble is defined]]
+[[project:notes/lava-payrun-ui-summary.org][Org file with lava summary]]
+[[project:notes/lava-payrun-ui-summary.org][Org file with lava summary for the spec N°2]]
+[[project:enterprise/hr_payroll/views/hr_payslip_run_views.xml::111][Where "Time" Continue button is]]
+[[project:enterprise/hr_payroll/views/hr_payslip_run_views.xml::66][payslip kanban card view]]
+[[project:enterprise/hr_payroll/views/hr_payslip_views.xml::11][Where the validate button you have to move is]]
+** Trying via git revert
+=7e4e2367f17bede938bd2ed4bd9af151c3c05493 [IMP] hr_payroll: Payrun Mixin=
+** Talk avec lebm
+=payrunRecordComponentProps= + contient les params a passer dans le =Record= component (son seul role c'est de donner acces au record du payrun wooo)
+Donc tu fais ca et dedans je mets un =PayrUnButtonBox=
+
+
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6259306][Overview Visibility]] :review:
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-hr_attendance_gantt-prgo >&2
+#+end_src
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6499161][[hr_attendance] correct groups of attendance officers]]
+#+begin_src bash :results silent
+../o --checkout-community saas-19.2-hr_attendance-hr_attendance_officer_groups-mlef \
+     --checkout-enterprise saas-19.2 >&2
+#+end_src
+#+begin_src bash :results silent
+../o --checkout-community master-hr_attendance-hr_attendance_officer_groups-mlef \
+     --checkout-enterprise master >&2
+#+end_src
+[[project:community/addons/hr_attendance/security/hr_attendance_security.xml::29][Où le truc doit être changé]]
 - [[https://github.com/odoo/odoo/pull/281713/changes#diff-4b6f4473332f5e30b7d83acb51946ffa4731af0093c75954f619906010c3f8a8R28][T'as fait ca en 19.4]] pdt le forward port du truc avec les gantt views
  #+begin_src diff
 modified   addons/hr_attendance/security/hr_attendance_security.xml
@@ -14,7 +56,11 @@ modified   addons/hr_attendance/security/hr_attendance_security.xml
  #+end_src
  Regarde si tu peux le faire dans les autres versions.
  Le probleme c'etait que =hr_attendance.group_hr_attendance_own_reader= ne imply pas =base.group_user= (needed for all users), mais =base.group_user= imply =hr_attendance.group_hr_attendance_own_reader= donc c'est un bon fix
-* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/6456252][[hr_attendance] Gantt crash marc demo as officer]]
+* CANCEL [[https://www.odoo.com/odoo/project/1251/tasks/6456252][[hr_attendance] Gantt crash marc demo as officer]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master >&2
+#+end_src
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6453757][[hr_attendance] Fix attendance gantt progress bar UI]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
@@ -22,11 +68,15 @@ modified   addons/hr_attendance/security/hr_attendance_security.xml
 #+end_src
 - Si il est attendance_based (version) et qu'il a 0 heures on l'afficher en jaune/orange
 [[project:enterprise/hr_attendance_gantt/static/src/attendance_gantt/attendance_gantt_model.js::82][ptet la ligne qui fait le souci]]
-* TODO [[https://runbot.odoo.com/odoo/runbot.build.error/944167][uninstall tests failed (runbot error)]]
+* [?] [[https://runbot.odoo.com/odoo/runbot.build.error/944167][uninstall tests failed (runbot error)]]
 #+begin_src bash :results silent
 ../o --checkout-community 18.0 \
      --checkout-enterprise 18.0 >&2
 #+end_src
+Steps to reproduce:
+- Install =hr_fleet,test_l10_be_hr_payroll_account=  (use the =18_fleet_test= template)
+- Uninstall =hr_fleet=
+- Reinstall =hr_fleet= -> Error
 [[project:enterprise/l10n_be_hr_payroll_fleet/__manifest__.py::8][hr_fleet gets renamed to fleet in 19.0 here]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6376147][[hr_payroll] Change behavior of extra info field]]
 #+begin_src bash :results silent
@@ -460,7 +510,7 @@ models heritent de ce model pour ne pas avoir a faire du code duplication
 - le probleme est la quand [[project:community/addons/hr_holidays/static/src/views/calendar/time_off_search_model.js::13][quand cette condition est false]] (moved to [[project:enterprise/hr_holidays_gantt/static/src/views/gantt/hr_holidays_report_search_model.js::12][this file]])
 - Faut changer ca et le faire que pour les [[project:enterprise/hr_holidays_gantt/views/hr_holidays_gantt_view.xml::136][time off overview gantt views]]
 ** DONE Upgrade fails when trying to update csv fields
-* WAIT [[https://www.odoo.com/odoo/project.task/5500347][[Time Off] Gant overview see all employees]]
+* CANCEL [[https://www.odoo.com/odoo/project.task/5500347][[Time Off] Gant overview see all employees]]
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/5477588][[Time Off, Planning] Gantt Domain Employee Without Records]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
@@ -913,7 +963,7 @@ Et apres dans la get_allocation_data overriden, dans le if (pas le else) je rajo
 
 Et retirer dans la condition le =or not leave_type.requires_allocation=
 
-* [X] [[https://www.odoo.com/odoo/project/1251/tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/4985543][[L10N_BE_Payroll] Changes since previous version]]
 **master**
 #+begin_src bash :results silent
 ../o --checkout-community master \

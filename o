@@ -509,7 +509,7 @@ fi
 
 if [[ $demo = 1 ]]; then
     echo "-D has been specified. Enabling demo data"
-    # default is already --without-demo=False, no need to pass it
+    cmd="$cmd --without-demo=False"
 else
     echo "Demo data is disabled"
     cmd="$cmd --without-demo=all"
