@@ -8,7 +8,7 @@ read -rp 'Full name (used for `git config`): ' FULL_NAME
 read -rp 'Odoo n-gram (used for `git config`): ' NGRAM
 
 # clone and setup each project
-for i in community enterprise tutorials upgrade upgrade-util documentation; do
+for i in community enterprise upgrade upgrade-util documentation; do
     echo "Setting up $i project..."
     # community edition should be cloned from "odoo" git repo
     CLONE_URL="git@github.com:odoo/$([[ $i == 'community' ]] && echo "odoo.git" || echo "$i.git")"

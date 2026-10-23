@@ -2,21 +2,28 @@
 
 * How to upgrade using =./o=
 ** Upgrade without tests
-#+begin_src
+#+begin_src shell
 ./o -c <older_branch>
 ./o --save-template <template_name> -d -D -m <module_to_test_migration_on>
 ./o -c <newer_branch>
 ./o --template <template_name> -m all -u
 #+end_src
 ** Upgrade with tests
-#+begin_src
-./o -c <older_branch>
-./o -d -m <module_to_test_migration_on> --init-only
-./o --save-template <template_name> -u -t upgrade.test_prepare
-./o -c <newer_branch>
-./o --template <template_name> -m all -u
-./o -u -t upgrade.test_check
+#+begin_src bash :async yes :results silent :session upgrade_test
+MODULES=l10n_be_hr_payroll
+TEMPLATE_NAME=computed_stored
+OLDER_STABLE_BRANCH=saas-19.4
+NEWER_COMMUNITY_BRANCH=20.0
+NEWER_ENTERPRISE_BRANCH=master-l10n_be_hr_payroll-payrun_stored_fields-mlef
+
+../o -c $OLDER_STABLE_BRANCH;
+../o -d -m $MODULES --init-only;
+../o --save-template $TEMPLATE_NAME -u -t upgrade.test_prepare;
+../o --checkout-community $NEWER_COMMUNITY_BRANCH --checkout-enterprise $NEWER_ENTERPRISE_BRANCH;
+../o --template $TEMPLATE_NAME -m all -u;
+../o -u -t upgrade.test_check;
 #+end_src
+
 
 * How To Upgrade Locally (manual setup)
 #+begin_comment

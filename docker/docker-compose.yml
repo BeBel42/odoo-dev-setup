@@ -26,6 +26,8 @@ services:
     build:
       context: ..
       dockerfile: ./docker/Dockerfile.odoo
+    # environment:
+    #   ODOO_TEST_FAILURE_RETRIES: 1
     volumes:
       - ../enterprise:/app/enterprise
       - ../community:/app/community

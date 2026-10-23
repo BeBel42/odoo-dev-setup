@@ -1,10 +1,61 @@
 #+title: Tasks
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6565916][[hr_payroll] Payrun steps removal follow up]]
+* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/6650918][[hr_payroll_account_iso20022] drop wizard required journal_id]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6648109][⭐ Tour test runbot error]]
+#+begin_src bash :results silent
+../o --checkout-community master-hr_holidays-add_missing_test_freeze_time-mlef \
+     --checkout-enterprise master >&2
+#+end_src
+[[https://runbot.odoo.com/odoo/runbot.build.error/955111][Runbot error]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6635907][[l10n_be_hr_payroll] CP302 13th month non-assimilable days as salary rule category]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
-     --checkout-enterprise master-hr_payroll-payrun_no_stepbar_follow_up-mlef \
-     --checkout-upgrade master-hr_payroll-payrun_no_stepbar_follow_up-mlef >&2
+     --checkout-enterprise master-l10n_be_hr_payroll-cp302_13th_month_non_assimil_days_as_rule_category-mlef >&2
 #+end_src
+** TODO verifier les changements si c'est bien correct + voir avec toutes les salary rule categories crees si on a pas recree une qui existait deja.
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6632239][[hr_payroll] generate payslips at payrun creation]] :validation:difficult:
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-hr_payroll-generate_payslip_at_payrun_creation-eian \
+     --checkout-upgrade master-hr_payroll-generate_payslip_at_payrun_creation-eian >&2
+#+end_src
+** DONE review [[https://github.com/odoo/upgrade/pull/11516][upgrade PR]]
+* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/6633055][[hr_payroll] remove action_paid()]]
+* DONE ⭐ [[https://www.odoo.com/odoo/project/1251/tasks/6622003][[l10n_be_hr_payroll] store payrun fields]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-l10n_be_hr_payroll-payrun_stored_fields-mlef \
+     --checkout-upgrade master-l10n_be_hr_payroll-payrun_stored_fields-mlef >&2
+#+end_src
+** DONE commit messages are wrong on enterprise + upgrade
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6093474][[l10n_be_hr_payroll] 108% worker uplift rule parameter]] :validation:
+#+begin_src bash :results silent
+../o --checkout-community 20.0 \
+     --checkout-enterprise 20.0-l10n_be_hr_payroll-uplift_rule_parameter-feraz >&2
+#+end_src
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6587751][[Time Off - Attendance] Reintroduce "group by" in gantt]]
+#+begin_src bash :results silent
+../o --checkout-community 20.0-hr_gantt-reintroduce_group_by-mlef \
+     --checkout-enterprise 20.0-hr_gantt-reintroduce_group_by-mlef >&2
+#+end_src
+* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/6565916][[hr_payroll] Payrun steps removal follow up]]
+#+begin_src bash :results silent
+../o --checkout-community 20.0-hr_payroll-payrun_no_stepbar_follow_up-mlef \
+     --checkout-enterprise 20.0-hr_payroll-payrun_no_stepbar_follow_up-mlef >&2
+#+end_src
+Forward port:
+#+begin_src bash :results silent
+../o --checkout-community master-20.0-hr_payroll-payrun_no_stepbar_follow_up-mlef-573439-fw \
+     --checkout-enterprise master-20.0-hr_payroll-payrun_no_stepbar_follow_up-mlef-573439-fw >&2
+#+end_src
+** RUNBOT [[https://runbot.odoo.com/runbot/bundle/master-20-0-hr-payroll-payrun-no-stepbar-follow-up-mlef-573439-fw-528767][forward port (teste l'UI)]]
+** DONE computed optimization issues
+cannot make a compute stored on stable, maybe do it in another task
+https://github.com/odoo/enterprise/pull/130442#discussion_r3979828302
+*Once you did it, go and tell the task url in the spec description*
+** DONE Review code
+** DONE fix runbot errors
+** DONE increase horizontal margin (+ see why it disappears when grouped)
+** DONE check ui one more time
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6486910][[Payroll][L10N_BE] POC payrun no stepbar]] :difficult:
 #+begin_src bash :results silent
 ../o --checkout-community master \
@@ -27,7 +78,7 @@
 Donc tu fais ca et dedans je mets un =PayrUnButtonBox=
 
 
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6259306][Overview Visibility]] :review:
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6259306][Overview Visibility]] :validation:
 #+begin_src bash :results silent
 ../o --checkout-community master \
      --checkout-enterprise master-hr_attendance_gantt-prgo >&2
@@ -68,7 +119,7 @@ modified   addons/hr_attendance/security/hr_attendance_security.xml
 #+end_src
 - Si il est attendance_based (version) et qu'il a 0 heures on l'afficher en jaune/orange
 [[project:enterprise/hr_attendance_gantt/static/src/attendance_gantt/attendance_gantt_model.js::82][ptet la ligne qui fait le souci]]
-* [?] [[https://runbot.odoo.com/odoo/runbot.build.error/944167][uninstall tests failed (runbot error)]]
+* TODO [[https://runbot.odoo.com/odoo/runbot.build.error/944167][uninstall tests failed (runbot error)]]
 #+begin_src bash :results silent
 ../o --checkout-community 18.0 \
      --checkout-enterprise 18.0 >&2
@@ -102,13 +153,17 @@ This one is because the @ormcache params changed + function got split:
 #+end_src
 ** NOTE bedo etait pas chaud que je fixe sur 16.0. Donc euuh ben on va faire le patch a partir de 17.0 I guess
 ** DONE tests
-* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6317856][[l10n_be_hr_payroll] cp302 13th month partial incapacities]]
+* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/6317856][[l10n_be_hr_payroll] cp302 13th month partial incapacities]]
 #+begin_src bash :results silent
-../o --checkout-community master \
-     --checkout-enterprise master-l10n_be_hr_payroll-cp302_13th_month_partial_incapacities-mlef >&2
+../o --checkout-community 20.0 \
+     --checkout-enterprise 20.0-l10n_be_hr_payroll-cp302_13th_month_partial_incapacities-mlef >&2
 #+end_src
 En fait c'est pas MEDIC01 et les total incapacity codes qu'on peut mettre dans le calendar.
 C'est juste Partial Incapacity et un point c'est tout. Ca simplifie de fou la tache
+** WAIT faudra utiliser les salary rule categories pour le forward port de master apres la tache non assimilable days as ssalary rule category
+** DONE incapacity 66%
+Y a un débat que c'est ce que je pensais avec problème de mobilité et pas just 66% de congé par semaine
+Bon ben finalement utilise juste le code partial incapacity et on va call it a day
 ** DONE investigate WTF does MEDIC01 get converted to LEAVE110 when we change the resource_calendar_id?
 #+begin_src python
 # should not affect 2024's computation as no partial incapacities are
@@ -138,7 +193,7 @@ incapacity, should not influence the partial incapacity assimilation.
      --checkout-enterprise saas-19.3 >&2
 #+end_src
 Third world 4g. You just need to push + create PR
-* DONE [[https://github.com/odoo/enterprise/pull/113973][review gantt tasks employee public]] :review:not_in_pipe:
+* DONE [[https://github.com/odoo/enterprise/pull/113973][review gantt tasks employee public]] :validation:not_in_pipe:
 #+begin_src bash :results silent
 ../o --checkout-community saas-19.2 \
      --checkout-enterprise saas-19.2-hr-holidays-gnatt-domain-maji >&2
