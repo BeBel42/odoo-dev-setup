@@ -16,6 +16,9 @@ if [[ $ENABLE_DEBUG = 1 ]]; then
 	debug_params="-Xfrozen_modules=off -m debugpy --listen localhost:5678"
 fi
 
+# make ipdb udr input() to work even in dumb terminals
+export IPY_TEST_SIMPLE_PROMPT=1
+
 cd "$ODOO_DIR"
 
 set -x

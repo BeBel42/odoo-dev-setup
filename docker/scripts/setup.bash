@@ -68,6 +68,8 @@ packages=(
     "debugpy"
     "ipdb"
     "inotify"
+    "pyyaml"
+    "jsonschema"
     "pdfminer"                 # for attachment indexation of PDF documents
     "paramiko"                 # for l10n_be_hr_payroll
     "phonenumbers"             # for test_l10n_be_hr_payroll_account

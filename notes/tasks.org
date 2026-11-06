@@ -1,5 +1,24 @@
 #+title: Tasks
-* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/6650918][[hr_payroll_account_iso20022] drop wizard required journal_id]]
+* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/6681828][[Payroll][L10N_BE] Personal usage of company car]] :validation:
+#+begin_src bash :results silent
+set -e
+../o --checkout-community master \
+     --checkout-enterprise master-l10n_be_hr_payroll-company_car_emp_cont-abshe >&2
+../o --sync-community-with-enterprise >&2
+#+end_src
+
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6705461][l10n_be_hr_payroll] remove cp302 work entry rule parameter]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-l10n_be_hr_payroll-cp302_13th_month_rule_param_to_salary_rule_category-mlef \
+     --checkout-upgrade master-l10n_be_hr_payroll-cp302_13th_month_rule_param_to_salary_rule_category-mlef >&2
+#+end_src
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6650918][[hr_payroll_account_iso20022] drop wizard required journal_id]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-hr_payroll-payment_report_journal_id_restrictions-mlef >&2
+#+end_src
+** DONE test UI once runbot is green (see "TESTING" section in task spec)
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6648109][⭐ Tour test runbot error]]
 #+begin_src bash :results silent
 ../o --checkout-community master-hr_holidays-add_missing_test_freeze_time-mlef \
@@ -11,15 +30,20 @@
 ../o --checkout-community master \
      --checkout-enterprise master-l10n_be_hr_payroll-cp302_13th_month_non_assimil_days_as_rule_category-mlef >&2
 #+end_src
-** TODO verifier les changements si c'est bien correct + voir avec toutes les salary rule categories crees si on a pas recree une qui existait deja.
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6632239][[hr_payroll] generate payslips at payrun creation]] :validation:difficult:
+** TODO ne pas oublier de retirer le commit des salary rule params une fois que [[https://www.odoo.com/odoo/project/1251/tasks/6705461][l'autre tache]] est merged
+* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/6632239][[hr_payroll] generate payslips at payrun creation]] :validation:difficult:
 #+begin_src bash :results silent
 ../o --checkout-community master \
      --checkout-enterprise master-hr_payroll-generate_payslip_at_payrun_creation-eian \
      --checkout-upgrade master-hr_payroll-generate_payslip_at_payrun_creation-eian >&2
 #+end_src
 ** DONE review [[https://github.com/odoo/upgrade/pull/11516][upgrade PR]]
-* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/6633055][[hr_payroll] remove action_paid()]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6633055][[hr_payroll] remove action_paid()]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-hr_payroll-remove_action_paid-mlef >&2
+#+end_src
+
 * DONE ⭐ [[https://www.odoo.com/odoo/project/1251/tasks/6622003][[l10n_be_hr_payroll] store payrun fields]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
@@ -37,7 +61,7 @@
 ../o --checkout-community 20.0-hr_gantt-reintroduce_group_by-mlef \
      --checkout-enterprise 20.0-hr_gantt-reintroduce_group_by-mlef >&2
 #+end_src
-* RUNBOT [[https://www.odoo.com/odoo/project/1251/tasks/6565916][[hr_payroll] Payrun steps removal follow up]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6565916][[hr_payroll] Payrun steps removal follow up]]
 #+begin_src bash :results silent
 ../o --checkout-community 20.0-hr_payroll-payrun_no_stepbar_follow_up-mlef \
      --checkout-enterprise 20.0-hr_payroll-payrun_no_stepbar_follow_up-mlef >&2
@@ -47,7 +71,7 @@ Forward port:
 ../o --checkout-community master-20.0-hr_payroll-payrun_no_stepbar_follow_up-mlef-573439-fw \
      --checkout-enterprise master-20.0-hr_payroll-payrun_no_stepbar_follow_up-mlef-573439-fw >&2
 #+end_src
-** RUNBOT [[https://runbot.odoo.com/runbot/bundle/master-20-0-hr-payroll-payrun-no-stepbar-follow-up-mlef-573439-fw-528767][forward port (teste l'UI)]]
+** DONE [[https://runbot.odoo.com/runbot/bundle/master-20-0-hr-payroll-payrun-no-stepbar-follow-up-mlef-573439-fw-528767][forward port (teste l'UI)]]
 ** DONE computed optimization issues
 cannot make a compute stored on stable, maybe do it in another task
 https://github.com/odoo/enterprise/pull/130442#discussion_r3979828302
@@ -153,7 +177,7 @@ This one is because the @ormcache params changed + function got split:
 #+end_src
 ** NOTE bedo etait pas chaud que je fixe sur 16.0. Donc euuh ben on va faire le patch a partir de 17.0 I guess
 ** DONE tests
-* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/6317856][[l10n_be_hr_payroll] cp302 13th month partial incapacities]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6317856][[l10n_be_hr_payroll] cp302 13th month partial incapacities]]
 #+begin_src bash :results silent
 ../o --checkout-community 20.0 \
      --checkout-enterprise 20.0-l10n_be_hr_payroll-cp302_13th_month_partial_incapacities-mlef >&2
@@ -872,7 +896,7 @@ Everything is already fetched inf read_group_employee_id, so I can just fetch ev
 ** DONE tests don't work...
 ** DONE [[project:community/addons/hr_attendance/tests/test_hr_attendance_process.py::78][This test fails]]
 ** DONE Mathias review on both branches
-* [?] [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/5082687][[Employee] Database without recruitment]]
 #+begin_src bash :results silent
 ../o --checkout-community master-no_recruitment_employee_refactor-mlef \
      --checkout-enterprise master-no_recruitment_employee_refactor-mlef \
