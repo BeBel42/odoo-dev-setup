@@ -5,7 +5,7 @@ services:
     hostname: db
     image: postgres:latest
     environment:
-      POSTGRES_USER: odoo
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: dbpassword
       POSTGRES_DB: odoo
     ports:
@@ -20,6 +20,8 @@ services:
     volumes:
       - ./volumes/db:/var/lib/postgresql/
       - /var/run/postgresql:/var/run/postgresql
+      # only executed when ./volumes/db is empty
+      - ./initdb.d:/docker-entrypoint-initdb.d:ro
 
   odoo:
     network_mode: host # because debugpy uses ephemeral ports
