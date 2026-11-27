@@ -1,4 +1,12 @@
-name: odoo-dev
+# project name is set by ./o, one per worktree
+name: ${COMPOSE_PROJECT_NAME:-odoo-dev_odoo}
+
+networks:
+  default:
+  # shared with the caddy proxy, see docker/proxy/
+  proxy:
+    external: true
+    name: odoo-proxy-network
 
 services:
   db:
@@ -8,8 +16,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: dbpassword
       POSTGRES_DB: odoo
-    ports:
-      - "127.0.0.1:5432:5432"
     restart: on-failure:10
     healthcheck:
       test: pg_isready
@@ -19,17 +25,25 @@ services:
       timeout: 5s
     volumes:
       - ./volumes/db:/var/lib/postgresql/
-      - /var/run/postgresql:/var/run/postgresql
       # only executed when ./volumes/db is empty
       - ./initdb.d:/docker-entrypoint-initdb.d:ro
 
   odoo:
-    network_mode: host # because debugpy uses ephemeral ports
     build:
       context: ..
       dockerfile: ./docker/Dockerfile.odoo
-    # environment:
-    #   ODOO_TEST_FAILURE_RETRIES: 1
+    depends_on:
+      db:
+        condition: service_healthy
+    # hostname depends on directory
+    # (to not conflict with multiple instance from different workspaces)
+    hostname: ${INSTANCE_NAME:-odoo}
+    networks:
+      default:
+      proxy:
+        # caddy routes <instance>.localhost here
+        aliases:
+          - ${INSTANCE_NAME:-odoo}
     volumes:
       - ../enterprise:/app/enterprise
       - ../community:/app/community
@@ -42,6 +56,8 @@ services:
       # where odoo stores its session data
       - ./volumes/.odoo-share:/root/.local/share/Odoo/
       - ./volumes/screenshots/:/tmp/odoo_tests/
+    # environment:
+    #   ODOO_TEST_FAILURE_RETRIES: 1
 
   setup:
     build:

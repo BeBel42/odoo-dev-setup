@@ -1,0 +1,27 @@
+# shared proxy, started on demand by ./o:
+#   docker compose -p odoo-proxy -f docker/proxy/docker-compose.yml up -d
+name: odoo-proxy
+
+networks:
+  default:
+    name: odoo-proxy-network
+
+services:
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+
+  # landing page listing the running instances
+  home:
+    image: php:8.3-cli
+    restart: unless-stopped
+    command: php -S 0.0.0.0:8000 -t /app
+    working_dir: /app
+    volumes:
+      - ./home:/app:ro
+      # read-only: the page only lists containers
+      - /var/run/docker.sock:/var/run/docker.sock:ro

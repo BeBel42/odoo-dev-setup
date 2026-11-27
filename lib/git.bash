@@ -8,6 +8,141 @@
 #   pull_branch, pull_upgrade
 #   checkout_branch, checkout_community, checkout_enterprise, checkout_upgrade
 
+# warn (but do not fail) when the repo at $1 has staged or unstaged changes
+# untracked files are ignored on purpose
+warn_if_repo_dirty() {
+    local repo="$1" changes
+    changes="$(git -C "$repo" status --porcelain --untracked-files=no)"
+    if [[ -n "$changes" ]]; then
+        print_warning "uncommitted changes in $repo (the new worktree is made from HEAD):
+$changes"
+    fi
+}
+
+# create a detached worktree of the repository $1 at the path $2
+add_detached_worktree() {
+    local repo="$1" dest="$2"
+    if [[ -e "$dest" ]]; then
+        print_error "\"$dest\" already exists, refusing to create a worktree there."
+        exit 1
+    fi
+    warn_if_repo_dirty "$repo"
+    echo "Creating detached worktree of $repo at $dest..."
+    git -C "$repo" worktree add --detach "$dest" HEAD
+}
+
+# every direct subdirectory of $1 that is a git repository
+list_sub_repositories() {
+    local src="$1" dir
+    for dir in "$src"/*/; do
+        [[ -e "$dir/.git" ]] || continue
+        basename "$dir"
+    done
+}
+
+# create a worktree of the root repository $1 (and of each of its sub
+# repositories) at the path $2, then set the new worktree up
+create_worktrees() {
+    local src dest name
+    src="$(cd -- "$1" &>/dev/null && pwd)"
+    dest="$2"
+    # a bare name is created next to the source worktree
+    [[ "$dest" != */* ]] && dest="$(dirname "$src")/$dest"
+
+    add_detached_worktree "$src" "$dest"
+    dest="$(cd -- "$dest" &>/dev/null && pwd)"
+
+    for name in $(list_sub_repositories "$src"); do
+        add_detached_worktree "$src/$name" "$dest/$name"
+    done
+
+    echo "Setting the new worktree up..."
+    (cd "$dest" && ./o --setup --setup-skip-git-config)
+
+    echo "Linking ./notes/tasks.org to the one of $src..."
+    mkdir -p "$dest/notes"
+    ln -sfn "$src/notes/tasks.org" "$dest/notes/tasks.org"
+
+    echo "Worktree ready: $dest"
+}
+
+# every worktree of the repository $1, except the repository itself
+list_other_worktrees() {
+    local repo="$1" self line path
+    self="$(cd -- "$repo" &>/dev/null && pwd)"
+    git -C "$repo" worktree list --porcelain | while read -r line; do
+        [[ "$line" = worktree\ * ]] || continue
+        path="${line#worktree }"
+        [[ "$path" = "$self" ]] || echo "$path"
+    done
+}
+
+# stash the staged and unstaged changes of the repository $1, if any
+# echoes the random id of the created stash, so it can be popped back later on
+stash_worktree_changes() {
+    local repo="$1" stash_id
+    git -C "$repo" diff --quiet HEAD -- && return 0
+
+    # the random part lets us pop that exact stash, whatever was pushed meanwhile
+    stash_id="$(basename "$repo")_sync-stash_$(head -c 16 /dev/urandom | md5sum | cut -d' ' -f1)"
+    print_warning "uncommitted changes in $repo, stashing them as \"$stash_id\":
+$(git -C "$repo" status --porcelain --untracked-files=no)"
+    git -C "$repo" stash push --message "$stash_id" >/dev/null
+    echo "$stash_id"
+}
+
+# pop the stash created by stash_worktree_changes in the repository $1
+# $2 is the id it echoed: when empty, there is nothing to pop
+unstash_worktree_changes() {
+    local repo="$1" stash_id="$2" stash_ref
+    [[ -z "$stash_id" ]] && return 0
+
+    stash_ref="$(git -C "$repo" stash list | grep -F "$stash_id" | head -n1 | cut -d: -f1)"
+    if [[ -z "$stash_ref" ]]; then
+        print_warning "could not find back the stash \"$stash_id\" in $repo."
+        return 0
+    fi
+    echo "Restoring the stashed changes of $repo..."
+    # a conflicting pop leaves the stash in place on purpose: nothing is lost
+    git -C "$repo" stash pop "$stash_ref" ||
+        print_warning "could not restore \"$stash_id\" in $repo, it is kept in the stash list."
+}
+
+# move the worktree $1 onto the commit $2
+# the worktree is rebased, detached or not, so the commits it carries are
+# replayed on top of $2 instead of being thrown away
+# staged and unstaged changes are stashed beforehand and popped afterwards
+sync_worktree_to() {
+    local repo="$1" commit="$2" name stash_id
+    # only used to tell the user what is being rebased
+    name="$(git -C "$repo" symbolic-ref --quiet --short HEAD || echo "detached HEAD")"
+    stash_id="$(stash_worktree_changes "$repo")"
+
+    echo "Rebasing $name ($repo) onto $commit..."
+    # a failed rebase is left as is: the user has to resolve it
+    git -C "$repo" rebase "$commit" || {
+        print_warning "the rebase of $name ($repo) failed. Resolve it (or run \"git rebase --abort\")${stash_id:+, then run \"git stash pop\" to get \"$stash_id\" back}."
+        return 0
+    }
+
+    unstash_worktree_changes "$repo" "$stash_id"
+}
+
+# rebase every other worktree of the root repository $1 onto the HEAD of $1
+# the sub repositories are left alone: each worktree keeps its own odoo version
+sync_worktrees() {
+    local src worktree commit
+    src="$(cd -- "$1" &>/dev/null && pwd)"
+    commit="$(git -C "$src" rev-parse HEAD)"
+
+    for worktree in $(list_other_worktrees "$src"); do
+        echo "Syncing the worktree $worktree..."
+        sync_worktree_to "$worktree" "$commit"
+    done
+
+    echo "Done syncing the worktrees of $src."
+}
+
 # warn when community and enterprise are on different branches
 warn_user_if_needed() {
     cd "$project_dir/community" &&

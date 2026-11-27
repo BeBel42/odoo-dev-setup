@@ -1,4 +1,4 @@
 #+title: Project LLM Instructions
 
-- This projects is the Odoo codebase. Load the relecant skills.
+- This projects is the Odoo codebase. Load the relevant skills.
 - The user is a developer that work on HR-related tasks.

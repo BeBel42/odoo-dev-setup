@@ -1,10 +1,77 @@
 #+title: Tasks
-* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6434932][hr_payroll] simplify corrections in report_payslip_template.xml]]
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6743890][[HR] Sex in employee]] :validation:
+#+begin_src bash :results silent
+../o --checkout-community master-hr-sex_on_employee-ahnae \
+     --checkout-enterprise master-hr-sex_on_employee-ahnae \
+     --checkout-upgrade master-hr-sex_on_employee-ahnae >&2
+#+end_src
+
+#+begin_src elisp :results silent
+(pr-review "https://github.com/odoo/odoo/pull/304424")
+#+end_src
+#+begin_src elisp :results silent
+(pr-review "https://github.com/odoo/enterprise/pull/141099")
+#+end_src
+#+begin_src elisp :results silent
+(pr-review "https://github.com/odoo/upgrade/pull/11936")
+#+end_src
+
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6595203][[Time Off - Attendance] group-by show employees without assignation]] :validation:
+#+begin_src bash :results silent
+set -e
+../o --checkout-community master \
+     --checkout-enterprise master-hr-attendance-group-by-show-all-employees-dbe >&2
+../o --sync-community-with-enterprise;
+#+end_src
+
+#+begin_src elisp :results silent
+(pr-review "https://github.com/odoo/enterprise/pull/138660")
+#+end_src
+* DONE [[https://github.com/odoo/enterprise/pull/141277][[FIX] hr_payroll: payslip PDF name in the company language - #141277]] :validation:not_in_pipe:
+#+begin_src elisp :results silent
+(pr-review "https://github.com/odoo/enterprise/pull/141277")
+#+end_src
+* CHANG_REQ [[https://www.odoo.com/odoo/project/1251/tasks/6574535][[Payroll] Work schedule display issue]] :validation:
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-fix_work_schedule_wrm_hours-brsa >&2
+#+end_src
+** TODO saved pending review (SPC g R to recover it)
+#+begin_src elisp :results silent
+(pr-review "https://github.com/odoo/enterprise/pull/131771")
+#+end_src
+#+begin_src elisp :results silent
+(pr-review "https://github.com/odoo/upgrade/pull/11500")
+#+end_src
+*** TODO Oups le field doit pas etre related mais un onetoone I guess? A revoir
+* CHANG_REQ [[https://www.odoo.com/odoo/project/1251/tasks/6595289][[BE Payroll] Refactor/clean worked days methods]] :validation:
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-l10n-be-hr-payroll-worked-days-technical-improvemnets-yoahm >&2
+#+end_src
+#+begin_src elisp :results silent
+(pr-review "https://github.com/odoo/enterprise/pull/134624")
+#+end_src
+
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6742705][[l10n_in_Payroll]  EPF ECR report: add ECR text file download for EPFO portal upload]]
+#+begin_src bash :results silent
+../o --checkout-community master \
+     --checkout-enterprise master-l10n_in_hr_payroll-ecr_text_file_download-mlef >&2
+#+end_src
+** DONE revoir [[project:notes/lava-indian-report.org::3420][ma question + la reponse du llm]]
+** DONE revoir c'est du slop
+
+* DONE [[https://www.odoo.com/odoo/project/1251/tasks/6733738][[Fleet] Enforce unique chassis number (VIN)]]
+#+begin_src bash :results silent
+../o --checkout-community master-fleet-unique_chassis_number-mlef \
+     --checkout-enterprise master >&2
+#+end_src
+* CANCEL [[https://www.odoo.com/odoo/project/1251/tasks/6434932][hr_payroll] simplify corrections in report_payslip_template.xml]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
      --checkout-enterprise master >&2
 #+end_src
-* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/6737802][[Payroll][L10N_BE] Payslip adjustment wrongly added to validated payslips]]
+* TODO [[https://www.odoo.com/odoo/project/1251/tasks/6737802][[Payroll][L10N_BE] Payslip adjustment wrongly added to validated payslips]]
 #+begin_src bash :results silent
 ../o --checkout-community 20.0 \
      --checkout-enterprise 20.0 >&2
@@ -35,6 +102,7 @@ set -e
      --checkout-enterprise master-l10n_be_hr_payroll-cp302_13th_month_rule_param_to_salary_rule_category-mlef \
      --checkout-upgrade master-l10n_be_hr_payroll-cp302_13th_month_rule_param_to_salary_rule_category-mlef >&2
 #+end_src
+** DONE PR is conflicting
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6650918][[hr_payroll_account_iso20022] drop wizard required journal_id]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
@@ -47,12 +115,15 @@ set -e
      --checkout-enterprise master >&2
 #+end_src
 [[https://runbot.odoo.com/odoo/runbot.build.error/955111][Runbot error]]
-* WAIT [[https://www.odoo.com/odoo/project/1251/tasks/6635907][[l10n_be_hr_payroll] CP302 13th month explanations]]
+* DONE ⭐ [[https://www.odoo.com/odoo/project/1251/tasks/6635907][[l10n_be_hr_payroll] CP302 13th month explanations]]
 #+begin_src bash :results silent
 ../o --checkout-community master \
      --checkout-enterprise master-l10n_be_hr_payroll-cp302_13th_month_explanation-mlef >&2
 #+end_src
-** TODO ne pas oublier de retirer le commit des salary rule params une fois que [[https://www.odoo.com/odoo/project/1251/tasks/6705461][l'autre tache]] est merged
+** DONE ne pas oublier de retirer le commit des salary rule params une fois que [[https://www.odoo.com/odoo/project/1251/tasks/6705461][l'autre tache]] est merged
+** DONE REREAD ME j'ai rebase vite fait sur master tout est casse I guess
+** DONE Ensuite fait une review avec une IA
+** DONE tester tooltip
 ** DONE it works but it's a HUGE mess
 ** DONE add a test
 * DONE [[https://www.odoo.com/odoo/project/1251/tasks/6632239][[hr_payroll] generate payslips at payrun creation]] :validation:difficult:

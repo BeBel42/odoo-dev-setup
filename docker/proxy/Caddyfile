@@ -1,0 +1,18 @@
+{
+	auto_https off
+}
+
+# bare localhost: landing page listing the running instances
+# the scheme is mandatory, else caddy binds these to its default port (443)
+http://localhost, http://127.0.0.1 {
+	reverse_proxy home:8000
+}
+
+# <instance>.localhost -> the odoo container aliased <instance> on the
+# proxy network. labels.1 is the subdomain of "<sub>.localhost".
+:80 {
+	@ws path /websocket
+	reverse_proxy @ws {labels.1}:8072
+
+	reverse_proxy {labels.1}:8069
+}

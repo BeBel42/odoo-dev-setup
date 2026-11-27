@@ -1,9 +1,12 @@
 ---
 name: custom-odoo-write-test
-description: Use this skill when writing an Odoo test (not an upgrade test)
+description: Use this skill when writing an Odoo test
 ---
 
 # Writing Odoo tests
+
+## Languages
+- Unless explicitly testing for a translation, don't use translation functions like `self.env._()` to assert or compare strings. Default to english unless asked otherwise.
 
 ## Asserts
 **Assert messages**
@@ -35,3 +38,6 @@ def test_copy_submitted_request(self):
 ```
 - Always put the `"""` on their own line. Don't do `""" test docstring """`.
 - Start the docstring with a captial letter. No need for a period at the end.
+
+## Time and date
+- If a test involves anything related to a time or a date (e.g., payslips, timesheets, or rule parameters), use `freeze_time()` around the test function — or around the test class, if you created it.

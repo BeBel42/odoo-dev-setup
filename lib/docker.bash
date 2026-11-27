@@ -6,7 +6,7 @@
 # expected globals:
 #   compose_file     path to the docker-compose file
 #   run_odoo also uses: cmd, docker_run_exec, docker_volumes, docker_build,
-#   docker_service_ports, docker_entrypoint, enable_debug
+#   docker_entrypoint, enable_debug
 
 # prefix prepended to all created / deleted database templates
 database_template_prefix="odoo_template_"
@@ -14,6 +14,26 @@ database_template_prefix="odoo_template_"
 # thin wrapper around docker compose
 dc() {
     docker compose -f "$compose_file" "$@"
+}
+
+# the proxy is a singleton shared by every worktree, so it lives in its own
+# `odoo-proxy` compose project
+proxy_dc() {
+    docker compose -p odoo-proxy -f "$proxy_compose_file" "$@"
+}
+
+ensure_proxy() {
+    if [ -n "$(proxy_dc ps -q caddy)" ]; then
+        return 0
+    fi
+    echo "Starting the shared caddy proxy..."
+    proxy_dc up -d
+}
+
+# the network removal fails while instances are still attached to it, which
+# docker compose only reports as a warning
+proxy_down() {
+    proxy_dc down --remove-orphans
 }
 
 compose_down() {
@@ -80,15 +100,23 @@ save_db_template() {
 
 # runs the odoo container with the command built by the caller
 run_odoo() {
+    ensure_proxy
     echo "Starting odoo container with \"$cmd\" parameters..."
+    # only one instance at a time may own the debugger port
+    local debug_ports=""
+    if [[ $enable_debug = 1 && $docker_run_exec = "run" ]]; then
+        debug_ports="--publish 127.0.0.1:5678:5678"
+    fi
     # the option variables are left unquoted on purpose: empty ones must disappear
-    docker compose -f "$compose_file" $docker_run_exec $docker_volumes $docker_build -e "ENABLE_DEBUG=$enable_debug" $docker_service_ports $docker_entrypoint odoo $cmd
+    docker compose -f "$compose_file" $docker_run_exec $docker_volumes $docker_build -e "ENABLE_DEBUG=$enable_debug" $debug_ports $docker_entrypoint odoo $cmd
 }
 
 # full project setup through the setup container
+# uses the setup_skip_git_config global: when 1, the setup container does not
+# ask for the user's name and n-gram
 setup_project() {
     echo '"--setup" specified. Calling setup container...'
-    dc run --build --remove-orphans setup
+    dc run --build --remove-orphans -e "SKIP_GIT_CONFIG=$setup_skip_git_config" setup
     # files created from the container are owned by root, take them back
     echo "Setting owner of project to $USER..."
     sudo chown -R "$USER:$USER" .

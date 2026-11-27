@@ -4,8 +4,13 @@ set -eu
 
 cd "$ODOO_DIR"
 
-read -rp 'Full name (used for `git config`): ' FULL_NAME
-read -rp 'Odoo n-gram (used for `git config`): ' NGRAM
+# a worktree inherits the git configuration of its parent repository, so the
+# prompts can be skipped there (see "--setup-skip-git-config" in ./o)
+SKIP_GIT_CONFIG="${SKIP_GIT_CONFIG:-0}"
+if [[ $SKIP_GIT_CONFIG != 1 ]]; then
+    read -rp 'Full name (used for `git config`): ' FULL_NAME
+    read -rp 'Odoo n-gram (used for `git config`): ' NGRAM
+fi
 
 # clone and setup each project
 for i in community enterprise upgrade upgrade-util documentation; do
@@ -18,9 +23,11 @@ for i in community enterprise upgrade upgrade-util documentation; do
     cd "$ODOO_DIR/$i"
 
     # To pass CLA runbot tests
-    echo "Setting git user + email"
-    git config user.name "$FULL_NAME ($NGRAM)"
-    git config user.email "$NGRAM@odoo.com"
+    if [[ $SKIP_GIT_CONFIG != 1 ]]; then
+        echo "Setting git user + email"
+        git config user.name "$FULL_NAME ($NGRAM)"
+        git config user.email "$NGRAM@odoo.com"
+    fi
 
     # Check if the directory is already in the safe list
     if ! git config --global --get-all safe.directory | grep -q "$ODOO_DIR/$i"; then

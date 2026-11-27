@@ -13,7 +13,7 @@ echo -e "\033[0;35m$odoo_command\033[0m"
 
 debug_params=""
 if [[ $ENABLE_DEBUG = 1 ]]; then
-	debug_params="-Xfrozen_modules=off -m debugpy --listen localhost:5678"
+	debug_params="-Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5678"
 fi
 
 # make ipdb udr input() to work even in dumb terminals
