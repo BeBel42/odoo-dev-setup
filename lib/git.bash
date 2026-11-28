@@ -66,6 +66,48 @@ create_worktrees() {
     echo "Worktree ready: $dest"
 }
 
+# paths of the worktrees of $1 that git considers prunable
+list_prunable_worktrees() {
+    local repo="$1" line path=""
+    while read -r line; do
+        case "$line" in
+        worktree\ *) path="${line#worktree }" ;;
+        prunable\ *) [[ -n "$path" ]] && echo "$path" ;;
+        esac
+    done < <(git -C "$repo" worktree list --porcelain)
+}
+
+# drop the registrations of the worktrees of $1 whose directory is gone
+# worktrees that still exist on disk are left untouched
+# $2 is the directory the reported paths are displayed relative to
+# reports one line per repository, e.g. "community: removed 16.0/community"
+prune_repository_worktrees() {
+    local repo="$1" base="$2" path paths=()
+    while read -r path; do
+        [[ -n "$path" ]] && paths+=("${path#"$base"/}")
+    done < <(list_prunable_worktrees "$repo")
+
+    if [[ ${#paths[@]} -eq 0 ]]; then
+        echo "$(basename "$repo"): nothing to prune"
+        return 0
+    fi
+    echo -e "$(basename "$repo"): removed \033[1;34m${paths[*]}\033[0m"
+    git -C "$repo" worktree prune
+}
+
+# prune the stale worktrees of the root repository $1 and of its sub repositories
+prune_worktrees() {
+    local src base name
+    src="$(cd -- "$1" &>/dev/null && pwd)"
+    # the worktrees live next to the source one, hence the parent directory
+    base="$(dirname "$src")"
+
+    prune_repository_worktrees "$src" "$base"
+    for name in $(list_sub_repositories "$src"); do
+        prune_repository_worktrees "$src/$name" "$base"
+    done
+}
+
 # every worktree of the repository $1, except the repository itself
 list_other_worktrees() {
     local repo="$1" self line path

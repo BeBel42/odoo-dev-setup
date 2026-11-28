@@ -123,6 +123,9 @@ $0 usage:
         '--worktree-src-path'. Also creates a new worktree for each sub-repository
     --worktree-sync
        Rebases all the parent repo's worktrees onto \"--worktree-src-path\"'s HEAD
+    --prune-worktrees
+        Unregisters the worktrees of '--worktree-src-path' (and of its
+        sub-repositories) whose directory has been removed
     --disable-notifications
         Disable the notifications the script can emit (e.g.: when it exits)
 	-h | --help
@@ -156,6 +159,7 @@ worktree_src_path="$(dirname "$project_dir")/../.odoo-src"
 [[ -d "$worktree_src_path" ]] || worktree_src_path="$project_dir"
 worktree_path=""
 worktree_sync=0
+worktree_prune=0
 template=""
 save_template=""
 drop_template_regex=""
@@ -264,6 +268,7 @@ while [[ "$#" -gt 0 ]]; do
     --db-list) db_list=1 ;;
     --setup) setup=1 ;;
     --worktree-sync) worktree_sync=1 ;;
+    --prune-worktrees) worktree_prune=1 ;;
     --setup-skip-git-config) setup_skip_git_config=1 ;;
     --sync-community-with-enterprise) sync_community_with_enterprise=1 ;;
     --sync-enterprise-with-community) sync_enterprise_with_community=1 ;;
@@ -293,12 +298,22 @@ proxy_compose_file="$project_dir"/docker/proxy/docker-compose.yml
 # one compose project per worktree, else a second stack would adopt the
 # containers of the first one
 export INSTANCE_NAME="$(basename "$project_dir")"
-export COMPOSE_PROJECT_NAME="odoo-dev_$INSTANCE_NAME"
+# compose only accepts lowercase alphanumerics, hyphens and underscores
+# (e.g. the worktree "16.0" would be rejected because of its dot)
+compose_name="${INSTANCE_NAME,,}"
+export COMPOSE_PROJECT_NAME="odoo-dev_${compose_name//[^a-z0-9_-]/_}"
 
 # Create a new worktree of the whole project
 if [[ "$worktree_path" != "" ]]; then
     echo '"--worktree" has been specified. Creating the new worktrees...'
     create_worktrees "$worktree_src_path" "$worktree_path"
+    exit 0
+fi
+
+# Forget the worktrees whose directory has been removed
+if [[ $worktree_prune = 1 ]]; then
+    echo '"--prune-worktrees" has been specified. Pruning the stale worktrees...'
+    prune_worktrees "$worktree_src_path"
     exit 0
 fi
 
