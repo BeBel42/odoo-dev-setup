@@ -17,7 +17,10 @@ for i in community enterprise upgrade upgrade-util documentation; do
     echo "Setting up $i project..."
     # community edition should be cloned from "odoo" git repo
     CLONE_URL="git@github.com:odoo/$([[ $i == 'community' ]] && echo "odoo.git" || echo "$i.git")"
-    [ ! -d "$ODOO_DIR/$i/.git" ] && git clone "$CLONE_URL" "$ODOO_DIR/$i"
+    # NB: in a linked worktree, ".git" is a file, not a directory
+    if [ ! -e "$ODOO_DIR/$i/.git" ]; then
+        git clone "$CLONE_URL" "$ODOO_DIR/$i"
+    fi
 
     # need to go into repo to setup git
     cd "$ODOO_DIR/$i"
